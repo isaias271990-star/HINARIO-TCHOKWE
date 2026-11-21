@@ -65,18 +65,19 @@ jobs:
           # 6. Compilar APK com Gradle 8.7
           gradle assembleDebug --stacktrace
 
-          # 7. Injetar os hinos diretamente no APK se o Gradle tiver deixado de fora
-          if ! unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -q "assets/index.html"; then
-            echo "Injetando assets diretamente no arquivo APK..."
-            (cd app/src/main && zip -r -u ../../../app/build/outputs/apk/debug/app-debug.apk assets)
-            
-            # Assinar o APK com apksigner oficial para o Android 14 (Samsung S21)
-            APKSIGNER=$(find /usr/local/lib/android/sdk/build-tools -name "apksigner" | sort -V | tail -n 1)
-            echo "Assinando APK com: $APKSIGNER"
-            $APKSIGNER sign --ks ~/.android/debug.keystore --ks-pass pass:android app/build/outputs/apk/debug/app-debug.apk
-          fi
+          # 7. Injetar os hinos diretamente no APK
+          echo "Injetando assets diretamente no arquivo APK..."
+          (cd app/src/main && zip -r -u ../../../app/build/outputs/apk/debug/app-debug.apk assets)
 
-          # 8. Confirmar conteudo e tamanho final
+          # 8. Criar certificado debug e assinar o APK para o Android 14 (Samsung S21)
+          mkdir -p ~/.android
+          keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+
+          APKSIGNER=$(find /usr/local/lib/android/sdk/build-tools -name "apksigner" | sort -V | tail -n 1)
+          echo "Assinando APK com: $APKSIGNER"
+          $APKSIGNER sign --ks ~/.android/debug.keystore --ks-pass pass:android app/build/outputs/apk/debug/app-debug.apk
+
+          # 9. Confirmar conteudo final do APK
           echo "=== CONTEUDO FINAL DO APK ==="
           ls -lh app/build/outputs/apk/debug/app-debug.apk
           unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -E "assets/index|assets/app|hinos" || true
