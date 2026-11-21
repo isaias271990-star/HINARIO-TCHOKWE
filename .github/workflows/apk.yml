@@ -25,9 +25,9 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Ativar Permissões e Compilar
+      - name: Configurar e Compilar
         run: |
-          # 1. Renomear aplicativo para app se necessario
+          # 1. Renomear pastas se necessario
           if [ -d "aplicativo" ] && [ ! -d "app" ]; then
             mv aplicativo app
           fi
@@ -35,7 +35,28 @@ jobs:
             mv app/src/main/Ativos app/src/main/assets
           fi
 
-          # 2. Ativar permissao de leitura de arquivos para o Samsung S21 (Android 14)
+          # 2. Garantir index.html na raiz de assets (sem erro de copia)
+          if [ -f "app/src/main/assets/dados/index.html" ] && [ ! -f "app/src/main/assets/index.html" ]; then
+            cp app/src/main/assets/dados/index.html app/src/main/assets/index.html
+          fi
+          if [ -f "app/src/main/assets/dados/style.css" ] && [ ! -f "app/src/main/assets/style.css" ]; then
+            cp app/src/main/assets/dados/style.css app/src/main/assets/style.css
+          fi
+          if [ -f "app/src/main/assets/dados/app.js" ] && [ ! -f "app/src/main/assets/app.js" ]; then
+            cp app/src/main/assets/dados/app.js app/src/main/assets/app.js
+          fi
+
+          # 3. Garantir hinos.json em data e dados
+          mkdir -p app/src/main/assets/data
+          mkdir -p app/src/main/assets/dados
+          HINOS_SRC=$(find app/src/main/assets -iname "*hinos*.json" | head -n 1)
+          if [ -n "$HINOS_SRC" ]; then
+            [ "$HINOS_SRC" != "app/src/main/assets/data/hinos.json" ] && cp "$HINOS_SRC" app/src/main/assets/data/hinos.json || true
+            [ "$HINOS_SRC" != "app/src/main/assets/dados/hinos.json" ] && cp "$HINOS_SRC" app/src/main/assets/dados/hinos.json || true
+            [ "$HINOS_SRC" != "app/src/main/assets/hinos.json" ] && cp "$HINOS_SRC" app/src/main/assets/hinos.json || true
+          fi
+
+          # 4. Ativar permissao no MainActivity para o Samsung S21 (Android 14)
           MAIN_JAVA=$(find app/src/main/java -name "MainActivity.java" | head -n 1)
           if [ -n "$MAIN_JAVA" ]; then
             if ! grep -q "setAllowFileAccess" "$MAIN_JAVA"; then
@@ -43,7 +64,7 @@ jobs:
             fi
           fi
 
-          # 3. Compilar APK com Gradle 8.7
+          # 5. Compilar APK com Gradle 8.7
           gradle assembleDebug --stacktrace
 
       - name: Upload APK
