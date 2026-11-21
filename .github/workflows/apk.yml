@@ -54,7 +54,11 @@ jobs:
             cp -f "$HINOS_FILE" app/src/main/assets/hinos.json
           fi
 
-          # 5. Ativar permissoes no MainActivity para o Samsung S21 (Android 14)
+          # 5. Injetar a Autoria e Créditos Oficiais no aplicativo
+          CREDITOS='<footer style="text-align:center;padding:25px 15px;margin-top:35px;font-size:0.9em;opacity:0.9;border-top:1px solid rgba(128,128,128,0.3);"><p style="margin:4px 0;font-weight:bold;font-size:1.1em;color:#2e7d32;">📖 Hinário Tchokwe - IASD</p><p style="margin:4px 0;">💻 Desenvolvedor: <strong>Isaías Muwaneno</strong></p><p style="margin:4px 0;">🤝 Colaboradores: <strong>Januário Justo Miranda</strong> &amp; <strong>Ecal Gomes</strong></p><p style="margin:6px 0 0 0;font-size:0.8em;opacity:0.75;">Para a Glória de Deus • Edição 2026</p></footer>'
+          sed -i "s|</body>|$CREDITOS</body>|g" app/src/main/assets/index.html || true
+
+          # 6. Ativar permissoes no MainActivity para o Samsung S21 (Android 14)
           MAIN_JAVA=$(find app/src/main/java -name "MainActivity.java" | head -n 1)
           if [ -n "$MAIN_JAVA" ]; then
             if ! grep -q "setAllowFileAccess" "$MAIN_JAVA"; then
@@ -62,25 +66,25 @@ jobs:
             fi
           fi
 
-          # 6. Compilar APK com Gradle 8.7
+          # 7. Compilar APK com Gradle 8.7
           gradle assembleDebug --stacktrace
 
-          # 7. Injetar os hinos diretamente no APK
-          echo "Injetando assets diretamente no arquivo APK..."
+          # 8. Injetar os hinos e creditos diretamente no APK
+          echo "Injetando assets com creditos no arquivo APK..."
           (cd app/src/main && zip -r -u ../../../app/build/outputs/apk/debug/app-debug.apk assets)
 
-          # 8. Criar certificado debug e assinar o APK para o Android 14 (Samsung S21)
+          # 9. Assinar o APK com apksigner para o Android 14
           mkdir -p ~/.android
-          keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          if [ ! -f ~/.android/debug.keystore ]; then
+            keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          fi
 
           APKSIGNER=$(find /usr/local/lib/android/sdk/build-tools -name "apksigner" | sort -V | tail -n 1)
           echo "Assinando APK com: $APKSIGNER"
           $APKSIGNER sign --ks ~/.android/debug.keystore --ks-pass pass:android app/build/outputs/apk/debug/app-debug.apk
 
-          # 9. Confirmar conteudo final do APK
-          echo "=== CONTEUDO FINAL DO APK ==="
+          # 10. Confirmar tamanho final
           ls -lh app/build/outputs/apk/debug/app-debug.apk
-          unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -E "assets/index|assets/app|hinos" || true
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
