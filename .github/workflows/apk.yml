@@ -25,46 +25,17 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Configurar e Compilar
+      - name: Ativar Permissões e Compilar
         run: |
           # 1. Renomear aplicativo para app se necessario
           if [ -d "aplicativo" ] && [ ! -d "app" ]; then
             mv aplicativo app
           fi
-
-          # 2. Renomear Ativos para assets se necessario
           if [ -d "app/src/main/Ativos" ] && [ ! -d "app/src/main/assets" ]; then
             mv app/src/main/Ativos app/src/main/assets
           fi
 
-          # 3. Garantir index.html na raiz de assets (sem copiar sobre si mesmo)
-          if [ -f "app/src/main/assets/dados/index.html" ] && [ ! -f "app/src/main/assets/index.html" ]; then
-            cp app/src/main/assets/dados/index.html app/src/main/assets/index.html
-          fi
-          if [ -f "app/src/main/assets/dados/style.css" ] && [ ! -f "app/src/main/assets/style.css" ]; then
-            cp app/src/main/assets/dados/style.css app/src/main/assets/style.css
-          fi
-          if [ -f "app/src/main/assets/dados/app.js" ] && [ ! -f "app/src/main/assets/app.js" ]; then
-            cp app/src/main/assets/dados/app.js app/src/main/assets/app.js
-          fi
-
-          # 4. Garantir hinos.json em data e dados
-          mkdir -p app/src/main/assets/data
-          mkdir -p app/src/main/assets/dados
-          HINOS_SRC=$(find app/src/main/assets -iname "*hinos*.json" | head -n 1)
-          if [ -n "$HINOS_SRC" ]; then
-            if [ "$HINOS_SRC" != "app/src/main/assets/data/hinos.json" ]; then
-              cp "$HINOS_SRC" app/src/main/assets/data/hinos.json
-            fi
-            if [ "$HINOS_SRC" != "app/src/main/assets/dados/hinos.json" ]; then
-              cp "$HINOS_SRC" app/src/main/assets/dados/hinos.json
-            fi
-            if [ "$HINOS_SRC" != "app/src/main/assets/hinos.json" ]; then
-              cp "$HINOS_SRC" app/src/main/assets/hinos.json
-            fi
-          fi
-
-          # 5. Ativar permissao de leitura de arquivos para o Samsung S21 (Android 14)
+          # 2. Ativar permissao de leitura de arquivos para o Samsung S21 (Android 14)
           MAIN_JAVA=$(find app/src/main/java -name "MainActivity.java" | head -n 1)
           if [ -n "$MAIN_JAVA" ]; then
             if ! grep -q "setAllowFileAccess" "$MAIN_JAVA"; then
@@ -72,16 +43,8 @@ jobs:
             fi
           fi
 
-          # 6. Listar arquivos em assets para conferencia
-          echo "=== ARQUIVOS EM ASSETS ==="
-          ls -la app/src/main/assets/
-
-          # 7. Compilar APK com Gradle 8.7
+          # 3. Compilar APK com Gradle 8.7
           gradle assembleDebug --stacktrace
-
-          # 8. Verificar conteudo do APK gerado
-          echo "=== CONTEUDO DO APK ==="
-          unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -i assets || true
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
