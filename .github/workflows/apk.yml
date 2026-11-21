@@ -25,11 +25,37 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Build with Gradle
+      - name: Organizar Arquivos e Compilar
         run: |
+          # 1. Renomear aplicativo para app se necessario
           if [ -d "aplicativo" ] && [ ! -d "app" ]; then
             mv aplicativo app
           fi
+
+          # 2. Renomear Ativos para assets se necessario
+          if [ -d "app/src/main/Ativos" ] && [ ! -d "app/src/main/assets" ]; then
+            mv app/src/main/Ativos app/src/main/assets
+          fi
+
+          # 3. Puxar index.html, style.css e app.js para a raiz de assets
+          INDEX_PATH=$(find app/src/main -name "index.html" | head -n 1)
+          if [ -n "$INDEX_PATH" ]; then
+            INDEX_DIR=$(dirname "$INDEX_PATH")
+            mkdir -p app/src/main/assets
+            cp -r "$INDEX_DIR"/* app/src/main/assets/
+          fi
+
+          # 4. Garantir hinos.json na pasta data
+          mkdir -p app/src/main/assets/data
+          mkdir -p app/src/main/assets/dados
+          HINOS_PATH=$(find app/src/main -iname "*hinos*.json" | head -n 1)
+          if [ -n "$HINOS_PATH" ]; then
+            cp "$HINOS_PATH" app/src/main/assets/data/hinos.json
+            cp "$HINOS_PATH" app/src/main/assets/dados/hinos.json
+            cp "$HINOS_PATH" app/src/main/assets/hinos.json
+          fi
+
+          # 5. Compilar APK com Gradle 8.7
           gradle assembleDebug --stacktrace
 
       - name: Upload APK
