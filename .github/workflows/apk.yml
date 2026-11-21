@@ -25,7 +25,7 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Empacotar Hinos e Compilar
+      - name: Empacotar e Injetar Assets
         run: |
           # 1. Renomear pastas se necessario
           [ -d "aplicativo" ] && mv aplicativo app || true
@@ -37,11 +37,11 @@ jobs:
           mkdir -p app/src/main/assets/data
           mkdir -p app/src/main/assets/dados
 
-          # 3. Encontrar index.html em qualquer lugar e copiar tudo para assets
+          # 3. Encontrar index.html e copiar todos os arquivos web para assets
           INDEX_FILE=$(find . -name "index.html" | head -n 1)
           if [ -n "$INDEX_FILE" ]; then
             SRC_DIR=$(dirname "$INDEX_FILE")
-            echo "Copiando arquivos web de $SRC_DIR para app/src/main/assets/"
+            echo "Copiando de $SRC_DIR para app/src/main/assets/"
             cp -rf "$SRC_DIR"/* app/src/main/assets/ || true
           fi
 
@@ -54,7 +54,7 @@ jobs:
             cp -f "$HINOS_FILE" app/src/main/assets/hinos.json
           fi
 
-          # 5. Ativar permissao no MainActivity para o Samsung S21
+          # 5. Ativar permissoes no MainActivity para o Samsung S21 (Android 14)
           MAIN_JAVA=$(find app/src/main/java -name "MainActivity.java" | head -n 1)
           if [ -n "$MAIN_JAVA" ]; then
             if ! grep -q "setAllowFileAccess" "$MAIN_JAVA"; then
@@ -62,22 +62,24 @@ jobs:
             fi
           fi
 
-          # 6. Forcar o Gradle a incluir os assets na compilacao
-          if ! grep -q "assets.srcDirs" app/build.gradle; then
-            sed -i '/android {/a \    sourceSets { main { assets.srcDirs = ["src/main/assets"] } }' app/build.gradle || true
-          fi
-
-          # 7. Listar conteudo de assets
-          echo "=== CONTEUDO DE ASSETS ==="
-          ls -lhR app/src/main/assets/
-
-          # 8. Compilar APK com Gradle 8.7
+          # 6. Compilar APK com Gradle 8.7
           gradle assembleDebug --stacktrace
 
-          # 9. Inspecionar tamanho do APK
-          echo "=== ARQUIVO APK ==="
+          # 7. Injetar os hinos diretamente no APK se o Gradle tiver deixado de fora
+          if ! unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -q "assets/index.html"; then
+            echo "Injetando assets diretamente no arquivo APK..."
+            (cd app/src/main && zip -r -u ../../../app/build/outputs/apk/debug/app-debug.apk assets)
+            
+            # Assinar o APK com apksigner oficial para o Android 14 (Samsung S21)
+            APKSIGNER=$(find /usr/local/lib/android/sdk/build-tools -name "apksigner" | sort -V | tail -n 1)
+            echo "Assinando APK com: $APKSIGNER"
+            $APKSIGNER sign --ks ~/.android/debug.keystore --ks-pass pass:android app/build/outputs/apk/debug/app-debug.apk
+          fi
+
+          # 8. Confirmar conteudo e tamanho final
+          echo "=== CONTEUDO FINAL DO APK ==="
           ls -lh app/build/outputs/apk/debug/app-debug.apk
-          unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -E "assets|index" || true
+          unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -E "assets/index|assets/app|hinos" || true
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
