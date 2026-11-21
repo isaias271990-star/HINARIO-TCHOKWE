@@ -25,38 +25,36 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Configurar e Compilar
+      - name: Empacotar Hinos e Compilar
         run: |
           # 1. Renomear pastas se necessario
-          if [ -d "aplicativo" ] && [ ! -d "app" ]; then
-            mv aplicativo app
-          fi
-          if [ -d "app/src/main/Ativos" ] && [ ! -d "app/src/main/assets" ]; then
-            mv app/src/main/Ativos app/src/main/assets
-          fi
+          [ -d "aplicativo" ] && mv aplicativo app || true
+          [ -d "app/src/main/Ativos" ] && mv app/src/main/Ativos app/src/main/assets_temp || true
+          [ -d "app/src/main/Assets" ] && mv app/src/main/Assets app/src/main/assets_temp || true
 
-          # 2. Garantir index.html na raiz de assets (sem erro de copia)
-          if [ -f "app/src/main/assets/dados/index.html" ] && [ ! -f "app/src/main/assets/index.html" ]; then
-            cp app/src/main/assets/dados/index.html app/src/main/assets/index.html
-          fi
-          if [ -f "app/src/main/assets/dados/style.css" ] && [ ! -f "app/src/main/assets/style.css" ]; then
-            cp app/src/main/assets/dados/style.css app/src/main/assets/style.css
-          fi
-          if [ -f "app/src/main/assets/dados/app.js" ] && [ ! -f "app/src/main/assets/app.js" ]; then
-            cp app/src/main/assets/dados/app.js app/src/main/assets/app.js
-          fi
-
-          # 3. Garantir hinos.json em data e dados
+          # 2. Criar a pasta oficial assets
+          mkdir -p app/src/main/assets
           mkdir -p app/src/main/assets/data
           mkdir -p app/src/main/assets/dados
-          HINOS_SRC=$(find app/src/main/assets -iname "*hinos*.json" | head -n 1)
-          if [ -n "$HINOS_SRC" ]; then
-            [ "$HINOS_SRC" != "app/src/main/assets/data/hinos.json" ] && cp "$HINOS_SRC" app/src/main/assets/data/hinos.json || true
-            [ "$HINOS_SRC" != "app/src/main/assets/dados/hinos.json" ] && cp "$HINOS_SRC" app/src/main/assets/dados/hinos.json || true
-            [ "$HINOS_SRC" != "app/src/main/assets/hinos.json" ] && cp "$HINOS_SRC" app/src/main/assets/hinos.json || true
+
+          # 3. Encontrar index.html em qualquer lugar e copiar tudo para assets
+          INDEX_FILE=$(find . -name "index.html" | head -n 1)
+          if [ -n "$INDEX_FILE" ]; then
+            SRC_DIR=$(dirname "$INDEX_FILE")
+            echo "Copiando arquivos web de $SRC_DIR para app/src/main/assets/"
+            cp -rf "$SRC_DIR"/* app/src/main/assets/ || true
           fi
 
-          # 4. Ativar permissao no MainActivity para o Samsung S21 (Android 14)
+          # 4. Encontrar hinos.json e garantir nas pastas data e dados
+          HINOS_FILE=$(find . -iname "*hinos*.json" | head -n 1)
+          if [ -n "$HINOS_FILE" ]; then
+            echo "Hinos encontrado: $HINOS_FILE"
+            cp -f "$HINOS_FILE" app/src/main/assets/data/hinos.json
+            cp -f "$HINOS_FILE" app/src/main/assets/dados/hinos.json
+            cp -f "$HINOS_FILE" app/src/main/assets/hinos.json
+          fi
+
+          # 5. Ativar permissao no MainActivity para o Samsung S21
           MAIN_JAVA=$(find app/src/main/java -name "MainActivity.java" | head -n 1)
           if [ -n "$MAIN_JAVA" ]; then
             if ! grep -q "setAllowFileAccess" "$MAIN_JAVA"; then
@@ -64,8 +62,22 @@ jobs:
             fi
           fi
 
-          # 5. Compilar APK com Gradle 8.7
+          # 6. Forcar o Gradle a incluir os assets na compilacao
+          if ! grep -q "assets.srcDirs" app/build.gradle; then
+            sed -i '/android {/a \    sourceSets { main { assets.srcDirs = ["src/main/assets"] } }' app/build.gradle || true
+          fi
+
+          # 7. Listar conteudo de assets
+          echo "=== CONTEUDO DE ASSETS ==="
+          ls -lhR app/src/main/assets/
+
+          # 8. Compilar APK com Gradle 8.7
           gradle assembleDebug --stacktrace
+
+          # 9. Inspecionar tamanho do APK
+          echo "=== ARQUIVO APK ==="
+          ls -lh app/build/outputs/apk/debug/app-debug.apk
+          unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -E "assets|index" || true
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
