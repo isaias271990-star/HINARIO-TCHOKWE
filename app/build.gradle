@@ -1,0 +1,34 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'ao.iasd.hinariotchokwe'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "ao.iasd.hinariotchokwe"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    // A interface (HTML/CSS/JS) e os hinos ficam na pasta ../www, partilhada com a versão web.
+    sourceSets {
+        main {
+            assets.srcDirs = ['../www']
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
