@@ -23,22 +23,16 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Make Gradlew Executable
-        run: |
-          find . -name "gradlew" -exec chmod +x {} + || true
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.2'
 
       - name: Build with Gradle
-        run: |
-          if [ -f gradlew ]; then
-            ./gradlew assembleDebug --stacktrace
-          elif [ -f hinario-app/gradlew ]; then
-            cd hinario-app && ./gradlew assembleDebug --stacktrace
-          else
-            gradle assembleDebug --stacktrace
-          fi
+        run: gradle assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Hinario-Tchokwe-APK
+          name: Hinario-Tchokwe-IASD
           path: '**/build/outputs/apk/debug/*.apk'
