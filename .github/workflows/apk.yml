@@ -25,7 +25,7 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Renomear Assets e Compilar
+      - name: Posicionar Arquivos Web e Compilar
         run: |
           # 1. Renomear aplicativo para app se necessario
           if [ -d "aplicativo" ] && [ ! -d "app" ]; then
@@ -37,14 +37,26 @@ jobs:
             mv app/src/main/Ativos app/src/main/assets
           fi
 
-          # 3. Garantir hinos.json na pasta data
+          # 3. Copiar index.html, style.css e app.js para a raiz de assets
+          find app/src/main/assets -maxdepth 2 -name "index.html" -exec cp {} app/src/main/assets/index.html \;
+          find app/src/main/assets -maxdepth 2 -name "style.css" -exec cp {} app/src/main/assets/style.css \;
+          find app/src/main/assets -maxdepth 2 -name "app.js" -exec cp {} app/src/main/assets/app.js \;
+
+          # 4. Garantir hinos.json em data e dados
           mkdir -p app/src/main/assets/data
-          HINOS_PATH=$(find app/src/main/assets -iname "*hinos*.json" | head -n 1)
-          if [ -n "$HINOS_PATH" ] && [ "$HINOS_PATH" != "app/src/main/assets/data/hinos.json" ]; then
-            cp "$HINOS_PATH" app/src/main/assets/data/hinos.json
+          mkdir -p app/src/main/assets/dados
+          HINOS_SRC=$(find app/src/main/assets -iname "*hinos*.json" | head -n 1)
+          if [ -n "$HINOS_SRC" ]; then
+            cp "$HINOS_SRC" app/src/main/assets/data/hinos.json
+            cp "$HINOS_SRC" app/src/main/assets/dados/hinos.json
+            cp "$HINOS_SRC" app/src/main/assets/hinos.json
           fi
 
-          # 4. Compilar APK com Gradle 8.7
+          # 5. Listar para confirmacao visual no log
+          echo "=== ARQUIVOS EM ASSETS ==="
+          ls -la app/src/main/assets/
+
+          # 6. Compilar APK com Gradle 8.7
           gradle assembleDebug --stacktrace
 
       - name: Upload APK
