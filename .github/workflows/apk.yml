@@ -279,44 +279,52 @@ jobs:
                 }
               }
 
-              // CONVERSOR UNIVERSAL - EXTRAI TEXTO E NUNCA RETORNA [object Object]
-              function converterQualquerCoisaParaTexto(item) {
-                if (item === null || item === undefined) return '';
-                if (typeof item === 'string') return item.trim().replace(/\\n/g, '<br>');
-                if (typeof item === 'number') return '';
+              // DESEMPACOTADOR UNIVERSAL: EXTRAI TEXTO E NUNCA RETORNA [object Object]
+              function desempacotarObjeto(obj) {
+                if (obj === null || obj === undefined) return '';
+                if (typeof obj === 'string') return obj.trim().replace(/\\n/g, '<br>');
+                if (typeof obj === 'number') return '';
 
-                if (Array.isArray(item)) {
-                  var partesArr = [];
-                  for (var i = 0; i < item.length; i++) {
-                    var r = converterQualquerCoisaParaTexto(item[i]);
-                    if (r) partesArr.push(r);
+                if (Array.isArray(obj)) {
+                  var linhas = [];
+                  for (var i = 0; i < obj.length; i++) {
+                    var s = desempacotarObjeto(obj[i]);
+                    if (s) linhas.push(s);
                   }
-                  return partesArr.join('<br>');
+                  return linhas.join('<br>');
                 }
 
-                if (typeof item === 'object') {
-                  var chavesConhecidas = [
+                if (typeof obj === 'object') {
+                  var chaves = [
                     'texto', 'letra', 'text', 'lines', 'linhas', 'content', 'conteudo',
                     'corpo', 'body', 'verse', 'verso', 'versos', 'verses', 'estrofe',
-                    'stanza', 'stanzas', 'estrofes', 'coro', 'chorus', 'refrao', 'words'
+                    'stanza', 'stanzas', 'estrofes', 'coro', 'chorus', 'refrao', 'words', 'palavras'
                   ];
-                  for (var j = 0; j < chavesConhecidas.length; j++) {
-                    var k = chavesConhecidas[j];
-                    if (item[k] !== undefined && item[k] !== null) {
-                      var txt = converterQualquerCoisaParaTexto(item[k]);
-                      if (txt) return txt;
+                  for (var j = 0; j < chaves.length; j++) {
+                    var k = chaves[j];
+                    if (obj[k] !== undefined && obj[k] !== null) {
+                      var t = desempacotarObjeto(obj[k]);
+                      if (t) return t;
                     }
                   }
 
-                  var partesObj = [];
-                  for (var prop in item) {
+                  var partes = [];
+                  for (var prop in obj) {
                     if (['numero', 'number', 'num', 'id', 'tipo', 'type', 'titulo', 'title', 'nome'].indexOf(prop) === -1) {
-                      var pedaco = converterQualquerCoisaParaTexto(item[prop]);
-                      if (pedaco) partesObj.push(pedaco);
+                      var pedaco = desempacotarObjeto(obj[prop]);
+                      if (pedaco) partes.push(pedaco);
                     }
                   }
-                  if (partesObj.length > 0) return partesObj.join('<br>');
+                  if (partes.length > 0) return partes.join('<br>');
+
+                  var vals = Object.values(obj);
+                  for (var v = 0; v < vals.length; v++) {
+                    var valPedaco = desempacotarObjeto(vals[v]);
+                    if (valPedaco) partes.push(valPedaco);
+                  }
+                  if (partes.length > 0) return partes.join('<br>');
                 }
+
                 return '';
               }
 
@@ -332,4 +340,123 @@ jobs:
 
                 var tit = hino.titulo || hino.title || hino.nome || ('Hino ' + num);
                 document.getElementById('leitorTitulo').textContent = num + '. ' + tit;
-                document.getElementById('btnFavLeitor').classList
+                document.getElementById('btnFavLeitor').classList.toggle('active', favoritos.indexOf(num) !== -1);
+
+                var containerLetra = document.getElementById('leitorLetra');
+                containerLetra.innerHTML = '';
+
+                var listaEstrofes = null;
+                if (Array.isArray(hino.estrofes)) listaEstrofes = hino.estrofes;
+                else if (Array.isArray(hino.stanzas)) listaEstrofes = hino.stanzas;
+                else if (Array.isArray(hino.versos)) listaEstrofes = hino.versos;
+                else if (Array.isArray(hino.verses)) listaEstrofes = hino.verses;
+                else {
+                  for (var k in hino) {
+                    if (['numero', 'number', 'num', 'id'].indexOf(k) === -1 && Array.isArray(hino[k])) {
+                      listaEstrofes = hino[k];
+                      break;
+                    }
+                  }
+                }
+
+                if (listaEstrofes && listaEstrofes.length > 0) {
+                  listaEstrofes.forEach(function(est, idx) {
+                    var texto = desempacotarObjeto(est);
+                    if (!texto) return;
+
+                    var isCoro = false;
+                    if (est && typeof est === 'object') {
+                      if (est.tipo === 'coro' || est.isCoro || est.type === 'chorus') isCoro = true;
+                    }
+                    if (/^(coro|refr[ãa]o)/i.test(texto)) isCoro = true;
+
+                    var numEst = (est && (est.numero || est.num || est.id)) || (idx + 1);
+
+                    var div = document.createElement('div');
+                    if (isCoro) {
+                      div.className = 'chorus';
+                      div.innerHTML = '<div class="chorus-header">Coro</div><p>' + texto + '</p>';
+                    } else {
+                      div.className = 'stanza';
+                      div.innerHTML = '<div class="stanza-header">Estrofe ' + numEst + '</div><p>' + texto + '</p>';
+                    }
+                    containerLetra.appendChild(div);
+
+                    if (idx === 0 && hino.coro) {
+                      var textoCoro = desempacotarObjeto(hino.coro);
+                      if (textoCoro) {
+                        var coroDiv = document.createElement('div');
+                        coroDiv.className = 'chorus';
+                        coroDiv.innerHTML = '<div class="chorus-header">Coro</div><p>' + textoCoro + '</p>';
+                        containerLetra.appendChild(coroDiv);
+                      }
+                    }
+                  });
+                } else {
+                  for (var prop in hino) {
+                    if (['numero', 'number', 'num', 'id', 'tipo', 'type', 'titulo', 'title', 'nome'].indexOf(prop) === -1) {
+                      var t = desempacotarObjeto(hino[prop]);
+                      if (t && t !== tit) {
+                        var div = document.createElement('div');
+                        div.className = 'stanza';
+                        div.innerHTML = '<p>' + t + '</p>';
+                        containerLetra.appendChild(div);
+                      }
+                    }
+                  }
+                }
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+
+              function voltarParaLista() {
+                document.getElementById('view-leitor').style.display = 'none';
+                document.getElementById('view-lista').style.display = 'block';
+                document.getElementById('searchBox').style.display = 'block';
+                document.getElementById('navTabs').style.display = 'flex';
+                hinoAtualId = null;
+              }
+
+              function ajustarFonte(delta) {
+                tamanhoFonte = Math.max(0.85, Math.min(1.8, tamanhoFonte + delta * 0.1));
+                document.getElementById('leitorLetra').style.fontSize = tamanhoFonte + 'rem';
+              }
+
+              window.onload = inicializar;
+            </script>
+          </body>
+          </html>"""
+
+          os.makedirs('web_public', exist_ok=True)
+          with open('web_public/index.html', 'w', encoding='utf-8') as f:
+              f.write(html_template)
+
+          for asset_dir in ['app/src/main/assets', 'hinario-app/app/src/main/assets']:
+              if os.path.exists(os.path.dirname(os.path.dirname(asset_dir))):
+                  os.makedirs(asset_dir, exist_ok=True)
+                  with open(os.path.join(asset_dir, 'index.html'), 'w', encoding='utf-8') as f:
+                      f.write(html_template)
+
+          print("Preparacao concluida com sucesso!")
+          EOF
+          python3 preparar_hinos.py
+
+      - name: Publicar Versao Web para iPhone e Navegadores (GitHub Pages)
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./web_public
+
+      - name: Compilar Aplicativo Android (APK)
+        run: |
+          rm -f local.properties hinario-app/local.properties
+          if [ -d "hinario-app" ]; then
+            cd hinario-app
+          fi
+          gradle assembleDebug
+
+      - name: Disponibilizar APK para Download
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hinario-Tchokwe-Samsung-Android
+          path: '**/build/outputs/apk/debug/*.apk'
