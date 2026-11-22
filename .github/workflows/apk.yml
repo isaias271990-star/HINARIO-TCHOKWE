@@ -1,48 +1,379 @@
-name: Hinario Tchokwe - Build Oficial
+name: Hinário Tchokwe - Compilação e Publicação Oficial
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  build:
-    name: Compilar Hinario Tchokwe
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Baixar Código do Repositório
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Configurar JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Gradle
+      - name: Configurar Gradle
         uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: '8.7'
 
-      - name: Construir Aplicativo Limpo e Completo
+      - name: Preparar Hinos e Interface do Aplicativo
         run: |
-          # 1. Normalizar pastas do Android
-          [ -d "aplicativo" ] && mv aplicativo app || true
-          mkdir -p app/src/main/assets
-          rm -rf app/src/main/assets/*
+          python3 -c "
+          import json, os, re
 
-          # 2. Restaurar MainActivity.java limpo (usando Activity nativo do Android SDK)
-          python3 - << 'PYEOF'
-          import glob, os
-          main_javas = glob.glob('**/MainActivity.java', recursive=True)
-          for p in main_javas:
-              print(f"Restaurando MainActivity limpo em: {p}")
-              with open(p, 'w', encoding='utf-8') as f:
-                  f.write('''package ao.iasd.hinariotchokwe;
+          # 1. Localizar o ficheiro hinos.json
+          caminhos_busca = [
+              'hinario-app/tools/hinos.json',
+              'tools/hinos.json',
+              'app/src/main/assets/hinos.json'
+          ]
+          caminho_hinos = None
+          for c in caminhos_busca:
+              if os.path.exists(c):
+                  caminho_hinos = c
+                  break
+
+          if not caminho_hinos:
+              for raiz, _, ficheiros in os.walk('.'):
+                  if 'hinos.json' in ficheiros:
+                      caminho_hinos = os.path.join(raiz, 'hinos.json')
+                      break
+
+          if not caminho_hinos:
+              print('ERRO: hinos.json não encontrado!')
+              exit(1)
+
+          print(f'Lendo hinos de: {caminho_hinos}')
+          with open(caminho_hinos, 'r', encoding='utf-8') as f:
+              dados_brutos = json.load(f)
+
+          # Normalizar lista de hinos
+          if isinstance(dados_brutos, dict):
+              if 'hinos' in dados_brutos:
+                  lista_hinos = dados_brutos['hinos']
+              else:
+                  lista_hinos = list(dados_brutos.values())
+          else:
+              lista_hinos = dados_brutos
+
+          print(f'Total de hinos carregados: {len(lista_hinos)}')
+
+          # Formatar JSON seguro contra quebras de script
+          json_hinos = json.dumps(lista_hinos, ensure_ascii=False)
+          json_hinos_seguro = json_hinos.replace('</script>', '<\\/script>')
+
+          # 2. Criar HTML completo, responsivo e 100% offline
+          html_template = '''<!DOCTYPE html>
+          <html lang=\"pt\">
+          <head>
+            <meta charset=\"UTF-8\">
+            <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no\">
+            <title>Hinário Tchokwe - IASD</title>
+            <meta name=\"theme-color\" content=\"#1e293b\">
+            <style>
+              :root {
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --surface-hover: #334155;
+                --text: #f8fafc;
+                --text-muted: #94a3b8;
+                --primary: #f59e0b;
+                --primary-hover: #d97706;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --chorus-bg: rgba(245, 158, 11, 0.1);
+              }
+              body.light {
+                --bg: #f8fafc;
+                --surface: #ffffff;
+                --surface-hover: #f1f5f9;
+                --text: #0f172a;
+                --text-muted: #64748b;
+                --primary: #d97706;
+                --primary-hover: #b45309;
+                --border: #e2e8f0;
+                --card-bg: #ffffff;
+                --chorus-bg: rgba(217, 119, 6, 0.08);
+              }
+              * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; }
+              body { background-color: var(--bg); color: var(--text); display: flex; flex-direction: column; min-height: 100vh; }
+              header { background: var(--surface); padding: 12px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+              .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+              .header-title h1 { font-size: 1.15rem; font-weight: 700; color: var(--text); }
+              .header-title p { font-size: 0.8rem; color: var(--text-muted); }
+              .theme-toggle { background: transparent; border: 1px solid var(--border); color: var(--text); border-radius: 20px; padding: 4px 10px; cursor: pointer; font-size: 0.85rem; }
+              .search-container { position: relative; width: 100%; }
+              .search-input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.95rem; outline: none; }
+              .search-input:focus { border-color: var(--primary); }
+              .tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); }
+              .tab-btn { flex: 1; padding: 12px; text-align: center; background: none; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.9rem; }
+              .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+              main { flex: 1; overflow-y: auto; padding: 12px; max-width: 800px; margin: 0 auto; width: 100%; }
+              .hymn-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background 0.15s; }
+              .hymn-card:hover { background: var(--surface-hover); }
+              .hymn-info { display: flex; align-items: center; gap: 12px; overflow: hidden; }
+              .hymn-num { background: var(--primary); color: #000; font-weight: 700; min-width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; }
+              .hymn-name { font-size: 0.95rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+              .fav-icon { background: none; border: none; font-size: 1.25rem; color: var(--text-muted); cursor: pointer; padding: 4px 8px; }
+              .fav-icon.active { color: var(--primary); }
+              #view-leitor { display: none; }
+              .reader-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+              .back-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+              .font-controls { display: flex; gap: 6px; align-items: center; }
+              .font-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+              .reader-title { text-align: center; margin-bottom: 20px; }
+              .reader-title h2 { font-size: 1.35rem; color: var(--primary); margin-bottom: 4px; }
+              .reader-body { font-size: 1.15rem; line-height: 1.7; }
+              .stanza { margin-bottom: 18px; }
+              .stanza-header { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+              .chorus { background: var(--chorus-bg); border-left: 3px solid var(--primary); padding: 12px 14px; border-radius: 0 8px 8px 0; margin: 18px 0; font-style: italic; }
+              .chorus-header { font-size: 0.8rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 4px; font-style: normal; }
+              footer { background: var(--surface); border-top: 1px solid var(--border); padding: 18px 14px; text-align: center; margin-top: auto; }
+              .footer-church { font-weight: 700; font-size: 0.95rem; color: var(--text); margin-bottom: 6px; }
+              .credits-block { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 6px; }
+              .credits-block span { display: block; }
+              .footer-edition { font-size: 0.75rem; color: var(--primary); }
+            </style>
+          </head>
+          <body>
+            <header>
+              <div class=\"header-top\">
+                <div class=\"header-title\">
+                  <h1>Hinário Tchokwe - IASD</h1>
+                  <p>Missão Leste de Angola</p>
+                </div>
+                <button class=\"theme-toggle\" id=\"themeBtn\" onclick=\"toggleTema()\">Modo Claro</button>
+              </div>
+              <div class=\"search-container\" id=\"searchBox\">
+                <input type=\"text\" id=\"campoBusca\" class=\"search-input\" placeholder=\"Digite o número ou nome do hino...\" oninput=\"filtrarHinos()\">
+              </div>
+            </header>
+
+            <div class=\"tabs\" id=\"navTabs\">
+              <button class=\"tab-btn active\" id=\"tabTodos\" onclick=\"mudarAba('todos')\">Todos os Hinos (<span id=\"contTodos\">300</span>)</button>
+              <button class=\"tab-btn\" id=\"tabFavoritos\" onclick=\"mudarAba('favoritos')\">Favoritos (<span id=\"contFavs\">0</span>)</button>
+            </div>
+
+            <main>
+              <div id=\"view-lista\"></div>
+              <div id=\"view-leitor\">
+                <div class=\"reader-header\">
+                  <button class=\"back-btn\" onclick=\"voltarParaLista()\">← Voltar</button>
+                  <div class=\"font-controls\">
+                    <button class=\"font-btn\" onclick=\"ajustarFonte(-1)\">A-</button>
+                    <button class=\"font-btn\" onclick=\"ajustarFonte(1)\">A+</button>
+                    <button class=\"fav-icon\" id=\"btnFavLeitor\" onclick=\"toggleFavAtual()\">★</button>
+                  </div>
+                </div>
+                <div class=\"reader-title\">
+                  <h2 id=\"leitorTitulo\"></h2>
+                </div>
+                <div class=\"reader-body\" id=\"leitorLetra\"></div>
+              </div>
+            </main>
+
+            <footer>
+              <div class=\"footer-church\">Hinário Tchokwe - IASD</div>
+              <div class=\"credits-block\">
+                <span>Desenvolvedor: Isaías Muwaneno João IT</span>
+                <span>Revisão e Correção: Pastor Nunes Sacavumbi Lucas</span>
+                <span>Colaboradores: Líder Ecal Gomes e Líder Januário Justo Miranda</span>
+              </div>
+              <div class=\"footer-edition\">Para a Glória de Deus • Edição 2026</div>
+            </footer>
+
+            <script>
+              window.HINOS_DADOS = ''' + json_hinos_seguro + ''';
+              let abaAtual = 'todos';
+              let hinoAtualId = null;
+              let tamanhoFonte = 1.15;
+              let favoritos = JSON.parse(localStorage.getItem('tchokwe_favs') || '[]');
+
+              function inicializar() {
+                const temaSalvo = localStorage.getItem('tchokwe_tema');
+                if (temaSalvo === 'light') {
+                  document.body.classList.add('light');
+                  document.getElementById('themeBtn').textContent = 'Modo Escuro';
+                }
+                atualizarContadores();
+                renderizarLista();
+              }
+
+              function toggleTema() {
+                const isLight = document.body.classList.toggle('light');
+                document.getElementById('themeBtn').textContent = isLight ? 'Modo Escuro' : 'Modo Claro';
+                localStorage.setItem('tchokwe_tema', isLight ? 'light' : 'dark');
+              }
+
+              function mudarAba(aba) {
+                abaAtual = aba;
+                document.getElementById('tabTodos').classList.toggle('active', aba === 'todos');
+                document.getElementById('tabFavoritos').classList.toggle('active', aba === 'favoritos');
+                renderizarLista();
+              }
+
+              function atualizarContadores() {
+                document.getElementById('contTodos').textContent = window.HINOS_DADOS.length;
+                document.getElementById('contFavs').textContent = favoritos.length;
+              }
+
+              function renderizarLista() {
+                const termo = document.getElementById('campoBusca').value.trim().toLowerCase();
+                const container = document.getElementById('view-lista');
+                container.innerHTML = '';
+
+                let filtrados = window.HINOS_DADOS.filter(h => {
+                  const num = String(h.numero || h.number || h.id || '');
+                  const tit = String(h.titulo || h.title || h.nome || '').toLowerCase();
+                  const matchBusca = !termo || num === termo || tit.includes(termo);
+                  const numInt = parseInt(num, 10);
+                  const matchAba = (abaAtual === 'todos') || favoritos.includes(numInt);
+                  return matchBusca && matchAba;
+                });
+
+                if (filtrados.length === 0) {
+                  container.innerHTML = '<div style=\"text-align:center; padding: 40px 10px; color: var(--text-muted);\">Nenhum hino encontrado.</div>';
+                  return;
+                }
+
+                filtrados.forEach(h => {
+                  const num = parseInt(h.numero || h.number || h.id || 0, 10);
+                  const tit = h.titulo || h.title || h.nome || ('Hino ' + num);
+                  const isFav = favoritos.includes(num);
+
+                  const card = document.createElement('div');
+                  card.className = 'hymn-card';
+                  card.innerHTML = `
+                    <div class=\"hymn-info\" onclick=\"abrirHino(${num})\">
+                      <div class=\"hymn-num\">${num}</div>
+                      <div class=\"hymn-name\">${tit}</div>
+                    </div>
+                    <button class=\"fav-icon ${isFav ? 'active' : ''}\" onclick=\"event.stopPropagation(); toggleFav(${num})\">★</button>
+                  `;
+                  container.appendChild(card);
+                });
+              }
+
+              function filtrarHinos() {
+                renderizarLista();
+              }
+
+              function toggleFav(num) {
+                const idx = favoritos.indexOf(num);
+                if (idx > -1) {
+                  favoritos.splice(idx, 1);
+                } else {
+                  favoritos.push(num);
+                }
+                localStorage.setItem('tchokwe_favs', JSON.stringify(favoritos));
+                atualizarContadores();
+                renderizarLista();
+                if (hinoAtualId === num) {
+                  document.getElementById('btnFavLeitor').classList.toggle('active', favoritos.includes(num));
+                }
+              }
+
+              function toggleFavAtual() {
+                if (hinoAtualId !== null) {
+                  toggleFav(hinoAtualId);
+                }
+              }
+
+              function abrirHino(num) {
+                const hino = window.HINOS_DADOS.find(h => parseInt(h.numero || h.number || h.id, 10) === num);
+                if (!hino) return;
+
+                hinoAtualId = num;
+                document.getElementById('view-lista').style.display = 'none';
+                document.getElementById('searchBox').style.display = 'none';
+                document.getElementById('navTabs').style.display = 'none';
+                document.getElementById('view-leitor').style.display = 'block';
+
+                const tit = hino.titulo || hino.title || hino.nome || ('Hino ' + num);
+                document.getElementById('leitorTitulo').textContent = num + '. ' + tit;
+                document.getElementById('btnFavLeitor').classList.toggle('active', favoritos.includes(num));
+
+                const containerLetra = document.getElementById('leitorLetra');
+                containerLetra.innerHTML = '';
+
+                // Formatar estrofes e coro
+                if (hino.estrofes && Array.isArray(hino.estrofes)) {
+                  hino.estrofes.forEach((est, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'stanza';
+                    div.innerHTML = `<div class=\"stanza-header\">Estrofe ${idx + 1}</div><p>${est.replace(/\\n/g, '<br>')}</p>`;
+                    containerLetra.appendChild(div);
+
+                    if (idx === 0 && hino.coro) {
+                      const coroDiv = document.createElement('div');
+                      coroDiv.className = 'chorus';
+                      coroDiv.innerHTML = `<div class=\"chorus-header\">Coro</div><p>${hino.coro.replace(/\\n/g, '<br>')}</p>`;
+                      containerLetra.appendChild(coroDiv);
+                    }
+                  });
+                } else {
+                  const textoBruto = hino.letra || hino.lyrics || hino.content || '';
+                  const blocos = textoBruto.split(/\\n\\s*\\n/);
+                  blocos.forEach(bloco => {
+                    const limpo = bloco.trim();
+                    if (!limpo) return;
+                    const isCoro = /^(coro|refr[ãa]o)/i.test(limpo);
+                    const div = document.createElement('div');
+                    div.className = isCoro ? 'chorus' : 'stanza';
+                    div.innerHTML = isCoro
+                      ? `<div class=\"chorus-header\">Coro</div><p>${limpo.replace(/\\n/g, '<br>')}</p>`
+                      : `<p>${limpo.replace(/\\n/g, '<br>')}</p>`;
+                    containerLetra.appendChild(div);
+                  });
+                }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+
+              function voltarParaLista() {
+                document.getElementById('view-leitor').style.display = 'none';
+                document.getElementById('view-lista').style.display = 'block';
+                document.getElementById('searchBox').style.display = 'block';
+                document.getElementById('navTabs').style.display = 'flex';
+                hinoAtualId = null;
+              }
+
+              function ajustarFonte(delta) {
+                tamanhoFonte = Math.max(0.85, Math.min(1.8, tamanhoFonte + delta * 0.1));
+                document.getElementById('leitorLetra').style.fontSize = tamanhoFonte + 'rem';
+              }
+
+              window.onload = inicializar;
+            </script>
+          </body>
+          </html>'''
+
+          # 3. Gravar index.html nas pastas do Android e da Web
+          os.makedirs('web_public', exist_ok=True)
+          with open('web_public/index.html', 'w', encoding='utf-8') as f:
+              f.write(html_template)
+
+          os.makedirs('app/src/main/assets', exist_ok=True)
+          with open('app/src/main/assets/index.html', 'w', encoding='utf-8') as f:
+              f.write(html_template)
+
+          # Gravar ficheiro JS de dados adicional
+          with open('web_public/hinos_dados.js', 'w', encoding='utf-8') as f:
+              f.write('window.HINOS_DADOS = ' + json_hinos_seguro + ';\n')
+          with open('app/src/main/assets/hinos_dados.js', 'w', encoding='utf-8') as f:
+              f.write('window.HINOS_DADOS = ' + json_hinos_seguro + ';\n')
+
+          # 4. Criar MainActivity.java limpo (sem dependências externas)
+          os.makedirs('app/src/main/java/ao/iasd/hinariotchokwe', exist_ok=True)
+          main_java = '''package ao.iasd.hinariotchokwe;
 
           import android.app.Activity;
           import android.os.Bundle;
@@ -57,15 +388,16 @@ jobs:
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
                   webView = new WebView(this);
-                  setContentView(webView);
-
-                  WebSettings webSettings = webView.getSettings();
-                  webSettings.setJavaScriptEnabled(true);
-                  webSettings.setDomStorageEnabled(true);
-                  webSettings.setAllowFileAccess(true);
-
+                  WebSettings ws = webView.getSettings();
+                  ws.setJavaScriptEnabled(true);
+                  ws.setDomStorageEnabled(true);
+                  ws.setAllowFileAccess(true);
+                  ws.setAllowContentAccess(true);
+                  ws.setAllowFileAccessFromFileURLs(true);
+                  ws.setAllowUniversalAccessFromFileURLs(true);
                   webView.setWebViewClient(new WebViewClient());
-                  webView.loadUrl("file:///android_asset/index.html");
+                  webView.loadUrl(\"file:///android_asset/index.html\");
+                  setContentView(webView);
               }
 
               @Override
@@ -77,383 +409,82 @@ jobs:
                   }
               }
           }
-          ''')
-          PYEOF
+          '''
+          with open('app/src/main/java/ao/iasd/hinariotchokwe/MainActivity.java', 'w', encoding='utf-8') as f:
+              f.write(main_java)
 
-          # 3. Converter e embutir todos os 300 hinos em formato de lista direta
-          python3 - << 'PYEOF'
-          import json, glob, os, sys
+          # 5. Criar AndroidManifest.xml limpo
+          manifest_xml = '''<?xml version=\"1.0\" encoding=\"utf-8\"?>
+          <manifest xmlns:android=\"http://schemas.android.com/apk/res/android\">
+              <uses-permission android:name=\"android.permission.INTERNET\" />
+              <application
+                  android:allowBackup=\"true\"
+                  android:label=\"Hinário Tchokwe\"
+                  android:supportsRtl=\"true\"
+                  android:theme=\"@android:style/Theme.NoTitleBar\">
+                  <activity
+                      android:name=\".MainActivity\"
+                      android:exported=\"true\"
+                      android:configChanges=\"orientation|screenSize|keyboardHidden\">
+                      <intent-filter>
+                          <action android:name=\"android.intent.action.MAIN\" />
+                          <category android:name=\"android.intent.category.LAUNCHER\" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>'''
+          with open('app/src/main/AndroidManifest.xml', 'w', encoding='utf-8') as f:
+              f.write(manifest_xml)
 
-          hinos_files = glob.glob('**/*hinos*.json', recursive=True)
-          if not hinos_files:
-              print("ERRO: hinos.json nao encontrado!")
-              sys.exit(1)
-
-          hinos_path = hinos_files[0]
-          print(f"Lendo hinos de: {hinos_path}")
-          with open(hinos_path, 'r', encoding='utf-8') as f:
-              raw = json.load(f)
-
-          # Normalizar para lista pura
-          if isinstance(raw, dict):
-              for k in ['hinos', 'acervo', 'dados', 'data', 'items']:
-                  if k in raw and isinstance(raw[k], list):
-                      raw = raw[k]
-                      break
-          if isinstance(raw, dict):
-              raw = list(raw.values())
-
-          print(f"Total de hinos convertidos com sucesso: {len(raw)}")
-          json_hinos = json.dumps(raw, ensure_ascii=False)
-
-          html_conteudo = """<!DOCTYPE html>
-          <html lang="pt">
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-            <meta name="apple-mobile-web-app-capable" content="yes">
-            <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-            <meta name="apple-mobile-web-app-title" content="Hinário Tchokwe">
-            <title>Hinário Tchokwe - IASD</title>
-            <style>
-              :root {
-                --bg: #0d1b2a;
-                --card: #1b263b;
-                --cor-texto: #e0e1dd;
-                --acento: #008080;
-                --acento-ouro: #e0a96d;
-                --destaque-coro: rgba(0, 128, 128, 0.15);
-                --borda: rgba(255, 255, 255, 0.1);
+          # 6. Criar app/build.gradle limpo
+          build_gradle = '''plugins {
+              id 'com.android.application'
+          }
+          android {
+              namespace 'ao.iasd.hinariotchokwe'
+              compileSdk 34
+              defaultConfig {
+                  applicationId \"ao.iasd.hinariotchokwe\"
+                  minSdk 21
+                  targetSdk 34
+                  versionCode 1
+                  versionName \"1.0.0\"
               }
-              body.claro {
-                --bg: #f4f6f8;
-                --card: #ffffff;
-                --cor-texto: #1f2937;
-                --acento: #006666;
-                --acento-ouro: #b87333;
-                --destaque-coro: rgba(0, 102, 102, 0.08);
-                --borda: rgba(0, 0, 0, 0.08);
+              buildTypes {
+                  release {
+                      minifyEnabled false
+                  }
+                  debug {
+                      minifyEnabled false
+                  }
               }
-              * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-              body { background: var(--bg); color: var(--cor-texto); min-height: 100vh; display: flex; flex-direction: column; }
-              header { background: var(--card); border-bottom: 1px solid var(--borda); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-              .cabecalho-texto h1 { font-size: 1.1rem; font-weight: 700; color: var(--acento-ouro); }
-              .cabecalho-texto p { font-size: 0.75rem; opacity: 0.8; }
-              .btn-icone { background: none; border: none; color: var(--cor-texto); font-size: 1.25rem; cursor: pointer; padding: 6px; border-radius: 8px; }
-              .pesquisa-box { padding: 12px 16px; background: var(--card); border-bottom: 1px solid var(--borda); }
-              .campo-busca { width: 100%; padding: 12px 16px; font-size: 1rem; border-radius: 12px; border: 1px solid var(--borda); background: var(--bg); color: var(--cor-texto); outline: none; }
-              .abas { display: flex; background: var(--card); border-bottom: 1px solid var(--borda); }
-              .aba { flex: 1; padding: 10px; text-align: center; font-size: 0.9rem; font-weight: 600; background: none; border: none; color: var(--cor-texto); opacity: 0.6; cursor: pointer; border-bottom: 3px solid transparent; }
-              .aba.ativa { opacity: 1; color: var(--acento-ouro); border-bottom-color: var(--acento-ouro); }
-              .lista-hinos { flex: 1; overflow-y: auto; padding: 8px 12px; }
-              .item-hino { display: flex; align-items: center; justify-content: space-between; padding: 14px 12px; background: var(--card); margin-bottom: 8px; border-radius: 10px; border: 1px solid var(--borda); cursor: pointer; }
-              .item-hino:active { opacity: 0.8; transform: scale(0.99); }
-              .hino-info { display: flex; align-items: center; gap: 12px; flex: 1; }
-              .hino-num { background: var(--acento); color: #fff; font-weight: 700; font-size: 0.9rem; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; }
-              .hino-titulo { font-size: 0.95rem; font-weight: 600; line-height: 1.3; }
-              .btn-fav { background: none; border: none; color: #ffb703; font-size: 1.3rem; padding: 6px; cursor: pointer; }
-              
-              /* Tela de Detalhes do Hino */
-              .tela-hino { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg); z-index: 200; flex-direction: column; }
-              .tela-hino.ativa { display: flex; }
-              .topo-hino { background: var(--card); border-bottom: 1px solid var(--borda); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; }
-              .controles-fonte { display: flex; gap: 6px; align-items: center; }
-              .btn-tam { background: var(--bg); border: 1px solid var(--borda); color: var(--cor-texto); padding: 6px 12px; border-radius: 6px; font-weight: 700; cursor: pointer; }
-              .conteudo-hino { flex: 1; overflow-y: auto; padding: 24px 20px; line-height: 1.8; }
-              .hino-cabecalho-detalhe { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--borda); }
-              .detalhe-num { color: var(--acento-ouro); font-weight: 700; font-size: 1rem; text-transform: uppercase; }
-              .detalhe-titulo { font-size: 1.4rem; font-weight: 800; margin-top: 4px; }
-              .estrofe { margin-bottom: 20px; }
-              .estrofe-num { font-size: 0.85rem; font-weight: 700; color: var(--acento-ouro); margin-bottom: 4px; }
-              .coro { background: var(--destaque-coro); padding: 14px; border-radius: 10px; border-left: 4px solid var(--acento-ouro); margin-bottom: 20px; font-style: italic; }
-              .coro-rotulo { font-size: 0.85rem; font-weight: 700; color: var(--acento-ouro); margin-bottom: 4px; text-transform: uppercase; }
-              .linha-letra { margin-bottom: 4px; }
-              .navegacao-hinos { display: flex; justify-content: space-between; padding: 12px 16px; background: var(--card); border-top: 1px solid var(--borda); }
-              .btn-nav { background: var(--acento); color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-
-              /* Rodape Oficial */
-              footer { text-align: center; padding: 25px 15px; margin-top: auto; font-size: 0.88rem; opacity: 0.9; border-top: 1px solid var(--borda); line-height: 1.6; background: var(--card); }
-              footer strong { color: var(--cor-texto); }
-              footer p { margin: 4px 0; }
-              .rodape-titulo { font-weight: 800; font-size: 1.1rem; color: #2e7d32; }
-              .dedicatoria { margin-top: 8px; font-size: 0.8rem; opacity: 0.75; }
-            </style>
-          </head>
-          <body>
-
-            <!-- Cabecalho Principal -->
-            <header>
-              <div class="cabecalho-texto">
-                <h1>Hinário Tchokwe - IASD</h1>
-                <p>Missão Leste de Angola</p>
-              </div>
-              <button class="btn-icone" id="btn-tema" title="Tema">🌓</button>
-            </header>
-
-            <!-- Barra de Pesquisa -->
-            <div class="pesquisa-box">
-              <input type="text" id="campo-busca" class="campo-busca" placeholder="🔍 Digite o número ou nome do hino...">
-            </div>
-
-            <!-- Abas -->
-            <div class="abas">
-              <button class="aba ativa" id="aba-todos">Todos os Hinos (<span id="cont-todos">0</span>)</button>
-              <button class="aba" id="aba-fav">Favoritos (★)</button>
-            </div>
-
-            <!-- Lista de Hinos -->
-            <div class="lista-hinos" id="lista-hinos"></div>
-
-            <!-- Tela de Leitura do Hino -->
-            <div class="tela-hino" id="tela-hino">
-              <div class="topo-hino">
-                <button class="btn-tam" id="btn-voltar">← Voltar</button>
-                <div class="controles-fonte">
-                  <button class="btn-tam" id="fonte-menos">A -</button>
-                  <button class="btn-tam" id="fonte-mais">A +</button>
-                  <button class="btn-fav" id="btn-fav-detalhe">☆</button>
-                </div>
-              </div>
-              <div class="conteudo-hino" id="conteudo-hino"></div>
-              <div class="navegacao-hinos">
-                <button class="btn-nav" id="btn-ant">‹ Anterior</button>
-                <button class="btn-nav" id="btn-prox">Próximo ›</button>
-              </div>
-            </div>
-
-            <!-- Rodape Oficial com os Creditos -->
-            <footer>
-              <p class="rodape-titulo">Hinário Tchokwe - IASD</p>
-              <p><strong>Desenvolvedor:</strong> Isaías Muwaneno João IT</p>
-              <p><strong>Revisão e Correção:</strong> Pastor Nunes Sacavumbi Lucas</p>
-              <p><strong>Colaboradores:</strong> Líder Ecal Gomes e Líder Januário Justo Miranda</p>
-              <p class="dedicatoria">Para a Glória de Deus • Edição 2026</p>
-            </footer>
-
-            <script>
-              const RAW_DATA = """ + json_hinos + """;
-              const HINOS_DB = Array.isArray(RAW_DATA) ? RAW_DATA : (RAW_DATA.hinos || RAW_DATA.acervo || Object.values(RAW_DATA));
-
-              let favoritos = JSON.parse(localStorage.getItem('fav_hinos') || '[]');
-              let abaAtual = 'todos';
-              let hinoAtualIdx = 0;
-              let tamanhoFonte = 18;
-
-              const listaEl = document.getElementById('lista-hinos');
-              const buscaEl = document.getElementById('campo-busca');
-              const contTodosEl = document.getElementById('cont-todos');
-              const telaHinoEl = document.getElementById('tela-hino');
-              const conteudoHinoEl = document.getElementById('conteudo-hino');
-              const btnFavDetalhe = document.getElementById('btn-fav-detalhe');
-
-              contTodosEl.textContent = HINOS_DB.length;
-
-              function alternarTema() {
-                document.body.classList.toggle('claro');
-                localStorage.setItem('tema_claro', document.body.classList.contains('claro'));
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
               }
-              if (localStorage.getItem('tema_claro') === 'true') document.body.classList.add('claro');
-              document.getElementById('btn-tema').onclick = alternarTema;
+          }
+          dependencies {}
+          '''
+          with open('app/build.gradle', 'w', encoding='utf-8') as f:
+              f.write(build_gradle)
 
-              function getNum(h, idx) {
-                return h.n || h.numero || h.num || h.id || (idx + 1);
-              }
+          print('Preparação concluída com sucesso!')
+          "
 
-              function getTit(h, idx) {
-                return h.ti || h.titulo || h.title || h.nome || ('Hino ' + getNum(h, idx));
-              }
-
-              function renderizarLista(itens) {
-                listaEl.innerHTML = '';
-                if (!itens || itens.length === 0) {
-                  listaEl.innerHTML = '<p style="text-align:center;padding:40px;opacity:0.6;">Nenhum hino encontrado.</p>';
-                  return;
-                }
-                itens.forEach((h, idx) => {
-                  const num = getNum(h, idx);
-                  const tit = getTit(h, idx);
-                  const isFav = favoritos.includes(num);
-
-                  const card = document.createElement('div');
-                  card.className = 'item-hino';
-                  card.innerHTML = '<div class="hino-info">' +
-                    '<div class="hino-num">' + num + '</div>' +
-                    '<div class="hino-titulo">' + tit + '</div>' +
-                    '</div>' +
-                    '<button class="btn-fav">' + (isFav ? '★' : '☆') + '</button>';
-
-                  card.querySelector('.hino-info').onclick = () => abrirHinoPorNumero(num);
-                  const starBtn = card.querySelector('.btn-fav');
-                  starBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    toggleFav(num);
-                    starBtn.textContent = favoritos.includes(num) ? '★' : '☆';
-                    if (abaAtual === 'fav') filtrar();
-                  };
-
-                  listaEl.appendChild(card);
-                });
-              }
-
-              function toggleFav(num) {
-                if (favoritos.includes(num)) {
-                  favoritos = favoritos.filter(n => n !== num);
-                } else {
-                  favoritos.push(num);
-                }
-                localStorage.setItem('fav_hinos', JSON.stringify(favoritos));
-              }
-
-              function filtrar() {
-                const q = buscaEl.value.trim().toLowerCase();
-                let lista = abaAtual === 'fav' 
-                  ? HINOS_DB.filter((h, idx) => favoritos.includes(getNum(h, idx)))
-                  : HINOS_DB;
-
-                if (q) {
-                  lista = lista.filter((h, idx) => {
-                    const n = String(getNum(h, idx));
-                    const t = String(getTit(h, idx)).toLowerCase();
-                    return n === q || n.startsWith(q) || t.includes(q);
-                  });
-                }
-                renderizarLista(lista);
-              }
-
-              buscaEl.oninput = filtrar;
-
-              document.getElementById('aba-todos').onclick = () => {
-                abaAtual = 'todos';
-                document.getElementById('aba-todos').classList.add('ativa');
-                document.getElementById('aba-fav').classList.remove('ativa');
-                filtrar();
-              };
-
-              document.getElementById('aba-fav').onclick = () => {
-                abaAtual = 'fav';
-                document.getElementById('aba-fav').classList.add('ativa');
-                document.getElementById('aba-todos').classList.remove('ativa');
-                filtrar();
-              };
-
-              function abrirHinoPorNumero(num) {
-                const idx = HINOS_DB.findIndex((h, i) => getNum(h, i) == num);
-                if (idx !== -1) abrirHino(idx);
-              }
-
-              function abrirHino(idx) {
-                hinoAtualIdx = idx;
-                const h = HINOS_DB[idx];
-                const num = getNum(h, idx);
-                const tit = getTit(h, idx);
-
-                btnFavDetalhe.textContent = favoritos.includes(num) ? '★' : '☆';
-                btnFavDetalhe.onclick = () => {
-                  toggleFav(num);
-                  btnFavDetalhe.textContent = favoritos.includes(num) ? '★' : '☆';
-                };
-
-                let corpo = '<div class="hino-cabecalho-detalhe">' +
-                  '<div class="detalhe-num">Hino Nº ' + num + '</div>' +
-                  '<div class="detalhe-titulo">' + tit + '</div>' +
-                  '</div>';
-
-                if (Array.isArray(h.b)) {
-                  h.b.forEach((bloco, bIdx) => {
-                    const isCoro = bloco.t === 'c' || bloco.coro === true;
-                    const classe = isCoro ? 'coro' : 'estrofe';
-                    const rotulo = isCoro ? '<div class="coro-rotulo">Refrão</div>' : ('<div class="estrofe-num">' + (bIdx + 1) + '</div>');
-                    let linhas = '';
-                    if (Array.isArray(bloco.l)) {
-                      linhas = bloco.l.map(l => '<div class="linha-letra">' + l + '</div>').join('');
-                    } else if (typeof bloco.l === 'string') {
-                      linhas = '<div class="linha-letra">' + bloco.l + '</div>';
-                    }
-                    corpo += '<div class="' + classe + '">' + rotulo + linhas + '</div>';
-                  });
-                } else if (Array.isArray(h.estrofes)) {
-                  h.estrofes.forEach((est, eIdx) => {
-                    corpo += '<div class="estrofe"><div class="estrofe-num">' + (eIdx + 1) + '</div><div class="linha-letra">' + String(est).replace(/\n/g, '<br>') + '</div></div>';
-                  });
-                } else if (h.letra || h.corpo || h.texto) {
-                  const txt = h.letra || h.corpo || h.texto;
-                  corpo += '<div class="estrofe"><div class="linha-letra">' + String(txt).replace(/\n/g, '<br>') + '</div></div>';
-                }
-
-                conteudoHinoEl.innerHTML = corpo;
-                conteudoHinoEl.style.fontSize = tamanhoFonte + 'px';
-                conteudoHinoEl.scrollTop = 0;
-                telaHinoEl.classList.add('ativa');
-              }
-
-              document.getElementById('btn-voltar').onclick = () => {
-                telaHinoEl.classList.remove('ativa');
-                filtrar();
-              };
-
-              document.getElementById('fonte-mais').onclick = () => {
-                tamanhoFonte = Math.min(32, tamanhoFonte + 2);
-                conteudoHinoEl.style.fontSize = tamanhoFonte + 'px';
-              };
-
-              document.getElementById('fonte-menos').onclick = () => {
-                tamanhoFonte = Math.max(14, tamanhoFonte - 2);
-                conteudoHinoEl.style.fontSize = tamanhoFonte + 'px';
-              };
-
-              document.getElementById('btn-ant').onclick = () => {
-                if (hinoAtualIdx > 0) abrirHino(hinoAtualIdx - 1);
-              };
-
-              document.getElementById('btn-prox').onclick = () => {
-                if (hinoAtualIdx < HINOS_DB.length - 1) abrirHino(hinoAtualIdx + 1);
-              };
-
-              // Renderizacao Inicial Instantanea
-              filtrar();
-            </script>
-          </body>
-          </html>"""
-
-          for d in ['app/src/main/assets/index.html', 'hinario-app/app/src/main/assets/index.html']:
-              os.makedirs(os.path.dirname(d), exist_ok=True)
-              with open(d, 'w', encoding='utf-8') as f:
-                  f.write(html_conteudo)
-              print(f"Salvo em: {d}")
-
-          PYEOF
-
-          # 4. Compilar APK e AAB da Play Store
-          gradle assembleDebug bundleDebug --stacktrace
-
-          # 5. Garantir integridade dos assets no APK
-          if ! unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -q "assets/index.html"; then
-            (cd app/src/main && zip -r -u ../../../app/build/outputs/apk/debug/app-debug.apk assets)
-          fi
-
-          # 6. Criar chave e assinar o APK para Android
-          mkdir -p ~/.android
-          if [ ! -f ~/.android/debug.keystore ]; then
-            keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
-          fi
-
-          APKSIGNER=$(find /usr/local/lib/android/sdk/build-tools -name "apksigner" | sort -V | tail -n 1)
-          echo "Assinando APK com: $APKSIGNER"
-          $APKSIGNER sign --ks ~/.android/debug.keystore --ks-pass pass:android app/build/outputs/apk/debug/app-debug.apk
-
-          # 7. Organizar saida dos arquivos
-          mkdir -p saida_loja
-          cp -f app/build/outputs/apk/debug/app-debug.apk saida_loja/Hinario-Tchokwe.apk
-          find app/build/outputs/bundle -name "*.aab" -exec cp -f {} saida_loja/Hinario-Tchokwe-PlayStore.aab \;
-
-      - name: Disponibilizar APK e AAB para Download
-        uses: actions/upload-artifact@v4
-        with:
-          name: Hinario-Tchokwe-Arquivos-Finais
-          path: saida_loja/*
-
-      - name: Publicar Versão para iPhone
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Publicar Versão Web para iPhone e Navegadores (GitHub Pages)
+        uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./app/src/main/assets
+          publish_dir: ./web_public
+
+      - name: Compilar Aplicativo Android (APK)
+        run: |
+          rm -f local.properties hinario-app/local.properties
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Disponibilizar APK para Download
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hinario-Tchokwe-Samsung-Android
+          path: app/build/outputs/apk/debug/*.apk
