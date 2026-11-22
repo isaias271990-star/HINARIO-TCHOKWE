@@ -35,7 +35,7 @@ jobs:
           mkdir -p app/src/main/assets
           rm -rf app/src/main/assets/*
 
-          # 2. Restaurar MainActivity.java limpo e funcional
+          # 2. Restaurar MainActivity.java limpo (usando Activity nativo do Android SDK)
           python3 - << 'PYEOF'
           import glob, os
           main_javas = glob.glob('**/MainActivity.java', recursive=True)
@@ -44,13 +44,13 @@ jobs:
               with open(p, 'w', encoding='utf-8') as f:
                   f.write('''package ao.iasd.hinariotchokwe;
 
+          import android.app.Activity;
           import android.os.Bundle;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
           import android.webkit.WebViewClient;
-          import androidx.appcompat.app.AppCompatActivity;
 
-          public class MainActivity extends AppCompatActivity {
+          public class MainActivity extends Activity {
               private WebView webView;
 
               @Override
@@ -391,26 +391,23 @@ jobs:
           </body>
           </html>"""
 
-          with open('app/src/main/assets/index.html', 'w', encoding='utf-8') as f:
-              f.write(html_conteudo)
-          print("Aplicativo recriado com sucesso em app/src/main/assets/index.html!")
+          for d in ['app/src/main/assets/index.html', 'hinario-app/app/src/main/assets/index.html']:
+              os.makedirs(os.path.dirname(d), exist_ok=True)
+              with open(d, 'w', encoding='utf-8') as f:
+                  f.write(html_conteudo)
+              print(f"Salvo em: {d}")
 
           PYEOF
 
-          # 4. Forcar o Android a habilitar a pasta assets
-          if ! grep -q "assets.srcDirs" app/build.gradle; then
-            sed -i '/android {/a \    sourceSets { main { assets.srcDirs = ["src/main/assets"] } }' app/build.gradle || true
-          fi
-
-          # 5. Compilar APK e AAB da Play Store
+          # 4. Compilar APK e AAB da Play Store
           gradle assembleDebug bundleDebug --stacktrace
 
-          # 6. Garantir integridade dos assets no APK
+          # 5. Garantir integridade dos assets no APK
           if ! unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -q "assets/index.html"; then
             (cd app/src/main && zip -r -u ../../../app/build/outputs/apk/debug/app-debug.apk assets)
           fi
 
-          # 7. Criar chave e assinar o APK para Android
+          # 6. Criar chave e assinar o APK para Android
           mkdir -p ~/.android
           if [ ! -f ~/.android/debug.keystore ]; then
             keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
@@ -420,7 +417,7 @@ jobs:
           echo "Assinando APK com: $APKSIGNER"
           $APKSIGNER sign --ks ~/.android/debug.keystore --ks-pass pass:android app/build/outputs/apk/debug/app-debug.apk
 
-          # 8. Organizar saida dos arquivos
+          # 7. Organizar saida dos arquivos
           mkdir -p saida_loja
           cp -f app/build/outputs/apk/debug/app-debug.apk saida_loja/Hinario-Tchokwe.apk
           find app/build/outputs/bundle -name "*.aab" -exec cp -f {} saida_loja/Hinario-Tchokwe-PlayStore.aab \;
