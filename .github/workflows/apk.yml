@@ -1,4 +1,66 @@
-          # Corrigir automaticamente o erro das linhas 85, 91 e 92 do app.js
+name: Build APK e AAB Play Store
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Gerar APK e AAB
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.7'
+
+      - name: Preparar, Compilar APK e AAB
+        run: |
+          # 1. Renomear pastas se necessario
+          [ -d "aplicativo" ] && mv aplicativo app || true
+          [ -d "app/src/main/Ativos" ] && mv app/src/main/Ativos app/src/main/assets || true
+          [ -d "app/src/main/Assets" ] && mv app/src/main/Assets app/src/main/assets || true
+
+          # 2. Criar pastas necessarias
+          mkdir -p app/src/main/assets/data
+          mkdir -p app/src/main/assets/dados
+
+          # 3. Copiar arquivos apenas se nao estiverem ja dentro de assets
+          INDEX_FILE=$(find . -name "index.html" | head -n 1)
+          if [ -n "$INDEX_FILE" ]; then
+            SRC_DIR=$(dirname "$INDEX_FILE")
+            if [ "$SRC_DIR" != "app/src/main/assets" ] && [ "$SRC_DIR" != "./app/src/main/assets" ]; then
+              echo "Copiando de $SRC_DIR para app/src/main/assets/"
+              cp -rf "$SRC_DIR"/* app/src/main/assets/ || true
+            fi
+          fi
+
+          # 4. Copiar hinos apenas se estiverem fora
+          HINOS_FILE=$(find . -iname "*hinos*.json" | head -n 1)
+          if [ -n "$HINOS_FILE" ]; then
+            if [ "$HINOS_FILE" != "app/src/main/assets/data/hinos.json" ] && [ "$HINOS_FILE" != "./app/src/main/assets/data/hinos.json" ]; then
+              cp -f "$HINOS_FILE" app/src/main/assets/data/hinos.json || true
+            fi
+            if [ "$HINOS_FILE" != "app/src/main/assets/dados/hinos.json" ] && [ "$HINOS_FILE" != "./app/src/main/assets/dados/hinos.json" ]; then
+              cp -f "$HINOS_FILE" app/src/main/assets/dados/hinos.json || true
+            fi
+          fi
+
+          # 5. Corrigir automaticamente o erro das linhas 85, 91 e 92 do app.js
           python3 -c "
           import glob
           for p in glob.glob('**/app.js', recursive=True):
@@ -12,3 +74,77 @@
                   f.write(t)
               print('app.js corrigido em:', p)
           "
+
+          # 6. Injetar a Autoria Oficial limpa
+          python3 -c "
+          with open('app/src/main/assets/index.html', 'r', encoding='utf-8') as f:
+              c = f.read()
+          import re
+          c = re.sub(r'<footer[\s\S]*?</footer>', '', c)
+          creditos = '''<footer style=\"text-align:center;padding:25px 15px;margin-top:35px;font-size:0.9em;opacity:0.9;border-top:1px solid rgba(128,128,128,0.3);line-height:1.6;\">
+          <p style=\"margin:4px 0;font-weight:bold;font-size:1.15em;color:#2e7d32;\">Hinário Tchokwe - IASD</p>
+          <p style=\"margin:6px 0;\"><strong>Desenvolvedor:</strong> Isaías Muwaneno João IT</p>
+          <p style=\"margin:4px 0;\"><strong>Revisão e Correção:</strong> Pastor Nunes Sacavumbi Lucas</p>
+          <p style=\"margin:4px 0;\"><strong>Colaboradores:</strong> Líder Ecal Gomes e Líder Januário Justo Miranda</p>
+          <p style=\"margin:10px 0 0 0;font-size:0.8em;opacity:0.75;\">Para a Glória de Deus • Edição 2026</p>
+          </footer>'''
+          if '</body>' in c:
+              c = c.replace('</body>', creditos + '\n</body>')
+          else:
+              c = c + creditos
+          with open('app/src/main/assets/index.html', 'w', encoding='utf-8') as f:
+              f.write(c)
+          "
+
+          # 7. Otimizar para iPhone
+          PWA_HEAD='<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Hinário Tchokwe"><link rel="apple-touch-icon" href="icone-512.png">'
+          sed -i "s|</head>|$PWA_HEAD</head>|g" app/src/main/assets/index.html || true
+          [ -f "icone-512.png" ] && cp -f icone-512.png app/src/main/assets/ || true
+
+          # 8. Forcar Gradle a incluir a pasta assets
+          if ! grep -q "assets.srcDirs" app/build.gradle; then
+            sed -i '/android {/a \    sourceSets { main { assets.srcDirs = ["src/main/assets"] } }' app/build.gradle || true
+          fi
+
+          # 9. Permissoes no MainActivity para Android 14
+          MAIN_JAVA=$(find app/src/main/java -name "MainActivity.java" | head -n 1)
+          if [ -n "$MAIN_JAVA" ]; then
+            if ! grep -q "setAllowFileAccess" "$MAIN_JAVA"; then
+              sed -i '/setJavaScriptEnabled/a \        webSettings.setAllowFileAccess(true);\n        webSettings.setAllowContentAccess(true);\n        webSettings.setAllowFileAccessFromFileURLs(true);\n        webSettings.setAllowUniversalAccessFromFileURLs(true);' "$MAIN_JAVA" || true
+            fi
+          fi
+
+          # 10. Compilar APK e AAB da Play Store
+          gradle assembleDebug bundleDebug --stacktrace
+
+          # 11. Garantir integridade dos assets no APK
+          if ! unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -q "assets/index.html"; then
+            (cd app/src/main && zip -r -u ../../../app/build/outputs/apk/debug/app-debug.apk assets)
+          fi
+
+          # 12. Assinar o APK para o Android
+          mkdir -p ~/.android
+          if [ ! -f ~/.android/debug.keystore ]; then
+            keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
+          APKSIGNER=$(find /usr/local/lib/android/sdk/build-tools -name "apksigner" | sort -V | tail -n 1)
+          echo "Assinando APK com: $APKSIGNER"
+          $APKSIGNER sign --ks ~/.android/debug.keystore --ks-pass pass:android app/build/outputs/apk/debug/app-debug.apk
+
+          # 13. Organizar saida
+          mkdir -p saida_loja
+          cp -f app/build/outputs/apk/debug/app-debug.apk saida_loja/Hinario-Tchokwe.apk
+          find app/build/outputs/bundle -name "*.aab" -exec cp -f {} saida_loja/Hinario-Tchokwe-PlayStore.aab \;
+
+      - name: Disponibilizar APK e AAB para Download
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hinario-Tchokwe-Arquivos-Finais
+          path: saida_loja/*
+
+      - name: Publicar Versão para iPhone
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./app/src/main/assets
