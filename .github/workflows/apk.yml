@@ -80,7 +80,7 @@ jobs:
           ''')
           PYEOF
 
-          # 3. Localizar os 300 hinos e construir o aplicativo completo e 100% offline
+          # 3. Converter e embutir todos os 300 hinos em formato de lista direta
           python3 - << 'PYEOF'
           import json, glob, os, sys
 
@@ -92,10 +92,19 @@ jobs:
           hinos_path = hinos_files[0]
           print(f"Lendo hinos de: {hinos_path}")
           with open(hinos_path, 'r', encoding='utf-8') as f:
-              hinos_data = json.load(f)
+              raw = json.load(f)
 
-          print(f"Total de hinos carregados: {len(hinos_data)}")
-          json_hinos = json.dumps(hinos_data, ensure_ascii=False)
+          # Normalizar para lista pura
+          if isinstance(raw, dict):
+              for k in ['hinos', 'acervo', 'dados', 'data', 'items']:
+                  if k in raw and isinstance(raw[k], list):
+                      raw = raw[k]
+                      break
+          if isinstance(raw, dict):
+              raw = list(raw.values())
+
+          print(f"Total de hinos convertidos com sucesso: {len(raw)}")
+          json_hinos = json.dumps(raw, ensure_ascii=False)
 
           html_conteudo = """<!DOCTYPE html>
           <html lang="pt">
@@ -222,7 +231,9 @@ jobs:
             </footer>
 
             <script>
-              const HINOS_DB = """ + json_hinos + """;
+              const RAW_DATA = """ + json_hinos + """;
+              const HINOS_DB = Array.isArray(RAW_DATA) ? RAW_DATA : (RAW_DATA.hinos || RAW_DATA.acervo || Object.values(RAW_DATA));
+
               let favoritos = JSON.parse(localStorage.getItem('fav_hinos') || '[]');
               let abaAtual = 'todos';
               let hinoAtualIdx = 0;
@@ -244,6 +255,14 @@ jobs:
               if (localStorage.getItem('tema_claro') === 'true') document.body.classList.add('claro');
               document.getElementById('btn-tema').onclick = alternarTema;
 
+              function getNum(h, idx) {
+                return h.n || h.numero || h.num || h.id || (idx + 1);
+              }
+
+              function getTit(h, idx) {
+                return h.ti || h.titulo || h.title || h.nome || ('Hino ' + getNum(h, idx));
+              }
+
               function renderizarLista(itens) {
                 listaEl.innerHTML = '';
                 if (!itens || itens.length === 0) {
@@ -251,8 +270,8 @@ jobs:
                   return;
                 }
                 itens.forEach((h, idx) => {
-                  const num = h.n || h.numero || (idx + 1);
-                  const tit = h.ti || h.titulo || ('Hino ' + num);
+                  const num = getNum(h, idx);
+                  const tit = getTit(h, idx);
                   const isFav = favoritos.includes(num);
 
                   const card = document.createElement('div');
@@ -288,13 +307,13 @@ jobs:
               function filtrar() {
                 const q = buscaEl.value.trim().toLowerCase();
                 let lista = abaAtual === 'fav' 
-                  ? HINOS_DB.filter(h => favoritos.includes(h.n || h.numero))
+                  ? HINOS_DB.filter((h, idx) => favoritos.includes(getNum(h, idx)))
                   : HINOS_DB;
 
                 if (q) {
-                  lista = lista.filter(h => {
-                    const n = String(h.n || h.numero || '');
-                    const t = String(h.ti || h.titulo || '').toLowerCase();
+                  lista = lista.filter((h, idx) => {
+                    const n = String(getNum(h, idx));
+                    const t = String(getTit(h, idx)).toLowerCase();
                     return n === q || n.startsWith(q) || t.includes(q);
                   });
                 }
@@ -318,15 +337,15 @@ jobs:
               };
 
               function abrirHinoPorNumero(num) {
-                const idx = HINOS_DB.findIndex(h => (h.n || h.numero) === num);
+                const idx = HINOS_DB.findIndex((h, i) => getNum(h, i) == num);
                 if (idx !== -1) abrirHino(idx);
               }
 
               function abrirHino(idx) {
                 hinoAtualIdx = idx;
                 const h = HINOS_DB[idx];
-                const num = h.n || h.numero || (idx + 1);
-                const tit = h.ti || h.titulo || ('Hino ' + num);
+                const num = getNum(h, idx);
+                const tit = getTit(h, idx);
 
                 btnFavDetalhe.textContent = favoritos.includes(num) ? '★' : '☆';
                 btnFavDetalhe.onclick = () => {
@@ -352,8 +371,13 @@ jobs:
                     }
                     corpo += '<div class="' + classe + '">' + rotulo + linhas + '</div>';
                   });
-                } else if (h.letra) {
-                  corpo += '<div class="estrofe"><div class="linha-letra">' + String(h.letra).replace(/\n/g, '<br>') + '</div></div>';
+                } else if (Array.isArray(h.estrofes)) {
+                  h.estrofes.forEach((est, eIdx) => {
+                    corpo += '<div class="estrofe"><div class="estrofe-num">' + (eIdx + 1) + '</div><div class="linha-letra">' + String(est).replace(/\n/g, '<br>') + '</div></div>';
+                  });
+                } else if (h.letra || h.corpo || h.texto) {
+                  const txt = h.letra || h.corpo || h.texto;
+                  corpo += '<div class="estrofe"><div class="linha-letra">' + String(txt).replace(/\n/g, '<br>') + '</div></div>';
                 }
 
                 conteudoHinoEl.innerHTML = corpo;
