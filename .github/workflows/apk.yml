@@ -1,13 +1,16 @@
-name: Build APK
+name: Build APK e Publicar iPhone
 
 on:
   push:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
-    name: Build Android APK
+    name: Build Android APK e Web iPhone
     runs-on: ubuntu-latest
 
     steps:
@@ -25,7 +28,7 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Empacotar e Injetar Assets
+      - name: Empacotar e Otimizar para iPhone
         run: |
           # 1. Renomear pastas se necessario
           [ -d "aplicativo" ] && mv aplicativo app || true
@@ -54,11 +57,16 @@ jobs:
             cp -f "$HINOS_FILE" app/src/main/assets/hinos.json
           fi
 
-          # 5. Injetar Autoria Oficial no aplicativo (Sem icones, formato formal)
+          # 5. Injetar a Autoria Oficial (sem icones)
           CREDITOS='<footer style="text-align:center;padding:25px 15px;margin-top:35px;font-size:0.9em;opacity:0.9;border-top:1px solid rgba(128,128,128,0.3);line-height:1.6;"><p style="margin:4px 0;font-weight:bold;font-size:1.15em;color:#2e7d32;">Hinário Tchokwe - IASD</p><p style="margin:6px 0;"><strong>Desenvolvedor:</strong> Isaías Muwaneno João (Líder)</p><p style="margin:4px 0;"><strong>Revisão e Correção do Hinário:</strong> Pastor Nunes Sacavumbi Lucas (Líder)</p><p style="margin:4px 0;"><strong>Colaboradores:</strong> Januário Justo Miranda &amp; Ecal Gomes</p><p style="margin:10px 0 0 0;font-size:0.8em;opacity:0.75;">Para a Glória de Deus • Edição 2026</p></footer>'
           sed -i "s|</body>|$CREDITOS</body>|g" app/src/main/assets/index.html || true
 
-          # 6. Ativar permissoes no MainActivity para o Samsung S21 (Android 14)
+          # 6. Otimizar para iPhone (Abrir em tela cheia como aplicativo)
+          PWA_HEAD='<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Hinário Tchokwe"><link rel="apple-touch-icon" href="icone-512.png">'
+          sed -i "s|</head>|$PWA_HEAD</head>|g" app/src/main/assets/index.html || true
+          [ -f "icone-512.png" ] && cp icone-512.png app/src/main/assets/ || true
+
+          # 7. Ativar permissoes no MainActivity para o Samsung S21 (Android 14)
           MAIN_JAVA=$(find app/src/main/java -name "MainActivity.java" | head -n 1)
           if [ -n "$MAIN_JAVA" ]; then
             if ! grep -q "setAllowFileAccess" "$MAIN_JAVA"; then
@@ -66,14 +74,14 @@ jobs:
             fi
           fi
 
-          # 7. Compilar APK com Gradle 8.7
+          # 8. Compilar APK com Gradle 8.7
           gradle assembleDebug --stacktrace
 
-          # 8. Injetar os hinos e creditos diretamente no APK
+          # 9. Injetar os hinos e creditos diretamente no APK
           echo "Injetando assets com creditos no arquivo APK..."
           (cd app/src/main && zip -r -u ../../../app/build/outputs/apk/debug/app-debug.apk assets)
 
-          # 9. Assinar o APK com apksigner para o Android 14
+          # 10. Assinar o APK com apksigner para o Android 14
           mkdir -p ~/.android
           if [ ! -f ~/.android/debug.keystore ]; then
             keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
@@ -83,11 +91,14 @@ jobs:
           echo "Assinando APK com: $APKSIGNER"
           $APKSIGNER sign --ks ~/.android/debug.keystore --ks-pass pass:android app/build/outputs/apk/debug/app-debug.apk
 
-          # 10. Confirmar tamanho final
-          ls -lh app/build/outputs/apk/debug/app-debug.apk
-
-      - name: Upload APK
+      - name: Upload APK para Android
         uses: actions/upload-artifact@v4
         with:
           name: Hinario-Tchokwe-IASD
           path: '**/build/outputs/apk/debug/*.apk'
+
+      - name: Publicar Versão para iPhone (GitHub Pages)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./app/src/main/assets
