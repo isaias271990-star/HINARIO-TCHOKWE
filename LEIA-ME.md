@@ -6,11 +6,11 @@ Aplicativo oficial do Hinário em língua Tchokwe com os 300 Hinos de louvor e a
 
 ## Autoria e Ficha Técnica
 
-* **Desenvolvedor:** Isaías Muwaneno João (Líder)
-* **Revisão e Correção do Hinário:** Pastor Nunes Sacavumbi Lucas (Líder)
+* **Desenvolvedor:** Isaías Muwaneno João IT
+* **Revisão e Correção:** Pastor Nunes Sacavumbi Lucas
 * **Colaboradores:** 
-  * Januário Justo Miranda
-  * Ecal Gomes
+  * Líder Ecal Gomes
+  * Líder Januário Justo Miranda
 
 ---
 
