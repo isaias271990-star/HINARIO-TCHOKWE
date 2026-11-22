@@ -213,7 +213,6 @@
       }
     }
 
-    // EXTRATOR UNIVERSAL DE LETRAS
     function extrairConteudoHino(h) {
       if (h.estrofes && Array.isArray(h.estrofes) && h.estrofes.length > 0) {
         return { tipo: 'estrofes', dados: h.estrofes, coro: h.coro || h.chorus || h.refrao };
