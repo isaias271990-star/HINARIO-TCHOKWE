@@ -49,22 +49,41 @@ jobs:
             fi
           fi
 
-          # 4. Copiar hinos se estiverem fora
-          HINOS_FILE=$(find . -iname "*hinos*.json" | head -n 1)
-          if [ -n "$HINOS_FILE" ]; then
-            if [ "$HINOS_FILE" != "app/src/main/assets/data/hinos.json" ] && [ "$HINOS_FILE" != "./app/src/main/assets/data/hinos.json" ]; then
-              cp -f "$HINOS_FILE" app/src/main/assets/data/hinos.json || true
-            fi
-            if [ "$HINOS_FILE" != "app/src/main/assets/dados/hinos.json" ] && [ "$HINOS_FILE" != "./app/src/main/assets/dados/hinos.json" ]; then
-              cp -f "$HINOS_FILE" app/src/main/assets/dados/hinos.json || true
-            fi
+          # 4. Injetar todos os 300 hinos no hinos.js (Garante carregamento 100% offline)
+          HINOS_JSON=$(find . -iname "*hinos*.json" | head -n 1)
+          if [ -n "$HINOS_JSON" ]; then
+            echo "Encontrado arquivo de hinos: $HINOS_JSON"
+            python3 - << EOF
+          import json, os
+          with open('$HINOS_JSON', 'r', encoding='utf-8') as f:
+              raw = f.read().strip()
+          dados = json.loads(raw)
+          js_content = 'window.HINOS = ' + json.dumps(dados, ensure_ascii=False) + ';\n'
+          for dest in ['app/src/main/assets/hinos.js', 'hinos.js']:
+              os.makedirs(os.path.dirname(dest) if os.path.dirname(dest) else '.', exist_ok=True)
+              with open(dest, 'w', encoding='utf-8') as f:
+                  f.write(js_content)
+              print('Hinos gravados em:', dest)
+          EOF
           fi
 
-          # 5. Injetar elementos invisiveis para destravar o app.js (elimina qualquer erro de null)
+          # 5. Injetar elementos invisiveis para destravar o app.js
           DUMMY='<div id="elementos-suporte" style="display:none!important;"><button id="fonte-menos"></button><button id="fonte-mais"></button><button id="btn-tema"></button><span id="logo-reserva"></span></div>'
           find . -name "index.html" -exec sed -i "s|<body>|<body>$DUMMY|g" {} + || true
 
-          # 6. Corrigir o app.js diretamente em todas as pastas
+          # 6. Garantir que hinos.js seja carregado antes do app.js no index.html
+          python3 - << 'EOF'
+          import glob, re
+          for p in glob.glob('**/index.html', recursive=True):
+              with open(p, 'r', encoding='utf-8') as f:
+                  html = f.read()
+              if 'hinos.js' not in html:
+                  html = re.sub(r'(<script[^>]*app\.js[^>]*></script>)', r'<script src="hinos.js"></script>\n\1', html)
+              with open(p, 'w', encoding='utf-8') as f:
+                  f.write(html)
+          EOF
+
+          # 7. Corrigir o app.js para garantir carregamento da lista
           python3 - << 'EOF'
           import glob, re
           for p in glob.glob('**/*.js', recursive=True):
@@ -75,12 +94,14 @@ jobs:
               t = re.sub(r"\$\(['\"]fonte-menos['\"]\)\.disabled", "if ($('fonte-menos')) $('fonte-menos').disabled", t)
               t = re.sub(r"\$\(['\"]fonte-mais['\"]\)\.disabled", "if ($('fonte-mais')) $('fonte-mais').disabled", t)
               t = re.sub(r"\$\(['\"]btn-tema['\"]\)\.onclick", "if ($('btn-tema')) $('btn-tema').onclick", t)
+              # Garantir que ao abrir a lista os hinos aparecam
+              if 'function mostrar(' in t and 'carregar()' not in t:
+                  t = t.replace("function mostrar(id) {", "function mostrar(id) { if (id === 'lista' && (!HINOS || HINOS.length === 0)) { carregar(); desenharLista(); }")
               with open(p, 'w', encoding='utf-8') as f:
                   f.write(t)
-              print("Corrigido:", p)
           EOF
 
-          # 7. Injetar a Autoria Oficial limpa
+          # 8. Injetar a Autoria Oficial limpa
           python3 - << 'EOF'
           import glob, re
           for p in glob.glob('**/index.html', recursive=True):
@@ -102,17 +123,17 @@ jobs:
                   f.write(c)
           EOF
 
-          # 8. Otimizar para iPhone
+          # 9. Otimizar para iPhone
           PWA_HEAD='<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Hinário Tchokwe"><link rel="apple-touch-icon" href="icone-512.png">'
           sed -i "s|</head>|$PWA_HEAD</head>|g" app/src/main/assets/index.html || true
           [ -f "icone-512.png" ] && cp -f icone-512.png app/src/main/assets/ || true
 
-          # 9. Forcar Gradle a incluir a pasta assets
+          # 10. Forcar Gradle a incluir a pasta assets
           if ! grep -q "assets.srcDirs" app/build.gradle; then
             sed -i '/android {/a \    sourceSets { main { assets.srcDirs = ["src/main/assets"] } }' app/build.gradle || true
           fi
 
-          # 10. Permissoes no MainActivity para Android 14
+          # 11. Permissoes no MainActivity para Android 14
           MAIN_JAVA=$(find app/src/main/java -name "MainActivity.java" | head -n 1)
           if [ -n "$MAIN_JAVA" ]; then
             if ! grep -q "setAllowFileAccess" "$MAIN_JAVA"; then
@@ -120,15 +141,15 @@ jobs:
             fi
           fi
 
-          # 11. Compilar APK e AAB da Play Store
+          # 12. Compilar APK e AAB da Play Store
           gradle assembleDebug bundleDebug --stacktrace
 
-          # 12. Garantir integridade dos assets no APK
+          # 13. Garantir integridade dos assets no APK
           if ! unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -q "assets/index.html"; then
             (cd app/src/main && zip -r -u ../../../app/build/outputs/apk/debug/app-debug.apk assets)
           fi
 
-          # 13. Assinar o APK para o Android
+          # 14. Assinar o APK para o Android
           mkdir -p ~/.android
           if [ ! -f ~/.android/debug.keystore ]; then
             keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
@@ -138,7 +159,7 @@ jobs:
           echo "Assinando APK com: $APKSIGNER"
           $APKSIGNER sign --ks ~/.android/debug.keystore --ks-pass pass:android app/build/outputs/apk/debug/app-debug.apk
 
-          # 14. Organizar saida
+          # 15. Organizar saida
           mkdir -p saida_loja
           cp -f app/build/outputs/apk/debug/app-debug.apk saida_loja/Hinario-Tchokwe.apk
           find app/build/outputs/bundle -name "*.aab" -exec cp -f {} saida_loja/Hinario-Tchokwe-PlayStore.aab \;
