@@ -1,532 +1,64 @@
-<!DOCTYPE html>
-<html lang="pt-AO">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Hinário Tchokwe - Igreja Adventista do Sétimo Dia</title>
-  <meta name="theme-color" content="#d95804">
-  <style>
-    :root {
-      --primary: #d95804;
-      --primary-dark: #b24300;
-      --primary-light: #fff3ec;
-      --bg-color: #f8fafc;
-      --card-bg: #ffffff;
-      --text-color: #1e293b;
-      --text-muted: #64748b;
-      --border-color: #e2e8f0;
-      --font-scale: 18px;
-    }
+name: Gerar Aplicativo e APK
 
-    body.dark-mode {
-      --primary: #f97316;
-      --primary-dark: #d95804;
-      --primary-light: #2c1a0e;
-      --bg-color: #0f172a;
-      --card-bg: #1e293b;
-      --text-color: #f1f5f9;
-      --text-muted: #94a3b8;
-      --border-color: #334155;
-    }
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    body { background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-    /* CAPA INICIAL */
-    #capa-screen {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%);
-      display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-      padding: 30px 20px 40px; z-index: 1000; text-align: center;
-    }
-    body.dark-mode #capa-screen {
-      background: linear-gradient(180deg, #0f172a 0%, #1e1b18 100%);
-    }
+    steps:
+      - name: Baixar Código do Repositório
+        uses: actions/checkout@v4
 
-    .capa-header { margin-top: 10px; }
-    .capa-org { font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: var(--primary); text-transform: uppercase; margin-bottom: 4px; }
-    .capa-sub { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+      - name: Preparar Arquivos e Criar ZIP Offline
+        run: |
+          mkdir -p pacote_offline
+          cp -f index.html pacote_offline/ 2>/dev/null || true
+          cp -f hinos.js pacote_offline/ 2>/dev/null || true
+          cp -f hinos.json pacote_offline/ 2>/dev/null || true
+          cp -f manifest.json pacote_offline/ 2>/dev/null || true
+          cp -f sw.js pacote_offline/ 2>/dev/null || true
+          cp -f *.png pacote_offline/ 2>/dev/null || true
+          cp -f *.svg pacote_offline/ 2>/dev/null || true
+          cd pacote_offline
+          zip -r ../Hinario-Tchokwe-Offline.zip ./*
+          cd ..
 
-    /* LOGO OFICIAL LARANJA */
-    .capa-logo-box {
-      margin: 15px auto; width: 170px; height: 170px;
-      display: flex; align-items: center; justify-content: center;
-      filter: drop-shadow(0 6px 16px rgba(217, 88, 4, 0.2));
-    }
-    .capa-logo-box svg { width: 100%; height: 100%; fill: #d95804; }
+      - name: Disponibilizar ZIP do Aplicativo para Download
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hinario-Tchokwe-ZIP
+          path: Hinario-Tchokwe-Offline.zip
 
-    .capa-titles { margin-bottom: 10px; }
-    .capa-title { font-size: 28px; font-weight: 900; color: #1e293b; letter-spacing: 0.5px; line-height: 1.2; margin-bottom: 6px; }
-    body.dark-mode .capa-title { color: #f8fafc; }
-    .capa-desc { font-size: 14px; color: var(--text-muted); }
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
 
-    .capa-actions { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px; }
-    .btn-abrir-hinario {
-      background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
-      color: white; border: none; border-radius: 14px; padding: 16px 24px;
-      font-size: 16px; font-weight: 700; letter-spacing: 0.5px; cursor: pointer;
-      box-shadow: 0 4px 14px rgba(234, 88, 12, 0.4); transition: transform 0.15s;
-    }
-    .btn-abrir-hinario:active { transform: scale(0.98); }
-    .btn-sobre {
-      background: transparent; color: var(--text-muted); border: 1px solid var(--border-color);
-      border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 600; cursor: pointer;
-    }
+      - name: Compilar APK Android
+        run: |
+          if [ -d "hinario-app" ]; then
+            cd hinario-app
+          fi
+          if [ -f "./gradlew" ]; then
+            chmod +x ./gradlew
+            ./gradlew assembleDebug || gradle assembleDebug || true
+          else
+            gradle assembleDebug || true
+          fi
+          find . -name "*.apk" -exec cp {} $GITHUB_WORKSPACE/Hinario-Tchokwe.apk \; || true
 
-    /* BARRA SUPERIOR */
-    header {
-      position: sticky; top: 0; background-color: var(--primary); color: white;
-      padding: 12px 16px; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .header-title-box { display: flex; align-items: center; gap: 10px; }
-    .header-logo-mini { width: 28px; height: 28px; fill: white; }
-    .header-text h1 { font-size: 17px; font-weight: 700; }
-    .header-text span { font-size: 11px; opacity: 0.9; }
-
-    .header-actions { display: flex; gap: 8px; }
-    .icon-btn {
-      background: rgba(255,255,255,0.2); border: none; color: white;
-      width: 36px; height: 36px; border-radius: 50%; display: flex;
-      align-items: center; justify-content: center; cursor: pointer; font-size: 16px;
-    }
-
-    /* CAMPO DE PESQUISA */
-    .search-bar { padding: 12px 16px; background: var(--bg-color); position: sticky; top: 60px; z-index: 90; }
-    .search-input {
-      width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-color);
-      background: var(--card-bg); color: var(--text-color); font-size: 15px; outline: none;
-    }
-
-    /* LISTA DE HINOS */
-    .hymn-list { padding: 0 16px 80px; max-width: 600px; margin: 0 auto; list-style: none; }
-    .hymn-item {
-      background: var(--card-bg); border-radius: 12px; padding: 14px 16px;
-      margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;
-      border: 1px solid var(--border-color); cursor: pointer;
-    }
-    .hymn-info { display: flex; align-items: center; gap: 14px; }
-    .hymn-number {
-      background: var(--primary-light); color: var(--primary);
-      width: 40px; height: 40px; border-radius: 10px; display: flex;
-      align-items: center; justify-content: center; font-weight: bold; font-size: 15px;
-    }
-    .hymn-title { font-weight: 600; font-size: 15px; }
-
-    /* TELA DO LEITOR */
-    #reader-screen {
-      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: var(--bg-color); z-index: 200; overflow-y: auto;
-    }
-    .reader-header {
-      position: sticky; top: 0; background: var(--primary); color: white;
-      padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; z-index: 20;
-    }
-    .reader-content { padding: 20px 20px 100px; max-width: 650px; margin: 0 auto; font-size: var(--font-scale); line-height: 1.7; }
-    .reader-title-box { text-align: center; margin-bottom: 25px; }
-    .reader-hymn-num { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
-    .reader-hymn-name { font-size: 22px; font-weight: 800; margin-top: 4px; }
-
-    .stanza { margin-bottom: 24px; }
-    .stanza-num { font-weight: 700; color: var(--primary); margin-bottom: 4px; }
-    .stanza-line { margin-bottom: 4px; }
-    .chorus {
-      background: var(--primary-light); border-left: 4px solid var(--primary);
-      padding: 14px 18px; border-radius: 0 12px 12px 0; margin-bottom: 24px; font-style: italic;
-    }
-    .chorus-tag { font-weight: bold; color: var(--primary); font-style: normal; margin-bottom: 6px; font-size: 0.9em; text-transform: uppercase; }
-
-    /* BOTÃO DE EDIÇÃO NO LEITOR */
-    .btn-edit-hymn {
-      display: none; margin: 20px auto; background: #0284c7; color: white; border: none;
-      padding: 10px 18px; border-radius: 10px; font-weight: bold; cursor: pointer;
-    }
-
-    /* MODAL DE EDIÇÃO DE HINO (MODO DESENVOLVEDOR) */
-    #editor-modal {
-      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.7); z-index: 500; align-items: center; justify-content: center; padding: 15px;
-    }
-    .editor-card {
-      background: var(--card-bg); border-radius: 16px; width: 100%; max-width: 500px;
-      max-height: 90vh; overflow-y: auto; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-    }
-    .editor-card h3 { margin-bottom: 15px; color: var(--primary); }
-    .editor-card label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: var(--text-muted); }
-    .editor-card input, .editor-card textarea {
-      width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);
-      background: var(--bg-color); color: var(--text-color); margin-bottom: 12px; font-size: 14px;
-    }
-    .editor-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; }
-    .btn-save { background: #16a34a; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-    .btn-cancel { background: #64748b; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; }
-
-    /* MODAL SOBRE */
-    #about-modal {
-      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.6); z-index: 400; align-items: center; justify-content: center; padding: 20px;
-    }
-    .about-card {
-      background: var(--card-bg); border-radius: 20px; max-width: 440px; width: 100%;
-      padding: 24px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-    .about-credits-box {
-      background: var(--bg-color); border: 1px solid var(--border-color);
-      border-radius: 12px; padding: 14px; text-align: left; margin: 15px 0; font-size: 13px; line-height: 1.6;
-    }
-  </style>
-</head>
-<body>
-
-  <!-- CAPA INICIAL COM LOGO OFICIAL LARANJA -->
-  <div id="capa-screen">
-    <div class="capa-header">
-      <div class="capa-org">Igreja Adventista do Sétimo Dia</div>
-      <div class="capa-sub">Missão Leste de Angola</div>
-    </div>
-
-    <!-- LOGO OFICIAL LARANJA (SVG VECTORIAL PURO) -->
-    <div class="capa-logo-box">
-      <svg viewBox="0 0 800 800">
-        <path d="M435.6,603.5 L435.6,569.2 L405.3,569.2 L405.3,588.6 C405.3,628.7 406.8,658.7 407.4,683.4 C399.7,665.4 380.3,644.2 344.4,635.8 C287.6,622.5 194.2,642.5 114.7,705.5 C197.6,606.3 358.3,622.2 384.7,624.8 L384.7,569.2 L348.8,569.2 L348.8,603.5 L348.8,547.4 L384.7,547.4 L384.7,532.8 C384.7,460.8 393.3,371.1 440.6,279.1 C440.6,279.1 430.2,324.7 416.3,378.8 C406.3,417.8 405.3,475.9 405.3,532.8 L405.3,547.4 L435.6,547.4 L435.6,603.5 Z" />
-        <path d="M504.6,535.1 C513.7,506.7 523.5,471.2 523.5,431.1 C523.5,373.1 501.9,343.8 478.4,342.3 C499.7,381.7 500.9,431.1 494.8,459.7 C488.7,488.2 473.4,524.2 443.9,560.8 L443.9,599.9 C464.7,567.8 480.9,531.1 487.6,500.1 C494.3,469.1 493.5,420.2 481.3,382.2 C470.8,416.7 453.7,460.7 427.8,495.7 L427.8,540.6 C433.8,531.3 439.1,521.6 443.9,511.4 L443.9,535.1 Z" />
-        <path d="M410.6,684.6 C411.3,659.8 412.8,629.8 412.8,589.7 L412.8,569.2 L442.9,569.2 L442.9,603.5 L442.9,547.4 L412.8,547.4 L412.8,532.8 C412.8,490.9 413.4,445.8 420.7,403.4 C409.8,435.5 401.9,474.3 401.9,518.2 L401.9,547.4 L378.8,547.4 L378.8,569.2 L401.9,569.2 L401.9,625.2 C428.2,622.6 588.9,606.7 671.8,705.9 C592.3,642.9 498.9,622.9 442.1,636.2 C417.8,641.9 412.5,658.3 410.6,684.6 Z" />
-        <path d="M439.9,183.4 C439.9,183.4 430.4,242.4 397.6,312.3 C370.4,370.2 322.8,432.8 317.8,510.9 C317.8,510.9 311.2,465.3 331.6,412.2 C352.1,359.1 408.8,245.2 439.9,183.4 Z" />
-        <path d="M440.6,243.8 C440.6,243.8 406.8,321.4 366.5,392.3 C339.7,439.5 323.7,495.2 329.8,545.9 C329.8,545.9 322.7,506.7 341.3,460.7 C360.7,412.6 414.8,307.7 440.6,243.8 Z" />
-      </svg>
-    </div>
-
-    <div class="capa-titles">
-      <h2 class="capa-title">HINÁRIO TCHOKWE</h2>
-      <p class="capa-desc">300 Hinos de Louvor e Adoração ao Deus Eterno</p>
-    </div>
-
-    <div class="capa-actions">
-      <button class="btn-abrir-hinario" onclick="abrirHinario()">ABRIR HINÁRIO TCHOKWE</button>
-      <button class="btn-sobre" onclick="abrirSobre()">Sobre o Hinário</button>
-    </div>
-  </div>
-
-  <!-- CABEÇALHO PRINCIPAL -->
-  <header>
-    <div class="header-title-box">
-      <svg class="header-logo-mini" viewBox="0 0 800 800">
-        <path d="M435.6,603.5 L435.6,569.2 L405.3,569.2 L405.3,588.6 C405.3,628.7 406.8,658.7 407.4,683.4 C399.7,665.4 380.3,644.2 344.4,635.8 C287.6,622.5 194.2,642.5 114.7,705.5 C197.6,606.3 358.3,622.2 384.7,624.8 L384.7,569.2 L348.8,569.2 L348.8,603.5 L348.8,547.4 L384.7,547.4 L384.7,532.8 C384.7,460.8 393.3,371.1 440.6,279.1 C440.6,279.1 430.2,324.7 416.3,378.8 C406.3,417.8 405.3,475.9 405.3,532.8 L405.3,547.4 L435.6,547.4 L435.6,603.5 Z" />
-      </svg>
-      <div class="header-text">
-        <h1>Hinário Tchokwe</h1>
-        <span>IASD • Missão Leste de Angola</span>
-      </div>
-    </div>
-    <div class="header-actions">
-      <button class="icon-btn" onclick="toggleTema()" title="Modo Escuro">🌓</button>
-      <button class="icon-btn" onclick="voltarCapa()" title="Capa Inicial">🏠</button>
-    </div>
-  </header>
-
-  <!-- PESQUISA -->
-  <div class="search-bar">
-    <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar por número ou título..." oninput="filtrarHinos()">
-  </div>
-
-  <!-- LISTA DE TODOS OS HINOS -->
-  <ul id="hymnList" class="hymn-list"></ul>
-
-  <!-- LEITOR DE HINOS -->
-  <div id="reader-screen">
-    <div class="reader-header">
-      <button class="icon-btn" onclick="fecharLeitor()">←</button>
-      <span id="readerTopTitle">Hino</span>
-      <div style="display:flex; gap:6px;">
-        <button class="icon-btn" onclick="mudarFonte(-2)">A-</button>
-        <button class="icon-btn" onclick="mudarFonte(2)">A+</button>
-      </div>
-    </div>
-    <div class="reader-content">
-      <div class="reader-title-box">
-        <div id="readerNum" class="reader-hymn-num"></div>
-        <h2 id="readerTitle" class="reader-hymn-name"></h2>
-      </div>
-      <div id="readerBody"></div>
-      
-      <!-- BOTÃO DE EDIÇÃO PARA O DESENVOLVEDOR -->
-      <button id="btnEditHymn" class="btn-edit-hymn" onclick="abrirEditorHino()">✏️ Editar Este Hino (Dev)</button>
-    </div>
-  </div>
-
-  <!-- MODAL EDITOR DE HINO (MODO DESENVOLVEDOR NO TELEFONE) -->
-  <div id="editor-modal">
-    <div class="editor-card">
-      <h3>Modo Desenvolvedor • Editor</h3>
-      <label>Número:</label>
-      <input type="number" id="editNum" readonly>
-      <label>Título do Hino:</label>
-      <input type="text" id="editTitulo">
-      <label>Coro / Refrão (opcional):</label>
-      <textarea id="editCoro" rows="3" placeholder="Escreva o coro aqui..."></textarea>
-      <label>Estrofes (Separe cada estrofe com uma linha vazia):</label>
-      <textarea id="editEstrofes" rows="8" placeholder="Estrofe 1...&#10;&#10;Estrofe 2..."></textarea>
-      
-      <div class="editor-btns">
-        <button class="btn-cancel" onclick="fecharEditorHino()">Cancelar</button>
-        <button class="btn-save" onclick="salvarEdicaoHino()">Salvar no Telefone</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL SOBRE O HINÁRIO COM MODO DEV -->
-  <div id="about-modal">
-    <div class="about-card">
-      <h3 style="color:var(--primary); font-size:20px; margin-bottom:4px;">Hinário Tchokwe</h3>
-      <p style="font-size:12px; color:var(--text-muted); text-transform:uppercase;">Igreja Adventista do Sétimo Dia</p>
-      
-      <div class="about-credits-box">
-        <div><strong>Desenvolvedor:</strong> Isaías Muwaneno João IT</div>
-        <div><strong>Revisão e Correção:</strong> Pastor Nunes Sacavumbi Lucas</div>
-        <div><strong>Colaboradores:</strong> Líder Ecal Gomes e Líder Januário Justo Miranda</div>
-        <div style="margin-top:8px; font-weight:bold; color:var(--primary);">Para a Glória de Deus • Edição 2026</div>
-      </div>
-
-      <div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">
-        <button id="btnAtivarDev" style="background:#0284c7; color:white; border:none; padding:10px; border-radius:10px; font-weight:bold; cursor:pointer;" onclick="toggleModoDev()">
-          ⚙️ Activar Modo Desenvolvedor
-        </button>
-        <button id="btnExportarJSON" style="display:none; background:#16a34a; color:white; border:none; padding:10px; border-radius:10px; font-weight:bold; cursor:pointer;" onclick="exportarHinosJSON()">
-          💾 Exportar Hinos Atualizados (.json)
-        </button>
-        <button class="btn-sobre" onclick="fecharSobre()">Fechar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- BASE DE DADOS DOS HINOS -->
-  <script src="hinos.js"></script>
-  
-  <script>
-    let hinosLista = [];
-    let hinoAtual = null;
-    let modoDevAtivo = localStorage.getItem("modo_dev_ativo") === "true";
-    let fontSize = 18;
-
-    // Desempacotador robusto para evitar [object Object]
-    function desempacotar(item) {
-      if (!item) return "";
-      if (typeof item === 'string') return item;
-      if (Array.isArray(item)) return item.map(desempacotar).join("\n");
-      if (typeof item === 'object') {
-        if (item.texto) return desempacotar(item.texto);
-        if (item.linhas) return desempacotar(item.linhas);
-        if (item.lines) return desempacotar(item.lines);
-        return Object.values(item).map(desempacotar).join("\n");
-      }
-      return String(item);
-    }
-
-    function carregarHinos() {
-      // Verifica se há hinos com edições salvas no telefone
-      let edicoesSalvas = JSON.parse(localStorage.getItem("hinos_personalizados") || "{}");
-
-      if (window.HINOS_DADOS && Array.isArray(window.HINOS_DADOS)) {
-        hinosLista = window.HINOS_DADOS.map(h => {
-          let num = h.numero || h.num || h.id;
-          if (edicoesSalvas[num]) {
-            return { ...h, ...edicoesSalvas[num] };
-          }
-          return h;
-        });
-      } else {
-        // Fallback dinâmico 1 a 300
-        for (let i = 1; i <= 300; i++) {
-          if (edicoesSalvas[i]) {
-            hinosLista.push(edicoesSalvas[i]);
-          } else {
-            hinosLista.push({
-              numero: i,
-              titulo: "Hino " + i,
-              estrofes: ["Letra do Hino " + i + " em Tchokwe..."],
-              coro: ""
-            });
-          }
-        }
-      }
-      renderizarLista(hinosLista);
-      atualizarInterfaceDev();
-    }
-
-    function renderizarLista(lista) {
-      const container = document.getElementById("hymnList");
-      container.innerHTML = "";
-      lista.forEach(hino => {
-        const num = hino.numero || hino.num || hino.id;
-        const titulo = hino.titulo || ("Hino " + num);
-        const li = document.createElement("li");
-        li.className = "hymn-item";
-        li.onclick = () => abrirHino(hino);
-        li.innerHTML = `
-          <div class="hymn-info">
-            <div class="hymn-number">${num}</div>
-            <div class="hymn-title">${titulo}</div>
-          </div>
-          <span style="color:var(--text-muted); font-size:18px;">›</span>
-        `;
-        container.appendChild(li);
-      });
-    }
-
-    function filtrarHinos() {
-      const q = document.getElementById("searchInput").value.toLowerCase().trim();
-      if (!q) { renderizarLista(hinosLista); return; }
-      const filtrados = hinosLista.filter(h => {
-        const num = String(h.numero || h.num || h.id);
-        const tit = (h.titulo || "").toLowerCase();
-        return num.includes(q) || tit.includes(q);
-      });
-      renderizarLista(filtrados);
-    }
-
-    function abrirHino(hino) {
-      hinoAtual = hino;
-      const num = hino.numero || hino.num || hino.id;
-      const titulo = hino.titulo || ("Hino " + num);
-
-      document.getElementById("readerTopTitle").innerText = "Hino " + num;
-      document.getElementById("readerNum").innerText = "HINO " + num;
-      document.getElementById("readerTitle").innerText = titulo;
-
-      const body = document.getElementById("readerBody");
-      body.innerHTML = "";
-
-      // Renderiza Estrofes e Coro
-      let estrofes = Array.isArray(hino.estrofes) ? hino.estrofes : [hino.estrofes];
-      estrofes.forEach((est, idx) => {
-        const div = document.createElement("div");
-        div.className = "stanza";
-        const texto = desempacotar(est);
-        div.innerHTML = `<div class="stanza-num">${idx + 1}.</div>` + 
-          texto.split("\n").map(l => `<div class="stanza-line">${l}</div>`).join("");
-        body.appendChild(div);
-
-        // Se houver coro após a 1ª estrofe
-        if (idx === 0 && hino.coro) {
-          const coroDiv = document.createElement("div");
-          coroDiv.className = "chorus";
-          const coroTexto = desempacotar(hino.coro);
-          coroDiv.innerHTML = `<div class="chorus-tag">Coro:</div>` + 
-            coroTexto.split("\n").map(l => `<div>${l}</div>`).join("");
-          body.appendChild(coroDiv);
-        }
-      });
-
-      document.getElementById("reader-screen").style.display = "block";
-      window.scrollTo(0, 0);
-    }
-
-    function fecharLeitor() {
-      document.getElementById("reader-screen").style.display = "none";
-    }
-
-    /* MODO DESENVOLVEDOR & EDITOR */
-    function toggleModoDev() {
-      if (!modoDevAtivo) {
-        let pin = prompt("Introduza o PIN de Desenvolvedor:", "");
-        if (pin === "2026") {
-          modoDevAtivo = true;
-          localStorage.setItem("modo_dev_ativo", "true");
-          alert("Modo Desenvolvedor Ativado com sucesso!");
-        } else {
-          alert("PIN incorreto.");
-          return;
-        }
-      } else {
-        modoDevAtivo = false;
-        localStorage.setItem("modo_dev_ativo", "false");
-        alert("Modo Desenvolvedor Desativado.");
-      }
-      atualizarInterfaceDev();
-    }
-
-    function atualizarInterfaceDev() {
-      const btnDev = document.getElementById("btnAtivarDev");
-      const btnExp = document.getElementById("btnExportarJSON");
-      const btnEdit = document.getElementById("btnEditHymn");
-
-      if (modoDevAtivo) {
-        btnDev.innerText = "🔒 Desativar Modo Dev";
-        btnExp.style.display = "block";
-        btnEdit.style.display = "block";
-      } else {
-        btnDev.innerText = "⚙️ Activar Modo Desenvolvedor";
-        btnExp.style.display = "none";
-        btnEdit.style.display = "none";
-      }
-    }
-
-    function abrirEditorHino() {
-      if (!hinoAtual) return;
-      const num = hinoAtual.numero || hinoAtual.num || hinoAtual.id;
-      document.getElementById("editNum").value = num;
-      document.getElementById("editTitulo").value = hinoAtual.titulo || "";
-      document.getElementById("editCoro").value = desempacotar(hinoAtual.coro || "");
-      
-      let ests = Array.isArray(hinoAtual.estrofes) ? hinoAtual.estrofes.map(desempacotar).join("\n\n") : desempacotar(hinoAtual.estrofes || "");
-      document.getElementById("editEstrofes").value = ests;
-      document.getElementById("editor-modal").style.display = "flex";
-    }
-
-    function fecharEditorHino() {
-      document.getElementById("editor-modal").style.display = "none";
-    }
-
-    function salvarEdicaoHino() {
-      const num = parseInt(document.getElementById("editNum").value);
-      const novoTitulo = document.getElementById("editTitulo").value.trim();
-      const novoCoro = document.getElementById("editCoro").value.trim();
-      const novasEstrofes = document.getElementById("editEstrofes").value.trim().split(/\n\n+/);
-
-      let edicoesSalvas = JSON.parse(localStorage.getItem("hinos_personalizados") || "{}");
-      edicoesSalvas[num] = {
-        numero: num,
-        titulo: novoTitulo,
-        coro: novoCoro,
-        estrofes: novasEstrofes
-      };
-
-      localStorage.setItem("hinos_personalizados", JSON.stringify(edicoesSalvas));
-      alert("Hino " + num + " salvo no telemóvel!");
-      fecharEditorHino();
-      carregarHinos();
-      
-      // Reabre o hino atualizado
-      const hinoAtualizado = hinosLista.find(h => (h.numero || h.num || h.id) === num);
-      if (hinoAtualizado) abrirHino(hinoAtualizado);
-    }
-
-    function exportarHinosJSON() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(hinosLista, null, 2));
-      const a = document.createElement('a');
-      a.setAttribute("href", dataStr);
-      a.setAttribute("download", "hinos_atualizados.json");
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    }
-
-    /* CONTROLES GERAIS */
-    function mudarFonte(delta) {
-      fontSize = Math.max(14, Math.min(32, fontSize + delta));
-      document.documentElement.style.setProperty('--font-scale', fontSize + 'px');
-    }
-
-    function toggleTema() {
-      document.body.classList.toggle("dark-mode");
-    }
-
-    function abrirHinario() { document.getElementById("capa-screen").style.display = "none"; }
-    function voltarCapa() { document.getElementById("capa-screen").style.display = "flex"; }
-    function abrirSobre() { document.getElementById("about-modal").style.display = "flex"; }
-    function fecharSobre() { document.getElementById("about-modal").style.display = "none"; }
-
-    window.onload = carregarHinos;
-  </script>
-</body>
-</html>
+      - name: Disponibilizar APK para Download
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hinario-Tchokwe-APK
+          path: |
+            Hinario-Tchokwe.apk
+            **/build/outputs/apk/debug/*.apk
