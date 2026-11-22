@@ -71,7 +71,7 @@ jobs:
           json_hinos = json.dumps(lista_hinos, ensure_ascii=False)
           json_hinos_seguro = json_hinos.replace('</script>', '<\\/script>')
 
-          # 2. Gerar HTML completo com extrator inteligente de qualquer campo de letra
+          # 2. Gerar HTML completo com extrator inteligente
           html_template = """<!DOCTYPE html>
           <html lang="pt">
           <head>
@@ -287,7 +287,6 @@ jobs:
                 }
               }
 
-              // EXTRATOR UNIVERSAL DE LETRAS
               function extrairConteudoHino(h) {
                 if (h.estrofes && Array.isArray(h.estrofes) && h.estrofes.length > 0) {
                   return { tipo: 'estrofes', dados: h.estrofes, coro: h.coro || h.chorus || h.refrao };
@@ -399,7 +398,6 @@ jobs:
           with open('web_public/index.html', 'w', encoding='utf-8') as f:
               f.write(html_template)
 
-          # Gravar também na pasta assets do Android
           for asset_dir in ['app/src/main/assets', 'hinario-app/app/src/main/assets']:
               if os.path.exists(os.path.dirname(os.path.dirname(asset_dir))):
                   os.makedirs(asset_dir, exist_ok=True)
@@ -419,12 +417,10 @@ jobs:
       - name: Compilar Aplicativo Android (APK)
         run: |
           rm -f local.properties hinario-app/local.properties
-          # Localizar gradlew onde quer que ele esteja
-          if [ -f "hinario-app/gradlew" ]; then
+          if [ -f "hinario-app/build.gradle" ]; then
             cd hinario-app
           fi
-          chmod +x gradlew
-          ./gradlew assembleDebug
+          gradle assembleDebug
 
       - name: Disponibilizar APK para Download
         uses: actions/upload-artifact@v4
