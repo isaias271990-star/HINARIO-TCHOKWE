@@ -52,7 +52,7 @@ jobs:
           print(f"Total de hinos carregados: {len(hinos_data)}")
           json_hinos = json.dumps(hinos_data, ensure_ascii=False)
 
-          html_conteudo = f"""<!DOCTYPE html>
+          html_conteudo = """<!DOCTYPE html>
           <html lang="pt">
           <head>
             <meta charset="utf-8">
@@ -62,7 +62,7 @@ jobs:
             <meta name="apple-mobile-web-app-title" content="Hinário Tchokwe">
             <title>Hinário Tchokwe - IASD</title>
             <style>
-              :root {{
+              :root {
                 --bg: #0d1b2a;
                 --card: #1b263b;
                 --cor-texto: #e0e1dd;
@@ -70,8 +70,8 @@ jobs:
                 --acento-ouro: #e0a96d;
                 --destaque-coro: rgba(0, 128, 128, 0.15);
                 --borda: rgba(255, 255, 255, 0.1);
-              }}
-              body.claro {{
+              }
+              body.claro {
                 --bg: #f4f6f8;
                 --card: #ffffff;
                 --cor-texto: #1f2937;
@@ -79,50 +79,50 @@ jobs:
                 --acento-ouro: #b87333;
                 --destaque-coro: rgba(0, 102, 102, 0.08);
                 --borda: rgba(0, 0, 0, 0.08);
-              }}
-              * {{ box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }}
-              body {{ background: var(--bg); color: var(--cor-texto); min-height: 100vh; display: flex; flex-direction: column; }}
-              header {{ background: var(--card); border-bottom: 1px solid var(--borda); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }}
-              .cabecalho-texto h1 {{ font-size: 1.1rem; font-weight: 700; color: var(--acento-ouro); }}
-              .cabecalho-texto p {{ font-size: 0.75rem; opacity: 0.8; }}
-              .btn-icone {{ background: none; border: none; color: var(--cor-texto); font-size: 1.25rem; cursor: pointer; padding: 6px; border-radius: 8px; }}
-              .pesquisa-box {{ padding: 12px 16px; background: var(--card); border-bottom: 1px solid var(--borda); }}
-              .campo-busca {{ width: 100%; padding: 12px 16px; font-size: 1rem; border-radius: 12px; border: 1px solid var(--borda); background: var(--bg); color: var(--cor-texto); outline: none; }}
-              .abas {{ display: flex; background: var(--card); border-bottom: 1px solid var(--borda); }}
-              .aba {{ flex: 1; padding: 10px; text-align: center; font-size: 0.9rem; font-weight: 600; background: none; border: none; color: var(--cor-texto); opacity: 0.6; cursor: pointer; border-bottom: 3px solid transparent; }}
-              .aba.ativa {{ opacity: 1; color: var(--acento-ouro); border-bottom-color: var(--acento-ouro); }}
-              .lista-hinos {{ flex: 1; overflow-y: auto; padding: 8px 12px; }}
-              .item-hino {{ display: flex; align-items: center; justify-content: space-between; padding: 14px 12px; background: var(--card); margin-bottom: 8px; border-radius: 10px; border: 1px solid var(--borda); cursor: pointer; }}
-              .item-hino:active {{ opacity: 0.8; transform: scale(0.99); }}
-              .hino-info {{ display: flex; align-items: center; gap: 12px; flex: 1; }}
-              .hino-num {{ background: var(--acento); color: #fff; font-weight: 700; font-size: 0.9rem; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; }}
-              .hino-titulo {{ font-size: 0.95rem; font-weight: 600; line-height: 1.3; }}
-              .btn-fav {{ background: none; border: none; color: #ffb703; font-size: 1.3rem; padding: 6px; cursor: pointer; }}
+              }
+              * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+              body { background: var(--bg); color: var(--cor-texto); min-height: 100vh; display: flex; flex-direction: column; }
+              header { background: var(--card); border-bottom: 1px solid var(--borda); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+              .cabecalho-texto h1 { font-size: 1.1rem; font-weight: 700; color: var(--acento-ouro); }
+              .cabecalho-texto p { font-size: 0.75rem; opacity: 0.8; }
+              .btn-icone { background: none; border: none; color: var(--cor-texto); font-size: 1.25rem; cursor: pointer; padding: 6px; border-radius: 8px; }
+              .pesquisa-box { padding: 12px 16px; background: var(--card); border-bottom: 1px solid var(--borda); }
+              .campo-busca { width: 100%; padding: 12px 16px; font-size: 1rem; border-radius: 12px; border: 1px solid var(--borda); background: var(--bg); color: var(--cor-texto); outline: none; }
+              .abas { display: flex; background: var(--card); border-bottom: 1px solid var(--borda); }
+              .aba { flex: 1; padding: 10px; text-align: center; font-size: 0.9rem; font-weight: 600; background: none; border: none; color: var(--cor-texto); opacity: 0.6; cursor: pointer; border-bottom: 3px solid transparent; }
+              .aba.ativa { opacity: 1; color: var(--acento-ouro); border-bottom-color: var(--acento-ouro); }
+              .lista-hinos { flex: 1; overflow-y: auto; padding: 8px 12px; }
+              .item-hino { display: flex; align-items: center; justify-content: space-between; padding: 14px 12px; background: var(--card); margin-bottom: 8px; border-radius: 10px; border: 1px solid var(--borda); cursor: pointer; }
+              .item-hino:active { opacity: 0.8; transform: scale(0.99); }
+              .hino-info { display: flex; align-items: center; gap: 12px; flex: 1; }
+              .hino-num { background: var(--acento); color: #fff; font-weight: 700; font-size: 0.9rem; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; }
+              .hino-titulo { font-size: 0.95rem; font-weight: 600; line-height: 1.3; }
+              .btn-fav { background: none; border: none; color: #ffb703; font-size: 1.3rem; padding: 6px; cursor: pointer; }
               
               /* Tela de Detalhes do Hino */
-              .tela-hino {{ display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg); z-index: 200; flex-direction: column; }}
-              .tela-hino.ativa {{ display: flex; }}
-              .topo-hino {{ background: var(--card); border-bottom: 1px solid var(--borda); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; }}
-              .controles-fonte {{ display: flex; gap: 6px; align-items: center; }}
-              .btn-tam {{ background: var(--bg); border: 1px solid var(--borda); color: var(--cor-texto); padding: 6px 12px; border-radius: 6px; font-weight: 700; cursor: pointer; }}
-              .conteudo-hino {{ flex: 1; overflow-y: auto; padding: 24px 20px; line-height: 1.8; }}
-              .hino-cabecalho-detalhe {{ text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--borda); }}
-              .detalhe-num {{ color: var(--acento-ouro); font-weight: 700; font-size: 1rem; text-transform: uppercase; }}
-              .detalhe-titulo {{ font-size: 1.4rem; font-weight: 800; margin-top: 4px; }}
-              .estrofe {{ margin-bottom: 20px; }}
-              .estrofe-num {{ font-size: 0.85rem; font-weight: 700; color: var(--acento-ouro); margin-bottom: 4px; }}
-              .coro {{ background: var(--destaque-coro); padding: 14px; border-radius: 10px; border-left: 4px solid var(--acento-ouro); margin-bottom: 20px; font-style: italic; }}
-              .coro-rotulo {{ font-size: 0.85rem; font-weight: 700; color: var(--acento-ouro); margin-bottom: 4px; text-transform: uppercase; }}
-              .linha-letra {{ margin-bottom: 4px; }}
-              .navegacao-hinos {{ display: flex; justify-content: space-between; padding: 12px 16px; background: var(--card); border-top: 1px solid var(--borda); }}
-              .btn-nav {{ background: var(--acento); color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; }}
+              .tela-hino { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg); z-index: 200; flex-direction: column; }
+              .tela-hino.ativa { display: flex; }
+              .topo-hino { background: var(--card); border-bottom: 1px solid var(--borda); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; }
+              .controles-fonte { display: flex; gap: 6px; align-items: center; }
+              .btn-tam { background: var(--bg); border: 1px solid var(--borda); color: var(--cor-texto); padding: 6px 12px; border-radius: 6px; font-weight: 700; cursor: pointer; }
+              .conteudo-hino { flex: 1; overflow-y: auto; padding: 24px 20px; line-height: 1.8; }
+              .hino-cabecalho-detalhe { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--borda); }
+              .detalhe-num { color: var(--acento-ouro); font-weight: 700; font-size: 1rem; text-transform: uppercase; }
+              .detalhe-titulo { font-size: 1.4rem; font-weight: 800; margin-top: 4px; }
+              .estrofe { margin-bottom: 20px; }
+              .estrofe-num { font-size: 0.85rem; font-weight: 700; color: var(--acento-ouro); margin-bottom: 4px; }
+              .coro { background: var(--destaque-coro); padding: 14px; border-radius: 10px; border-left: 4px solid var(--acento-ouro); margin-bottom: 20px; font-style: italic; }
+              .coro-rotulo { font-size: 0.85rem; font-weight: 700; color: var(--acento-ouro); margin-bottom: 4px; text-transform: uppercase; }
+              .linha-letra { margin-bottom: 4px; }
+              .navegacao-hinos { display: flex; justify-content: space-between; padding: 12px 16px; background: var(--card); border-top: 1px solid var(--borda); }
+              .btn-nav { background: var(--acento); color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; }
 
               /* Rodape Oficial */
-              footer {{ text-align: center; padding: 25px 15px; margin-top: auto; font-size: 0.88rem; opacity: 0.9; border-top: 1px solid var(--borda); line-height: 1.6; background: var(--card); }}
-              footer strong {{ color: var(--cor-texto); }}
-              footer p {{ margin: 4px 0; }}
-              .rodape-titulo {{ font-weight: 800; font-size: 1.1rem; color: #2e7d32; }}
-              .dedicatoria {{ margin-top: 8px; font-size: 0.8rem; opacity: 0.75; }}
+              footer { text-align: center; padding: 25px 15px; margin-top: auto; font-size: 0.88rem; opacity: 0.9; border-top: 1px solid var(--borda); line-height: 1.6; background: var(--card); }
+              footer strong { color: var(--cor-texto); }
+              footer p { margin: 4px 0; }
+              .rodape-titulo { font-weight: 800; font-size: 1.1rem; color: #2e7d32; }
+              .dedicatoria { margin-top: 8px; font-size: 0.8rem; opacity: 0.75; }
             </style>
           </head>
           <body>
@@ -177,7 +177,7 @@ jobs:
             </footer>
 
             <script>
-              const HINOS_DB = {json_hinos};
+              const HINOS_DB = """ + json_hinos + """;
               let favoritos = JSON.parse(localStorage.getItem('fav_hinos') || '[]');
               let abaAtual = 'todos';
               let hinoAtualIdx = 0;
@@ -192,155 +192,153 @@ jobs:
 
               contTodosEl.textContent = HINOS_DB.length;
 
-              function alternarTema() {{
+              function alternarTema() {
                 document.body.classList.toggle('claro');
                 localStorage.setItem('tema_claro', document.body.classList.contains('claro'));
-              }}
+              }
               if (localStorage.getItem('tema_claro') === 'true') document.body.classList.add('claro');
               document.getElementById('btn-tema').onclick = alternarTema;
 
-              function renderizarLista(itens) {{
+              function renderizarLista(itens) {
                 listaEl.innerHTML = '';
-                if (!itens || itens.length === 0) {{
+                if (!itens || itens.length === 0) {
                   listaEl.innerHTML = '<p style="text-align:center;padding:40px;opacity:0.6;">Nenhum hino encontrado.</p>';
                   return;
-                }}
-                itens.forEach((h, idx) => {{
+                }
+                itens.forEach((h, idx) => {
                   const num = h.n || h.numero || (idx + 1);
-                  const tit = h.ti || h.titulo || 'Hino ' + num;
+                  const tit = h.ti || h.titulo || ('Hino ' + num);
                   const isFav = favoritos.includes(num);
 
                   const card = document.createElement('div');
                   card.className = 'item-hino';
-                  card.innerHTML = `
-                    <div class="hino-info">
-                      <div class="hino-num">${{num}}</div>
-                      <div class="hino-titulo">${{tit}}</div>
-                    </div>
-                    <button class="btn-fav">${{isFav ? '★' : '☆'}}</button>
-                  `;
+                  card.innerHTML = '<div class="hino-info">' +
+                    '<div class="hino-num">' + num + '</div>' +
+                    '<div class="hino-titulo">' + tit + '</div>' +
+                    '</div>' +
+                    '<button class="btn-fav">' + (isFav ? '★' : '☆') + '</button>';
 
                   card.querySelector('.hino-info').onclick = () => abrirHinoPorNumero(num);
                   const starBtn = card.querySelector('.btn-fav');
-                  starBtn.onclick = (e) => {{
+                  starBtn.onclick = (e) => {
                     e.stopPropagation();
                     toggleFav(num);
                     starBtn.textContent = favoritos.includes(num) ? '★' : '☆';
                     if (abaAtual === 'fav') filtrar();
-                  }};
+                  };
 
                   listaEl.appendChild(card);
-                }});
-              }}
+                });
+              }
 
-              function toggleFav(num) {{
-                if (favoritos.includes(num)) {{
+              function toggleFav(num) {
+                if (favoritos.includes(num)) {
                   favoritos = favoritos.filter(n => n !== num);
-                }} else {{
+                } else {
                   favoritos.push(num);
-                }}
+                }
                 localStorage.setItem('fav_hinos', JSON.stringify(favoritos));
-              }}
+              }
 
-              function filtrar() {{
+              function filtrar() {
                 const q = buscaEl.value.trim().toLowerCase();
                 let lista = abaAtual === 'fav' 
                   ? HINOS_DB.filter(h => favoritos.includes(h.n || h.numero))
                   : HINOS_DB;
 
-                if (q) {{
-                  lista = lista.filter(h => {{
+                if (q) {
+                  lista = lista.filter(h => {
                     const n = String(h.n || h.numero || '');
                     const t = String(h.ti || h.titulo || '').toLowerCase();
                     return n === q || n.startsWith(q) || t.includes(q);
-                  }});
-                }}
+                  });
+                }
                 renderizarLista(lista);
-              }}
+              }
 
               buscaEl.oninput = filtrar;
 
-              document.getElementById('aba-todos').onclick = () => {{
+              document.getElementById('aba-todos').onclick = () => {
                 abaAtual = 'todos';
                 document.getElementById('aba-todos').classList.add('ativa');
                 document.getElementById('aba-fav').classList.remove('ativa');
                 filtrar();
-              }};
+              };
 
-              document.getElementById('aba-fav').onclick = () => {{
+              document.getElementById('aba-fav').onclick = () => {
                 abaAtual = 'fav';
                 document.getElementById('aba-fav').classList.add('ativa');
                 document.getElementById('aba-todos').classList.remove('ativa');
                 filtrar();
-              }};
+              };
 
-              function abrirHinoPorNumero(num) {{
+              function abrirHinoPorNumero(num) {
                 const idx = HINOS_DB.findIndex(h => (h.n || h.numero) === num);
                 if (idx !== -1) abrirHino(idx);
-              }}
+              }
 
-              function abrirHino(idx) {{
+              function abrirHino(idx) {
                 hinoAtualIdx = idx;
                 const h = HINOS_DB[idx];
                 const num = h.n || h.numero || (idx + 1);
-                const tit = h.ti || h.titulo || 'Hino ' + num;
+                const tit = h.ti || h.titulo || ('Hino ' + num);
 
                 btnFavDetalhe.textContent = favoritos.includes(num) ? '★' : '☆';
-                btnFavDetalhe.onclick = () => {{
+                btnFavDetalhe.onclick = () => {
                   toggleFav(num);
                   btnFavDetalhe.textContent = favoritos.includes(num) ? '★' : '☆';
-                }};
+                };
 
-                let corpo = `<div class="hino-cabecalho-detalhe">
-                  <div class="detalhe-num">Hino Nº ${{num}}</div>
-                  <div class="detalhe-titulo">${{tit}}</div>
-                </div>`;
+                let corpo = '<div class="hino-cabecalho-detalhe">' +
+                  '<div class="detalhe-num">Hino Nº ' + num + '</div>' +
+                  '<div class="detalhe-titulo">' + tit + '</div>' +
+                  '</div>';
 
-                if (Array.isArray(h.b)) {{
-                  h.b.forEach((bloco, bIdx) => {{
+                if (Array.isArray(h.b)) {
+                  h.b.forEach((bloco, bIdx) => {
                     const isCoro = bloco.t === 'c' || bloco.coro === true;
                     const classe = isCoro ? 'coro' : 'estrofe';
-                    const rotulo = isCoro ? '<div class="coro-rotulo">Refrão</div>' : `<div class="estrofe-num">${{bIdx + 1}}</div>`;
+                    const rotulo = isCoro ? '<div class="coro-rotulo">Refrão</div>' : ('<div class="estrofe-num">' + (bIdx + 1) + '</div>');
                     let linhas = '';
-                    if (Array.isArray(bloco.l)) {{
-                      linhas = bloco.l.map(l => `<div class="linha-letra">${{l}}</div>`).join('');
-                    }} else if (typeof bloco.l === 'string') {{
-                      linhas = `<div class="linha-letra">${{bloco.l}}</div>`;
-                    }}
-                    corpo += `<div class="${{classe}}">${{rotulo}}${{linhas}}</div>`;
-                  }});
-                }} else if (h.letra) {{
-                  corpo += `<div class="estrofe"><div class="linha-letra">${{String(h.letra).replace(/\\n/g, '<br>')}}</div></div>`;
-                }}
+                    if (Array.isArray(bloco.l)) {
+                      linhas = bloco.l.map(l => '<div class="linha-letra">' + l + '</div>').join('');
+                    } else if (typeof bloco.l === 'string') {
+                      linhas = '<div class="linha-letra">' + bloco.l + '</div>';
+                    }
+                    corpo += '<div class="' + classe + '">' + rotulo + linhas + '</div>';
+                  });
+                } else if (h.letra) {
+                  corpo += '<div class="estrofe"><div class="linha-letra">' + String(h.letra).replace(/\n/g, '<br>') + '</div></div>';
+                }
 
                 conteudoHinoEl.innerHTML = corpo;
                 conteudoHinoEl.style.fontSize = tamanhoFonte + 'px';
                 conteudoHinoEl.scrollTop = 0;
                 telaHinoEl.classList.add('ativa');
-              }}
+              }
 
-              document.getElementById('btn-voltar').onclick = () => {{
+              document.getElementById('btn-voltar').onclick = () => {
                 telaHinoEl.classList.remove('ativa');
                 filtrar();
-              }};
+              };
 
-              document.getElementById('fonte-mais').onclick = () => {{
+              document.getElementById('fonte-mais').onclick = () => {
                 tamanhoFonte = Math.min(32, tamanhoFonte + 2);
                 conteudoHinoEl.style.fontSize = tamanhoFonte + 'px';
-              }};
+              };
 
-              document.getElementById('fonte-menos').onclick = () => {{
+              document.getElementById('fonte-menos').onclick = () => {
                 tamanhoFonte = Math.max(14, tamanhoFonte - 2);
                 conteudoHinoEl.style.fontSize = tamanhoFonte + 'px';
-              }};
+              };
 
-              document.getElementById('btn-ant').onclick = () => {{
+              document.getElementById('btn-ant').onclick = () => {
                 if (hinoAtualIdx > 0) abrirHino(hinoAtualIdx - 1);
-              }};
+              };
 
-              document.getElementById('btn-prox').onclick = () => {{
+              document.getElementById('btn-prox').onclick = () => {
                 if (hinoAtualIdx < HINOS_DB.length - 1) abrirHino(hinoAtualIdx + 1);
-              }};
+              };
 
               // Renderizacao Inicial Instantanea
               filtrar();
@@ -380,6 +378,7 @@ jobs:
           fi
 
           APKSIGNER=$(find /usr/local/lib/android/sdk/build-tools -name "apksigner" | sort -V | tail -n 1)
+          echo "Assinando APK com: $APKSIGNER"
           $APKSIGNER sign --ks ~/.android/debug.keystore --ks-pass pass:android app/build/outputs/apk/debug/app-debug.apk
 
           # 8. Organizar saida dos arquivos
