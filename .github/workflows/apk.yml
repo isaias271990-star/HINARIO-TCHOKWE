@@ -1,4 +1,4 @@
-name: Hinário Tchokwe - Compilação e Publicação Oficial
+name: Hinario Tchokwe - Compilacao e Publicacao Oficial
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Baixar Código do Repositório
+      - name: Baixar Codigo do Repositorio
         uses: actions/checkout@v4
 
       - name: Configurar JDK 17
@@ -27,8 +27,8 @@ jobs:
 
       - name: Preparar Hinos e Interface do Aplicativo
         run: |
-          python3 -c "
-          import json, os, re
+          cat << 'EOF' > preparar_hinos.py
+          import json, os
 
           # 1. Localizar o ficheiro hinos.json
           caminhos_busca = [
@@ -49,14 +49,13 @@ jobs:
                       break
 
           if not caminho_hinos:
-              print('ERRO: hinos.json não encontrado!')
+              print('ERRO: hinos.json nao encontrado!')
               exit(1)
 
-          print(f'Lendo hinos de: {caminho_hinos}')
+          print('Lendo hinos de:', caminho_hinos)
           with open(caminho_hinos, 'r', encoding='utf-8') as f:
               dados_brutos = json.load(f)
 
-          # Normalizar lista de hinos
           if isinstance(dados_brutos, dict):
               if 'hinos' in dados_brutos:
                   lista_hinos = dados_brutos['hinos']
@@ -65,20 +64,19 @@ jobs:
           else:
               lista_hinos = dados_brutos
 
-          print(f'Total de hinos carregados: {len(lista_hinos)}')
+          print('Total de hinos carregados:', len(lista_hinos))
 
-          # Formatar JSON seguro contra quebras de script
           json_hinos = json.dumps(lista_hinos, ensure_ascii=False)
           json_hinos_seguro = json_hinos.replace('</script>', '<\\/script>')
 
-          # 2. Criar HTML completo, responsivo e 100% offline
-          html_template = '''<!DOCTYPE html>
-          <html lang=\"pt\">
+          # 2. Gerar HTML completo 100% offline
+          html_template = """<!DOCTYPE html>
+          <html lang="pt">
           <head>
-            <meta charset=\"UTF-8\">
-            <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no\">
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
             <title>Hinário Tchokwe - IASD</title>
-            <meta name=\"theme-color\" content=\"#1e293b\">
+            <meta name="theme-color" content="#1e293b">
             <style>
               :root {
                 --bg: #0f172a;
@@ -104,7 +102,7 @@ jobs:
                 --card-bg: #ffffff;
                 --chorus-bg: rgba(217, 119, 6, 0.08);
               }
-              * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; }
+              * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
               body { background-color: var(--bg); color: var(--text); display: flex; flex-direction: column; min-height: 100vh; }
               header { background: var(--surface); padding: 12px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
               .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -118,9 +116,9 @@ jobs:
               .tab-btn { flex: 1; padding: 12px; text-align: center; background: none; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.9rem; }
               .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
               main { flex: 1; overflow-y: auto; padding: 12px; max-width: 800px; margin: 0 auto; width: 100%; }
-              .hymn-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background 0.15s; }
+              .hymn-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
               .hymn-card:hover { background: var(--surface-hover); }
-              .hymn-info { display: flex; align-items: center; gap: 12px; overflow: hidden; }
+              .hymn-info { display: flex; align-items: center; gap: 12px; overflow: hidden; flex: 1; }
               .hymn-num { background: var(--primary); color: #000; font-weight: 700; min-width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; }
               .hymn-name { font-size: 0.95rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
               .fav-icon { background: none; border: none; font-size: 1.25rem; color: var(--text-muted); cursor: pointer; padding: 4px 8px; }
@@ -146,60 +144,60 @@ jobs:
           </head>
           <body>
             <header>
-              <div class=\"header-top\">
-                <div class=\"header-title\">
+              <div class="header-top">
+                <div class="header-title">
                   <h1>Hinário Tchokwe - IASD</h1>
                   <p>Missão Leste de Angola</p>
                 </div>
-                <button class=\"theme-toggle\" id=\"themeBtn\" onclick=\"toggleTema()\">Modo Claro</button>
+                <button class="theme-toggle" id="themeBtn" onclick="toggleTema()">Modo Claro</button>
               </div>
-              <div class=\"search-container\" id=\"searchBox\">
-                <input type=\"text\" id=\"campoBusca\" class=\"search-input\" placeholder=\"Digite o número ou nome do hino...\" oninput=\"filtrarHinos()\">
+              <div class="search-container" id="searchBox">
+                <input type="text" id="campoBusca" class="search-input" placeholder="Digite o número ou nome do hino..." oninput="filtrarHinos()">
               </div>
             </header>
 
-            <div class=\"tabs\" id=\"navTabs\">
-              <button class=\"tab-btn active\" id=\"tabTodos\" onclick=\"mudarAba('todos')\">Todos os Hinos (<span id=\"contTodos\">300</span>)</button>
-              <button class=\"tab-btn\" id=\"tabFavoritos\" onclick=\"mudarAba('favoritos')\">Favoritos (<span id=\"contFavs\">0</span>)</button>
+            <div class="tabs" id="navTabs">
+              <button class="tab-btn active" id="tabTodos" onclick="mudarAba('todos')">Todos os Hinos (<span id="contTodos">300</span>)</button>
+              <button class="tab-btn" id="tabFavoritos" onclick="mudarAba('favoritos')">Favoritos (<span id="contFavs">0</span>)</button>
             </div>
 
             <main>
-              <div id=\"view-lista\"></div>
-              <div id=\"view-leitor\">
-                <div class=\"reader-header\">
-                  <button class=\"back-btn\" onclick=\"voltarParaLista()\">← Voltar</button>
-                  <div class=\"font-controls\">
-                    <button class=\"font-btn\" onclick=\"ajustarFonte(-1)\">A-</button>
-                    <button class=\"font-btn\" onclick=\"ajustarFonte(1)\">A+</button>
-                    <button class=\"fav-icon\" id=\"btnFavLeitor\" onclick=\"toggleFavAtual()\">★</button>
+              <div id="view-lista"></div>
+              <div id="view-leitor">
+                <div class="reader-header">
+                  <button class="back-btn" onclick="voltarParaLista()">← Voltar</button>
+                  <div class="font-controls">
+                    <button class="font-btn" onclick="ajustarFonte(-1)">A-</button>
+                    <button class="font-btn" onclick="ajustarFonte(1)">A+</button>
+                    <button class="fav-icon" id="btnFavLeitor" onclick="toggleFavAtual()">★</button>
                   </div>
                 </div>
-                <div class=\"reader-title\">
-                  <h2 id=\"leitorTitulo\"></h2>
+                <div class="reader-title">
+                  <h2 id="leitorTitulo"></h2>
                 </div>
-                <div class=\"reader-body\" id=\"leitorLetra\"></div>
+                <div class="reader-body" id="leitorLetra"></div>
               </div>
             </main>
 
             <footer>
-              <div class=\"footer-church\">Hinário Tchokwe - IASD</div>
-              <div class=\"credits-block\">
+              <div class="footer-church">Hinário Tchokwe - IASD</div>
+              <div class="credits-block">
                 <span>Desenvolvedor: Isaías Muwaneno João IT</span>
                 <span>Revisão e Correção: Pastor Nunes Sacavumbi Lucas</span>
                 <span>Colaboradores: Líder Ecal Gomes e Líder Januário Justo Miranda</span>
               </div>
-              <div class=\"footer-edition\">Para a Glória de Deus • Edição 2026</div>
+              <div class="footer-edition">Para a Glória de Deus • Edição 2026</div>
             </footer>
 
             <script>
-              window.HINOS_DADOS = ''' + json_hinos_seguro + ''';
-              let abaAtual = 'todos';
-              let hinoAtualId = null;
-              let tamanhoFonte = 1.15;
-              let favoritos = JSON.parse(localStorage.getItem('tchokwe_favs') || '[]');
+              window.HINOS_DADOS = """ + json_hinos_seguro + """;
+              var abaAtual = 'todos';
+              var hinoAtualId = null;
+              var tamanhoFonte = 1.15;
+              var favoritos = JSON.parse(localStorage.getItem('tchokwe_favs') || '[]');
 
               function inicializar() {
-                const temaSalvo = localStorage.getItem('tchokwe_tema');
+                var temaSalvo = localStorage.getItem('tchokwe_tema');
                 if (temaSalvo === 'light') {
                   document.body.classList.add('light');
                   document.getElementById('themeBtn').textContent = 'Modo Escuro';
@@ -209,7 +207,7 @@ jobs:
               }
 
               function toggleTema() {
-                const isLight = document.body.classList.toggle('light');
+                var isLight = document.body.classList.toggle('light');
                 document.getElementById('themeBtn').textContent = isLight ? 'Modo Escuro' : 'Modo Claro';
                 localStorage.setItem('tchokwe_tema', isLight ? 'light' : 'dark');
               }
@@ -227,38 +225,36 @@ jobs:
               }
 
               function renderizarLista() {
-                const termo = document.getElementById('campoBusca').value.trim().toLowerCase();
-                const container = document.getElementById('view-lista');
+                var termo = document.getElementById('campoBusca').value.trim().toLowerCase();
+                var container = document.getElementById('view-lista');
                 container.innerHTML = '';
 
-                let filtrados = window.HINOS_DADOS.filter(h => {
-                  const num = String(h.numero || h.number || h.id || '');
-                  const tit = String(h.titulo || h.title || h.nome || '').toLowerCase();
-                  const matchBusca = !termo || num === termo || tit.includes(termo);
-                  const numInt = parseInt(num, 10);
-                  const matchAba = (abaAtual === 'todos') || favoritos.includes(numInt);
+                var filtrados = window.HINOS_DADOS.filter(function(h) {
+                  var num = String(h.numero || h.number || h.id || '');
+                  var tit = String(h.titulo || h.title || h.nome || '').toLowerCase();
+                  var matchBusca = !termo || num === termo || tit.indexOf(termo) !== -1;
+                  var numInt = parseInt(num, 10);
+                  var matchAba = (abaAtual === 'todos') || (favoritos.indexOf(numInt) !== -1);
                   return matchBusca && matchAba;
                 });
 
                 if (filtrados.length === 0) {
-                  container.innerHTML = '<div style=\"text-align:center; padding: 40px 10px; color: var(--text-muted);\">Nenhum hino encontrado.</div>';
+                  container.innerHTML = '<div style="text-align:center; padding: 40px 10px; color: var(--text-muted);">Nenhum hino encontrado.</div>';
                   return;
                 }
 
-                filtrados.forEach(h => {
-                  const num = parseInt(h.numero || h.number || h.id || 0, 10);
-                  const tit = h.titulo || h.title || h.nome || ('Hino ' + num);
-                  const isFav = favoritos.includes(num);
+                filtrados.forEach(function(h) {
+                  var num = parseInt(h.numero || h.number || h.id || 0, 10);
+                  var tit = h.titulo || h.title || h.nome || ('Hino ' + num);
+                  var isFav = favoritos.indexOf(num) !== -1;
 
-                  const card = document.createElement('div');
+                  var card = document.createElement('div');
                   card.className = 'hymn-card';
-                  card.innerHTML = `
-                    <div class=\"hymn-info\" onclick=\"abrirHino(${num})\">
-                      <div class=\"hymn-num\">${num}</div>
-                      <div class=\"hymn-name\">${tit}</div>
-                    </div>
-                    <button class=\"fav-icon ${isFav ? 'active' : ''}\" onclick=\"event.stopPropagation(); toggleFav(${num})\">★</button>
-                  `;
+                  card.innerHTML = '<div class="hymn-info" onclick="abrirHino(' + num + ')">' +
+                    '<div class="hymn-num">' + num + '</div>' +
+                    '<div class="hymn-name">' + tit + '</div>' +
+                    '</div>' +
+                    '<button class="fav-icon ' + (isFav ? 'active' : '') + '" onclick="event.stopPropagation(); toggleFav(' + num + ')">★</button>';
                   container.appendChild(card);
                 });
               }
@@ -268,7 +264,7 @@ jobs:
               }
 
               function toggleFav(num) {
-                const idx = favoritos.indexOf(num);
+                var idx = favoritos.indexOf(num);
                 if (idx > -1) {
                   favoritos.splice(idx, 1);
                 } else {
@@ -278,7 +274,7 @@ jobs:
                 atualizarContadores();
                 renderizarLista();
                 if (hinoAtualId === num) {
-                  document.getElementById('btnFavLeitor').classList.toggle('active', favoritos.includes(num));
+                  document.getElementById('btnFavLeitor').classList.toggle('active', favoritos.indexOf(num) !== -1);
                 }
               }
 
@@ -289,7 +285,7 @@ jobs:
               }
 
               function abrirHino(num) {
-                const hino = window.HINOS_DADOS.find(h => parseInt(h.numero || h.number || h.id, 10) === num);
+                var hino = window.HINOS_DADOS.find(function(h) { return parseInt(h.numero || h.number || h.id, 10) === num; });
                 if (!hino) return;
 
                 hinoAtualId = num;
@@ -298,40 +294,39 @@ jobs:
                 document.getElementById('navTabs').style.display = 'none';
                 document.getElementById('view-leitor').style.display = 'block';
 
-                const tit = hino.titulo || hino.title || hino.nome || ('Hino ' + num);
+                var tit = hino.titulo || hino.title || hino.nome || ('Hino ' + num);
                 document.getElementById('leitorTitulo').textContent = num + '. ' + tit;
-                document.getElementById('btnFavLeitor').classList.toggle('active', favoritos.includes(num));
+                document.getElementById('btnFavLeitor').classList.toggle('active', favoritos.indexOf(num) !== -1);
 
-                const containerLetra = document.getElementById('leitorLetra');
+                var containerLetra = document.getElementById('leitorLetra');
                 containerLetra.innerHTML = '';
 
-                // Formatar estrofes e coro
                 if (hino.estrofes && Array.isArray(hino.estrofes)) {
-                  hino.estrofes.forEach((est, idx) => {
-                    const div = document.createElement('div');
+                  hino.estrofes.forEach(function(est, idx) {
+                    var div = document.createElement('div');
                     div.className = 'stanza';
-                    div.innerHTML = `<div class=\"stanza-header\">Estrofe ${idx + 1}</div><p>${est.replace(/\\n/g, '<br>')}</p>`;
+                    div.innerHTML = '<div class="stanza-header">Estrofe ' + (idx + 1) + '</div><p>' + est.replace(/\\n/g, '<br>') + '</p>';
                     containerLetra.appendChild(div);
 
                     if (idx === 0 && hino.coro) {
-                      const coroDiv = document.createElement('div');
+                      var coroDiv = document.createElement('div');
                       coroDiv.className = 'chorus';
-                      coroDiv.innerHTML = `<div class=\"chorus-header\">Coro</div><p>${hino.coro.replace(/\\n/g, '<br>')}</p>`;
+                      coroDiv.innerHTML = '<div class="chorus-header">Coro</div><p>' + hino.coro.replace(/\\n/g, '<br>') + '</p>';
                       containerLetra.appendChild(coroDiv);
                     }
                   });
                 } else {
-                  const textoBruto = hino.letra || hino.lyrics || hino.content || '';
-                  const blocos = textoBruto.split(/\\n\\s*\\n/);
-                  blocos.forEach(bloco => {
-                    const limpo = bloco.trim();
+                  var textoBruto = hino.letra || hino.lyrics || hino.content || '';
+                  var blocos = textoBruto.split(/\\n\\s*\\n/);
+                  blocos.forEach(function(bloco) {
+                    var limpo = bloco.trim();
                     if (!limpo) return;
-                    const isCoro = /^(coro|refr[ãa]o)/i.test(limpo);
-                    const div = document.createElement('div');
+                    var isCoro = /^(coro|refr[ãa]o)/i.test(limpo);
+                    var div = document.createElement('div');
                     div.className = isCoro ? 'chorus' : 'stanza';
                     div.innerHTML = isCoro
-                      ? `<div class=\"chorus-header\">Coro</div><p>${limpo.replace(/\\n/g, '<br>')}</p>`
-                      : `<p>${limpo.replace(/\\n/g, '<br>')}</p>`;
+                      ? '<div class="chorus-header">Coro</div><p>' + limpo.replace(/\\n/g, '<br>') + '</p>'
+                      : '<p>' + limpo.replace(/\\n/g, '<br>') + '</p>';
                     containerLetra.appendChild(div);
                   });
                 }
@@ -354,9 +349,8 @@ jobs:
               window.onload = inicializar;
             </script>
           </body>
-          </html>'''
+          </html>"""
 
-          # 3. Gravar index.html nas pastas do Android e da Web
           os.makedirs('web_public', exist_ok=True)
           with open('web_public/index.html', 'w', encoding='utf-8') as f:
               f.write(html_template)
@@ -365,15 +359,8 @@ jobs:
           with open('app/src/main/assets/index.html', 'w', encoding='utf-8') as f:
               f.write(html_template)
 
-          # Gravar ficheiro JS de dados adicional
-          with open('web_public/hinos_dados.js', 'w', encoding='utf-8') as f:
-              f.write('window.HINOS_DADOS = ' + json_hinos_seguro + ';\n')
-          with open('app/src/main/assets/hinos_dados.js', 'w', encoding='utf-8') as f:
-              f.write('window.HINOS_DADOS = ' + json_hinos_seguro + ';\n')
-
-          # 4. Criar MainActivity.java limpo (sem dependências externas)
           os.makedirs('app/src/main/java/ao/iasd/hinariotchokwe', exist_ok=True)
-          main_java = '''package ao.iasd.hinariotchokwe;
+          main_java = """package ao.iasd.hinariotchokwe;
 
           import android.app.Activity;
           import android.os.Bundle;
@@ -396,7 +383,7 @@ jobs:
                   ws.setAllowFileAccessFromFileURLs(true);
                   ws.setAllowUniversalAccessFromFileURLs(true);
                   webView.setWebViewClient(new WebViewClient());
-                  webView.loadUrl(\"file:///android_asset/index.html\");
+                  webView.loadUrl("file:///android_asset/index.html");
                   setContentView(webView);
               }
 
@@ -409,46 +396,44 @@ jobs:
                   }
               }
           }
-          '''
+          """
           with open('app/src/main/java/ao/iasd/hinariotchokwe/MainActivity.java', 'w', encoding='utf-8') as f:
               f.write(main_java)
 
-          # 5. Criar AndroidManifest.xml limpo
-          manifest_xml = '''<?xml version=\"1.0\" encoding=\"utf-8\"?>
-          <manifest xmlns:android=\"http://schemas.android.com/apk/res/android\">
-              <uses-permission android:name=\"android.permission.INTERNET\" />
+          manifest_xml = """<?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET" />
               <application
-                  android:allowBackup=\"true\"
-                  android:label=\"Hinário Tchokwe\"
-                  android:supportsRtl=\"true\"
-                  android:theme=\"@android:style/Theme.NoTitleBar\">
+                  android:allowBackup="true"
+                  android:label="Hinário Tchokwe"
+                  android:supportsRtl="true"
+                  android:theme="@android:style/Theme.NoTitleBar">
                   <activity
-                      android:name=\".MainActivity\"
-                      android:exported=\"true\"
-                      android:configChanges=\"orientation|screenSize|keyboardHidden\">
+                      android:name=".MainActivity"
+                      android:exported="true"
+                      android:configChanges="orientation|screenSize|keyboardHidden">
                       <intent-filter>
-                          <action android:name=\"android.intent.action.MAIN\" />
-                          <category android:name=\"android.intent.category.LAUNCHER\" />
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
                       </intent-filter>
                   </activity>
               </application>
-          </manifest>'''
+          </manifest>"""
           with open('app/src/main/AndroidManifest.xml', 'w', encoding='utf-8') as f:
               f.write(manifest_xml)
 
-          # 6. Criar app/build.gradle limpo
-          build_gradle = '''plugins {
+          build_gradle = """plugins {
               id 'com.android.application'
           }
           android {
               namespace 'ao.iasd.hinariotchokwe'
               compileSdk 34
               defaultConfig {
-                  applicationId \"ao.iasd.hinariotchokwe\"
+                  applicationId "ao.iasd.hinariotchokwe"
                   minSdk 21
                   targetSdk 34
                   versionCode 1
-                  versionName \"1.0.0\"
+                  versionName "1.0.0"
               }
               buildTypes {
                   release {
@@ -464,14 +449,15 @@ jobs:
               }
           }
           dependencies {}
-          '''
+          """
           with open('app/build.gradle', 'w', encoding='utf-8') as f:
               f.write(build_gradle)
 
-          print('Preparação concluída com sucesso!')
-          "
+          print("Preparacao concluida com sucesso!")
+          EOF
+          python3 preparar_hinos.py
 
-      - name: Publicar Versão Web para iPhone e Navegadores (GitHub Pages)
+      - name: Publicar Versao Web para iPhone e Navegadores (GitHub Pages)
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
