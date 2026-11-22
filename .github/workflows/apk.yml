@@ -80,7 +80,7 @@ jobs:
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
             <title>Hinário Tchokwe - IASD</title>
-            <meta name="theme-color" content="#0f172a">
+            <meta name="theme-color" content="#0b1120">
             <link rel="icon" type="image/png" href="logo.png">
             <style>
               :root {
@@ -110,7 +110,6 @@ jobs:
               * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
               body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
               
-              /* CAPA INICIAL COM O LOGO LARANJA OFICIAL */
               #view-capa { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 32px 18px; text-align: center; }
               .logo-container { width: 170px; height: 170px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; }
               .logo-emblema { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 6px 20px rgba(217, 88, 4, 0.4)); }
@@ -126,7 +125,6 @@ jobs:
               .btn-sobre { background: var(--surface); color: var(--text); font-weight: 600; font-size: 0.95rem; padding: 13px 20px; border-radius: 12px; border: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
               .btn-sobre:hover { background: var(--surface-hover); }
               
-              /* CABECALHO DO HINARIO */
               #app-header { display: none; background: var(--surface); padding: 12px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
               .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
               .header-info-box { display: flex; align-items: center; gap: 10px; }
@@ -141,12 +139,10 @@ jobs:
               .search-input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.95rem; outline: none; }
               .search-input:focus { border-color: var(--primary); }
               
-              /* ABAS */
               #navTabs { display: none; background: var(--surface); border-bottom: 1px solid var(--border); }
               .tab-btn { flex: 1; padding: 12px; text-align: center; background: none; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.9rem; }
               .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
               
-              /* CORPO PRINCIPAL */
               main { flex: 1; overflow-y: auto; padding: 12px; max-width: 800px; margin: 0 auto; width: 100%; }
               #view-lista { display: none; }
               .hymn-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
@@ -157,7 +153,6 @@ jobs:
               .fav-icon { background: none; border: none; font-size: 1.25rem; color: var(--text-muted); cursor: pointer; padding: 4px 8px; }
               .fav-icon.active { color: var(--primary); }
               
-              /* LEITOR */
               #view-leitor { display: none; }
               .reader-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
               .back-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
@@ -171,7 +166,6 @@ jobs:
               .chorus { background: var(--chorus-bg); border-left: 3px solid var(--primary); padding: 12px 14px; border-radius: 0 8px 8px 0; margin: 20px 0; font-style: italic; }
               .chorus-header { font-size: 0.8rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 6px; font-style: normal; }
               
-              /* MODAL SOBRE */
               .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.78); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
               .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; max-width: 460px; width: 100%; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
               .modal-logo { width: 80px; height: 80px; object-fit: contain; margin-bottom: 12px; }
@@ -182,7 +176,6 @@ jobs:
               .modal-credits span { display: block; }
               .btn-fechar-modal { background: var(--primary); color: #ffffff; font-weight: 700; padding: 10px 26px; border-radius: 8px; border: none; cursor: pointer; }
               
-              /* RODAPÉ */
               footer { display: none; background: var(--surface); border-top: 1px solid var(--border); padding: 18px 14px; text-align: center; margin-top: auto; }
               .footer-church { font-weight: 700; font-size: 0.95rem; color: var(--text); margin-bottom: 6px; }
               .credits-block { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 6px; }
@@ -192,27 +185,44 @@ jobs:
           </head>
           <body>
 
-            <!-- 1. CAPA INICIAL COM O LOGO LARANJA IASD -->
             <div id="view-capa">
               <div class="logo-container">
                 <img src="logo.png" onerror="this.style.display='none'; document.getElementById('svg-logo-capa').style.display='block';" alt="Logo IASD Laranja" class="logo-emblema" style="display:none;" id="img-logo-capa">
                 
-                <!-- VETOR OFICIAL EXATO DO EMBLEMA ADVENTISTA EM LARANJA PURO (#d95804) -->
                 <svg id="svg-logo-capa" class="logo-emblema" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <!-- Bíblia Aberta em Laranja -->
                   <path d="M70 425 L240 380 L240 430 C170 436 110 434 70 425 Z" fill="#d95804"/>
                   <path d="M430 425 L260 380 L260 430 C330 436 390 434 430 425 Z" fill="#d95804"/>
                   <path d="M70 425 C120 375 180 360 240 380 L240 360 C170 345 110 360 70 425 Z" fill="#d95804"/>
                   <path d="M430 425 C380 375 320 360 260 380 L260 360 C330 345 390 360 430 425 Z" fill="#d95804"/>
-                  
-                  <!-- Cruz Central -->
                   <path d="M242 375 H258 V430 H242 Z" fill="#d95804"/>
                   <path d="M218 388 H282 V400 H218 Z" fill="#d95804"/>
-                  
-                  <!-- Chamas da Esquerda (Laranja Oficial) -->
                   <path d="M250 110 C230 160 170 230 165 300 C165 330 175 350 195 365 C180 340 178 315 185 285 C192 255 220 205 250 155 C262 135 258 118 250 110 Z" fill="#d95804"/>
                   <path d="M235 160 C205 200 185 245 185 290 C185 315 195 335 212 350 C198 330 198 305 205 280 C212 250 230 215 255 180 Z" fill="#d95804"/>
                   <path d="M220 220 C200 255 195 285 200 320 C208 335 218 345 230 355 C218 340 215 320 220 300 C225 275 240 245 260 215 Z" fill="#d95804"/>
-                  
-                  <!-- Chamas da Direita (Laranja Oficial) -->
-                  <path d="M255 210 C270 245 295 275 312 300 C330 325 335 350 328 375 C335 350 330 320 3
+                  <path d="M255 210 C270 245 295 275 312 300 C330 325 335 350 328 375 C335 350 330 320 310 290 C290 260 270 230 255 210 Z" fill="#d95804"/>
+                  <path d="M255 260 C275 290 295 320 305 350 C312 370 305 385 290 395 C305 380 308 360 300 340 C290 315 270 285 255 260 Z" fill="#d95804"/>
+                  <path d="M300 210 C320 245 330 280 325 320 C322 345 310 365 295 375 C310 360 315 340 315 315 C315 280 305 245 300 210 Z" fill="#d95804"/>
+                  <circle cx="415" cy="390" r="10" stroke="#d95804" stroke-width="2.5" fill="none"/>
+                  <text x="415" y="396" font-size="14" font-family="sans-serif" font-weight="bold" fill="#d95804" text-anchor="middle">R</text>
+                </svg>
+              </div>
+
+              <div class="capa-igreja">Igreja Adventista do Sétimo Dia</div>
+              <div class="capa-missao">Missão Leste de Angola</div>
+              <div class="capa-titulo">HINÁRIO TCHOKWE</div>
+              <div class="capa-subtitulo">300 Hinos de Louvor e Adoração ao Deus Eterno</div>
+
+              <div class="botoes-capa">
+                <button class="btn-abrir" onclick="abrirHinario()">ABRIR HINÁRIO TCHOKWE</button>
+                <button class="btn-sobre" onclick="abrirModalSobre()">SOBRE O HINÁRIO</button>
+              </div>
+
+              <div class="footer-edition">Para a Glória de Deus • Edição 2026</div>
+            </div>
+
+            <header id="app-header">
+              <div class="header-top">
+                <div class="header-info-box">
+                  <svg class="mini-logo" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M70 425 L240 380 L240 430 Z" fill="#d95804"/>
+                    <path d="M430 425 L260 380 L260 430 Z" fill="#d95804"/>
