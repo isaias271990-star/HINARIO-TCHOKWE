@@ -35,7 +35,52 @@ jobs:
           mkdir -p app/src/main/assets
           rm -rf app/src/main/assets/*
 
-          # 2. Localizar os 300 hinos e construir o aplicativo completo e 100% offline
+          # 2. Restaurar MainActivity.java limpo e funcional
+          python3 - << 'PYEOF'
+          import glob, os
+          main_javas = glob.glob('**/MainActivity.java', recursive=True)
+          for p in main_javas:
+              print(f"Restaurando MainActivity limpo em: {p}")
+              with open(p, 'w', encoding='utf-8') as f:
+                  f.write('''package ao.iasd.hinariotchokwe;
+
+          import android.os.Bundle;
+          import android.webkit.WebSettings;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import androidx.appcompat.app.AppCompatActivity;
+
+          public class MainActivity extends AppCompatActivity {
+              private WebView webView;
+
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  webView = new WebView(this);
+                  setContentView(webView);
+
+                  WebSettings webSettings = webView.getSettings();
+                  webSettings.setJavaScriptEnabled(true);
+                  webSettings.setDomStorageEnabled(true);
+                  webSettings.setAllowFileAccess(true);
+
+                  webView.setWebViewClient(new WebViewClient());
+                  webView.loadUrl("file:///android_asset/index.html");
+              }
+
+              @Override
+              public void onBackPressed() {
+                  if (webView != null && webView.canGoBack()) {
+                      webView.goBack();
+                  } else {
+                      super.onBackPressed();
+                  }
+              }
+          }
+          ''')
+          PYEOF
+
+          # 3. Localizar os 300 hinos e construir o aplicativo completo e 100% offline
           python3 - << 'PYEOF'
           import json, glob, os, sys
 
@@ -352,15 +397,9 @@ jobs:
 
           PYEOF
 
-          # 3. Forcar o Android a habilitar o arquivo assets
+          # 4. Forcar o Android a habilitar a pasta assets
           if ! grep -q "assets.srcDirs" app/build.gradle; then
             sed -i '/android {/a \    sourceSets { main { assets.srcDirs = ["src/main/assets"] } }' app/build.gradle || true
-          fi
-
-          # 4. Ativar permissao no MainActivity para Android 14
-          MAIN_JAVA=$(find app/src/main/java -name "MainActivity.java" | head -n 1)
-          if [ -n "$MAIN_JAVA" ]; then
-            sed -i '/setJavaScriptEnabled/a \        webSettings.setAllowFileAccess(true);\n        webSettings.setAllowContentAccess(true);\n        webSettings.setAllowFileAccessFromFileURLs(true);\n        webSettings.setAllowUniversalAccessFromFileURLs(true);' "$MAIN_JAVA" || true
           fi
 
           # 5. Compilar APK e AAB da Play Store
