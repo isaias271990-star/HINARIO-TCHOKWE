@@ -30,7 +30,6 @@ jobs:
           cat << 'EOF' > preparar_hinos.py
           import json, os, shutil
 
-          # 1. Copiar imagem do logotipo se existir
           os.makedirs('web_public', exist_ok=True)
           for l in ['logo.png', 'logo.jpg', 'logo.jpeg', 'logo_iasd.png']:
               if os.path.exists(l):
@@ -38,10 +37,8 @@ jobs:
                   for d in ['app/src/main/assets', 'hinario-app/app/src/main/assets']:
                       os.makedirs(d, exist_ok=True)
                       shutil.copy(l, os.path.join(d, 'logo.png'))
-                  print(f'Logotipo copiado com sucesso de: {l}')
                   break
 
-          # 2. Localizar o ficheiro hinos.json
           caminhos_busca = [
               'hinario-app/tools/hinos.json',
               'tools/hinos.json',
@@ -87,16 +84,16 @@ jobs:
             <link rel="icon" type="image/png" href="logo.png">
             <style>
               :root {
-                --bg: #0f172a;
+                --bg: #0b1120;
                 --surface: #1e293b;
                 --surface-hover: #334155;
                 --text: #f8fafc;
                 --text-muted: #94a3b8;
-                --primary: #f59e0b;
-                --primary-hover: #d97706;
+                --primary: #d95804;
+                --primary-hover: #b44502;
                 --border: #334155;
                 --card-bg: #1e293b;
-                --chorus-bg: rgba(245, 158, 11, 0.1);
+                --chorus-bg: rgba(217, 88, 4, 0.12);
               }
               body.light {
                 --bg: #f8fafc;
@@ -104,27 +101,27 @@ jobs:
                 --surface-hover: #f1f5f9;
                 --text: #0f172a;
                 --text-muted: #64748b;
-                --primary: #d97706;
-                --primary-hover: #b45309;
+                --primary: #d95804;
+                --primary-hover: #b44502;
                 --border: #e2e8f0;
                 --card-bg: #ffffff;
-                --chorus-bg: rgba(217, 119, 6, 0.08);
+                --chorus-bg: rgba(217, 88, 4, 0.08);
               }
               * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
               body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
               
-              /* CAPA INICIAL */
+              /* CAPA INICIAL COM O LOGO LARANJA OFICIAL */
               #view-capa { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 32px 18px; text-align: center; }
-              .logo-container { width: 140px; height: 140px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; }
-              .logo-emblema { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 6px 20px rgba(245, 158, 11, 0.25)); }
+              .logo-container { width: 170px; height: 170px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; }
+              .logo-emblema { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 6px 20px rgba(217, 88, 4, 0.4)); }
               
               .capa-igreja { font-size: 0.95rem; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
-              .capa-missao { font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 24px; letter-spacing: 0.5px; }
+              .capa-missao { font-size: 1.2rem; font-weight: 800; color: var(--primary); margin-bottom: 24px; letter-spacing: 0.5px; }
               .capa-titulo { font-size: 2.3rem; font-weight: 800; color: var(--text); margin-bottom: 10px; letter-spacing: -0.5px; }
-              .capa-subtitulo { font-size: 1rem; color: var(--text-muted); margin-bottom: 40px; max-width: 340px; line-height: 1.5; }
+              .capa-subtitulo { font-size: 1rem; color: var(--text-muted); margin-bottom: 38px; max-width: 340px; line-height: 1.5; }
               
               .botoes-capa { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 320px; margin-bottom: 34px; }
-              .btn-abrir { background: var(--primary); color: #000; font-weight: 800; font-size: 1.05rem; padding: 16px 22px; border-radius: 12px; border: none; cursor: pointer; transition: transform 0.15s, background 0.15s; box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35); letter-spacing: 0.5px; }
+              .btn-abrir { background: var(--primary); color: #ffffff; font-weight: 800; font-size: 1.05rem; padding: 16px 22px; border-radius: 12px; border: none; cursor: pointer; transition: transform 0.15s, background 0.15s; box-shadow: 0 4px 18px rgba(217, 88, 4, 0.45); letter-spacing: 0.5px; }
               .btn-abrir:hover { background: var(--primary-hover); transform: translateY(-2px); }
               .btn-sobre { background: var(--surface); color: var(--text); font-weight: 600; font-size: 0.95rem; padding: 13px 20px; border-radius: 12px; border: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
               .btn-sobre:hover { background: var(--surface-hover); }
@@ -133,7 +130,7 @@ jobs:
               #app-header { display: none; background: var(--surface); padding: 12px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
               .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
               .header-info-box { display: flex; align-items: center; gap: 10px; }
-              .mini-logo { width: 34px; height: 34px; object-fit: contain; }
+              .mini-logo { width: 36px; height: 36px; object-fit: contain; }
               .header-title h1 { font-size: 1.15rem; font-weight: 700; color: var(--text); }
               .header-title p { font-size: 0.8rem; color: var(--text-muted); }
               .header-acoes { display: flex; gap: 8px; align-items: center; }
@@ -155,7 +152,7 @@ jobs:
               .hymn-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
               .hymn-card:hover { background: var(--surface-hover); }
               .hymn-info { display: flex; align-items: center; gap: 12px; overflow: hidden; flex: 1; }
-              .hymn-num { background: var(--primary); color: #000; font-weight: 700; min-width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; }
+              .hymn-num { background: var(--primary); color: #ffffff; font-weight: 800; min-width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; }
               .hymn-name { font-size: 0.95rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
               .fav-icon { background: none; border: none; font-size: 1.25rem; color: var(--text-muted); cursor: pointer; padding: 4px 8px; }
               .fav-icon.active { color: var(--primary); }
@@ -177,13 +174,13 @@ jobs:
               /* MODAL SOBRE */
               .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.78); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
               .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; max-width: 460px; width: 100%; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
-              .modal-logo { width: 70px; height: 70px; object-fit: contain; margin-bottom: 12px; }
+              .modal-logo { width: 80px; height: 80px; object-fit: contain; margin-bottom: 12px; }
               .modal-box h3 { font-size: 1.3rem; color: var(--primary); margin-bottom: 4px; }
               .modal-box h4 { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 16px; }
               .modal-desc { font-size: 0.9rem; line-height: 1.6; color: var(--text); margin-bottom: 18px; text-align: justify; }
               .modal-credits { background: var(--bg); padding: 14px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem; line-height: 1.8; margin-bottom: 20px; text-align: left; }
               .modal-credits span { display: block; }
-              .btn-fechar-modal { background: var(--primary); color: #000; font-weight: 700; padding: 10px 26px; border-radius: 8px; border: none; cursor: pointer; }
+              .btn-fechar-modal { background: var(--primary); color: #ffffff; font-weight: 700; padding: 10px 26px; border-radius: 8px; border: none; cursor: pointer; }
               
               /* RODAPÉ */
               footer { display: none; background: var(--surface); border-top: 1px solid var(--border); padding: 18px 14px; text-align: center; margin-top: auto; }
@@ -195,399 +192,27 @@ jobs:
           </head>
           <body>
 
-            <!-- 1. CAPA INICIAL OFICIAL -->
+            <!-- 1. CAPA INICIAL COM O LOGO LARANJA IASD -->
             <div id="view-capa">
               <div class="logo-container">
-                <img src="logo.png" alt="Igreja Adventista do Sétimo Dia" class="logo-emblema">
-              </div>
-
-              <div class="capa-igreja">Igreja Adventista do Sétimo Dia</div>
-              <div class="capa-missao">Missão Leste de Angola</div>
-              <div class="capa-titulo">HINÁRIO TCHOKWE</div>
-              <div class="capa-subtitulo">300 Hinos de Louvor e Adoração ao Deus Eterno</div>
-
-              <div class="botoes-capa">
-                <button class="btn-abrir" onclick="abrirHinario()">ABRIR HINÁRIO TCHOKWE</button>
-                <button class="btn-sobre" onclick="abrirModalSobre()">SOBRE O HINÁRIO</button>
-              </div>
-
-              <div class="footer-edition">Para a Glória de Deus • Edição 2026</div>
-            </div>
-
-            <!-- 2. CABECALHO DO APP -->
-            <header id="app-header">
-              <div class="header-top">
-                <div class="header-info-box">
-                  <img src="logo.png" alt="Logo IASD" class="mini-logo">
-                  <div class="header-title">
-                    <h1>Hinário Tchokwe - IASD</h1>
-                    <p>Missão Leste de Angola</p>
-                  </div>
-                </div>
-                <div class="header-acoes">
-                  <button class="btn-nav-capa" onclick="voltarParaCapa()">Capa</button>
-                  <button class="btn-nav-capa" onclick="abrirModalSobre()">Sobre</button>
-                  <button class="theme-toggle" id="themeBtn" onclick="toggleTema()">Modo Claro</button>
-                </div>
-              </div>
-              <div class="search-container" id="searchBox">
-                <input type="text" id="campoBusca" class="search-input" placeholder="Digite o número ou nome do hino..." oninput="filtrarHinos()">
-              </div>
-            </header>
-
-            <div class="tabs" id="navTabs">
-              <button class="tab-btn active" id="tabTodos" onclick="mudarAba('todos')">Todos os Hinos (<span id="contTodos">300</span>)</button>
-              <button class="tab-btn" id="tabFavoritos" onclick="mudarAba('favoritos')">Favoritos (<span id="contFavs">0</span>)</button>
-            </div>
-
-            <!-- 3. CONTEÚDO PRINCIPAL -->
-            <main>
-              <div id="view-lista"></div>
-              <div id="view-leitor">
-                <div class="reader-header">
-                  <button class="back-btn" onclick="voltarParaLista()">← Voltar</button>
-                  <div class="font-controls">
-                    <button class="font-btn" onclick="ajustarFonte(-1)">A-</button>
-                    <button class="font-btn" onclick="ajustarFonte(1)">A+</button>
-                    <button class="fav-icon" id="btnFavLeitor" onclick="toggleFavAtual()">★</button>
-                  </div>
-                </div>
-                <div class="reader-title">
-                  <h2 id="leitorTitulo"></h2>
-                </div>
-                <div class="reader-body" id="leitorLetra"></div>
-              </div>
-            </main>
-
-            <!-- 4. MODAL SOBRE O HINÁRIO -->
-            <div class="modal-overlay" id="modalSobre" onclick="fecharModalSobre(event)">
-              <div class="modal-box" onclick="event.stopPropagation()">
-                <img src="logo.png" alt="Logo IASD" class="modal-logo">
-                <h3>Hinário Tchokwe - IASD</h3>
-                <h4>Missão Leste de Angola</h4>
-                <div class="modal-desc">
-                  Este aplicativo do Hinário Tchokwe da Igreja Adventista do Sétimo Dia reúne os 300 hinos sagrados para a adoração e exaltação do nome de Deus na língua Tchokwe. Funciona offline em qualquer dispositivo móvel e computador.
-                </div>
-                <div class="modal-credits">
-                  <span><strong>Desenvolvedor:</strong> Isaías Muwaneno João IT</span>
-                  <span><strong>Revisão e Correção:</strong> Pastor Nunes Sacavumbi Lucas</span>
-                  <span><strong>Colaboradores:</strong> Líder Ecal Gomes e Líder Januário Justo Miranda</span>
-                  <span style="text-align: center; margin-top: 10px; color: var(--primary); font-weight: 700;">Para a Glória de Deus • Edição 2026</span>
-                </div>
-                <button class="btn-fechar-modal" onclick="fecharModalSobre()">Fechar</button>
-              </div>
-            </div>
-
-            <footer id="app-footer">
-              <div class="footer-church">Hinário Tchokwe - IASD • Missão Leste de Angola</div>
-              <div class="credits-block">
-                <span>Desenvolvedor: Isaías Muwaneno João IT</span>
-                <span>Revisão e Correção: Pastor Nunes Sacavumbi Lucas</span>
-                <span>Colaboradores: Líder Ecal Gomes e Líder Januário Justo Miranda</span>
-              </div>
-              <div class="footer-edition">Para a Glória de Deus • Edição 2026</div>
-            </footer>
-
-            <script>
-              window.HINOS_DADOS = """ + json_hinos_seguro + """;
-              var abaAtual = 'todos';
-              var hinoAtualId = null;
-              var tamanhoFonte = 1.15;
-              var favoritos = JSON.parse(localStorage.getItem('tchokwe_favs') || '[]');
-
-              function inicializar() {
-                var temaSalvo = localStorage.getItem('tchokwe_tema');
-                if (temaSalvo === 'light') {
-                  document.body.classList.add('light');
-                  document.getElementById('themeBtn').textContent = 'Modo Escuro';
-                }
-                atualizarContadores();
-              }
-
-              function toggleTema() {
-                var isLight = document.body.classList.toggle('light');
-                document.getElementById('themeBtn').textContent = isLight ? 'Modo Escuro' : 'Modo Claro';
-                localStorage.setItem('tchokwe_tema', isLight ? 'light' : 'dark');
-              }
-
-              function abrirHinario() {
-                document.getElementById('view-capa').style.display = 'none';
-                document.getElementById('app-header').style.display = 'block';
-                document.getElementById('navTabs').style.display = 'flex';
-                document.getElementById('view-lista').style.display = 'block';
-                document.getElementById('app-footer').style.display = 'block';
-                renderizarLista();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }
-
-              function voltarParaCapa() {
-                document.getElementById('view-lista').style.display = 'none';
-                document.getElementById('view-leitor').style.display = 'none';
-                document.getElementById('app-header').style.display = 'none';
-                document.getElementById('navTabs').style.display = 'none';
-                document.getElementById('app-footer').style.display = 'none';
-                document.getElementById('view-capa').style.display = 'flex';
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }
-
-              function abrirModalSobre() {
-                document.getElementById('modalSobre').style.display = 'flex';
-              }
-
-              function fecharModalSobre() {
-                document.getElementById('modalSobre').style.display = 'none';
-              }
-
-              function mudarAba(aba) {
-                abaAtual = aba;
-                document.getElementById('tabTodos').classList.toggle('active', aba === 'todos');
-                document.getElementById('tabFavoritos').classList.toggle('active', aba === 'favoritos');
-                renderizarLista();
-              }
-
-              function atualizarContadores() {
-                document.getElementById('contTodos').textContent = window.HINOS_DADOS.length;
-                document.getElementById('contFavs').textContent = favoritos.length;
-              }
-
-              function renderizarLista() {
-                var termo = document.getElementById('campoBusca').value.trim().toLowerCase();
-                var container = document.getElementById('view-lista');
-                container.innerHTML = '';
-
-                var filtrados = window.HINOS_DADOS.filter(function(h) {
-                  var num = String(h.numero || h.number || h.id || '');
-                  var tit = String(h.titulo || h.title || h.nome || '').toLowerCase();
-                  var matchBusca = !termo || num === termo || tit.indexOf(termo) !== -1;
-                  var numInt = parseInt(num, 10);
-                  var matchAba = (abaAtual === 'todos') || (favoritos.indexOf(numInt) !== -1);
-                  return matchBusca && matchAba;
-                });
-
-                if (filtrados.length === 0) {
-                  container.innerHTML = '<div style="text-align:center; padding: 40px 10px; color: var(--text-muted);">Nenhum hino encontrado.</div>';
-                  return;
-                }
-
-                filtrados.forEach(function(h) {
-                  var num = parseInt(h.numero || h.number || h.id || 0, 10);
-                  var tit = h.titulo || h.title || h.nome || ('Hino ' + num);
-                  var isFav = favoritos.indexOf(num) !== -1;
-
-                  var card = document.createElement('div');
-                  card.className = 'hymn-card';
-                  card.innerHTML = '<div class="hymn-info" onclick="abrirHino(' + num + ')">' +
-                    '<div class="hymn-num">' + num + '</div>' +
-                    '<div class="hymn-name">' + tit + '</div>' +
-                    '</div>' +
-                    '<button class="fav-icon ' + (isFav ? 'active' : '') + '" onclick="event.stopPropagation(); toggleFav(' + num + ')">★</button>';
-                  container.appendChild(card);
-                });
-              }
-
-              function filtrarHinos() {
-                renderizarLista();
-              }
-
-              function toggleFav(num) {
-                var idx = favoritos.indexOf(num);
-                if (idx > -1) {
-                  favoritos.splice(idx, 1);
-                } else {
-                  favoritos.push(num);
-                }
-                localStorage.setItem('tchokwe_favs', JSON.stringify(favoritos));
-                atualizarContadores();
-                renderizarLista();
-                if (hinoAtualId === num) {
-                  document.getElementById('btnFavLeitor').classList.toggle('active', favoritos.indexOf(num) !== -1);
-                }
-              }
-
-              function toggleFavAtual() {
-                if (hinoAtualId !== null) {
-                  toggleFav(hinoAtualId);
-                }
-              }
-
-              // DESEMPACOTADOR UNIVERSAL DE TEXTO (ZERO [object Object])
-              function desempacotarObjeto(obj) {
-                if (obj === null || obj === undefined) return '';
-                if (typeof obj === 'string') return obj.trim().replace(/\\n/g, '<br>');
-                if (typeof obj === 'number') return '';
-
-                if (Array.isArray(obj)) {
-                  var linhas = [];
-                  for (var i = 0; i < obj.length; i++) {
-                    var s = desempacotarObjeto(obj[i]);
-                    if (s) linhas.push(s);
-                  }
-                  return linhas.join('<br>');
-                }
-
-                if (typeof obj === 'object') {
-                  var chaves = [
-                    'texto', 'letra', 'text', 'lines', 'linhas', 'content', 'conteudo',
-                    'corpo', 'body', 'verse', 'verso', 'versos', 'verses', 'estrofe',
-                    'stanza', 'stanzas', 'estrofes', 'coro', 'chorus', 'refrao', 'words', 'palavras'
-                  ];
-                  for (var j = 0; j < chaves.length; j++) {
-                    var k = chaves[j];
-                    if (obj[k] !== undefined && obj[k] !== null) {
-                      var t = desempacotarObjeto(obj[k]);
-                      if (t) return t;
-                    }
-                  }
-
-                  var partes = [];
-                  for (var prop in obj) {
-                    if (['numero', 'number', 'num', 'id', 'tipo', 'type', 'titulo', 'title', 'nome'].indexOf(prop) === -1) {
-                      var pedaco = desempacotarObjeto(obj[prop]);
-                      if (pedaco) partes.push(pedaco);
-                    }
-                  }
-                  if (partes.length > 0) return partes.join('<br>');
-
-                  var vals = Object.values(obj);
-                  for (var v = 0; v < vals.length; v++) {
-                    var valPedaco = desempacotarObjeto(vals[v]);
-                    if (valPedaco) partes.push(valPedaco);
-                  }
-                  if (partes.length > 0) return partes.join('<br>');
-                }
-
-                return '';
-              }
-
-              function abrirHino(num) {
-                var hino = window.HINOS_DADOS.find(function(h) { return parseInt(h.numero || h.number || h.id, 10) === num; });
-                if (!hino) return;
-
-                hinoAtualId = num;
-                document.getElementById('view-lista').style.display = 'none';
-                document.getElementById('searchBox').style.display = 'none';
-                document.getElementById('navTabs').style.display = 'none';
-                document.getElementById('view-leitor').style.display = 'block';
-
-                var tit = hino.titulo || hino.title || hino.nome || ('Hino ' + num);
-                document.getElementById('leitorTitulo').textContent = num + '. ' + tit;
-                document.getElementById('btnFavLeitor').classList.toggle('active', favoritos.indexOf(num) !== -1);
-
-                var containerLetra = document.getElementById('leitorLetra');
-                containerLetra.innerHTML = '';
-
-                var listaEstrofes = null;
-                if (Array.isArray(hino.estrofes)) listaEstrofes = hino.estrofes;
-                else if (Array.isArray(hino.stanzas)) listaEstrofes = hino.stanzas;
-                else if (Array.isArray(hino.versos)) listaEstrofes = hino.versos;
-                else if (Array.isArray(hino.verses)) listaEstrofes = hino.verses;
-                else {
-                  for (var k in hino) {
-                    if (['numero', 'number', 'num', 'id'].indexOf(k) === -1 && Array.isArray(hino[k])) {
-                      listaEstrofes = hino[k];
-                      break;
-                    }
-                  }
-                }
-
-                if (listaEstrofes && listaEstrofes.length > 0) {
-                  listaEstrofes.forEach(function(est, idx) {
-                    var texto = desempacotarObjeto(est);
-                    if (!texto) return;
-
-                    var isCoro = false;
-                    if (est && typeof est === 'object') {
-                      if (est.tipo === 'coro' || est.isCoro || est.type === 'chorus') isCoro = true;
-                    }
-                    if (/^(coro|refr[ãa]o)/i.test(texto)) isCoro = true;
-
-                    var numEst = (est && (est.numero || est.num || est.id)) || (idx + 1);
-
-                    var div = document.createElement('div');
-                    if (isCoro) {
-                      div.className = 'chorus';
-                      div.innerHTML = '<div class="chorus-header">Coro</div><p>' + texto + '</p>';
-                    } else {
-                      div.className = 'stanza';
-                      div.innerHTML = '<div class="stanza-header">Estrofe ' + numEst + '</div><p>' + texto + '</p>';
-                    }
-                    containerLetra.appendChild(div);
-
-                    if (idx === 0 && hino.coro) {
-                      var textoCoro = desempacotarObjeto(hino.coro);
-                      if (textoCoro) {
-                        var coroDiv = document.createElement('div');
-                        coroDiv.className = 'chorus';
-                        coroDiv.innerHTML = '<div class="chorus-header">Coro</div><p>' + textoCoro + '</p>';
-                        containerLetra.appendChild(coroDiv);
-                      }
-                    }
-                  });
-                } else {
-                  for (var prop in hino) {
-                    if (['numero', 'number', 'num', 'id', 'tipo', 'type', 'titulo', 'title', 'nome'].indexOf(prop) === -1) {
-                      var t = desempacotarObjeto(hino[prop]);
-                      if (t && t !== tit) {
-                        var div = document.createElement('div');
-                        div.className = 'stanza';
-                        div.innerHTML = '<p>' + t + '</p>';
-                        containerLetra.appendChild(div);
-                      }
-                    }
-                  }
-                }
-
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }
-
-              function voltarParaLista() {
-                document.getElementById('view-leitor').style.display = 'none';
-                document.getElementById('view-lista').style.display = 'block';
-                document.getElementById('searchBox').style.display = 'block';
-                document.getElementById('navTabs').style.display = 'flex';
-                hinoAtualId = null;
-              }
-
-              function ajustarFonte(delta) {
-                tamanhoFonte = Math.max(0.85, Math.min(1.8, tamanhoFonte + delta * 0.1));
-                document.getElementById('leitorLetra').style.fontSize = tamanhoFonte + 'rem';
-              }
-
-              window.onload = inicializar;
-            </script>
-          </body>
-          </html>"""
-
-          os.makedirs('web_public', exist_ok=True)
-          with open('web_public/index.html', 'w', encoding='utf-8') as f:
-              f.write(html_template)
-
-          for asset_dir in ['app/src/main/assets', 'hinario-app/app/src/main/assets']:
-              if os.path.exists(os.path.dirname(os.path.dirname(asset_dir))):
-                  os.makedirs(asset_dir, exist_ok=True)
-                  with open(os.path.join(asset_dir, 'index.html'), 'w', encoding='utf-8') as f:
-                      f.write(html_template)
-
-          print("Preparacao concluida com sucesso!")
-          EOF
-          python3 preparar_hinos.py
-
-      - name: Publicar Versao Web para iPhone e Navegadores (GitHub Pages)
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./web_public
-
-      - name: Compilar Aplicativo Android (APK)
-        run: |
-          rm -f local.properties hinario-app/local.properties
-          if [ -d "hinario-app" ]; then
-            cd hinario-app
-          fi
-          gradle assembleDebug
-
-      - name: Disponibilizar APK para Download
-        uses: actions/upload-artifact@v4
-        with:
-          name: Hinario-Tchokwe-Samsung-Android
-          path: '**/build/outputs/apk/debug/*.apk'
+                <img src="logo.png" onerror="this.style.display='none'; document.getElementById('svg-logo-capa').style.display='block';" alt="Logo IASD Laranja" class="logo-emblema" style="display:none;" id="img-logo-capa">
+                
+                <!-- VETOR OFICIAL EXATO DO EMBLEMA ADVENTISTA EM LARANJA PURO (#d95804) -->
+                <svg id="svg-logo-capa" class="logo-emblema" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Bíblia Aberta em Laranja -->
+                  <path d="M70 425 L240 380 L240 430 C170 436 110 434 70 425 Z" fill="#d95804"/>
+                  <path d="M430 425 L260 380 L260 430 C330 436 390 434 430 425 Z" fill="#d95804"/>
+                  <path d="M70 425 C120 375 180 360 240 380 L240 360 C170 345 110 360 70 425 Z" fill="#d95804"/>
+                  <path d="M430 425 C380 375 320 360 260 380 L260 360 C330 345 390 360 430 425 Z" fill="#d95804"/>
+                  
+                  <!-- Cruz Central -->
+                  <path d="M242 375 H258 V430 H242 Z" fill="#d95804"/>
+                  <path d="M218 388 H282 V400 H218 Z" fill="#d95804"/>
+                  
+                  <!-- Chamas da Esquerda (Laranja Oficial) -->
+                  <path d="M250 110 C230 160 170 230 165 300 C165 330 175 350 195 365 C180 340 178 315 185 285 C192 255 220 205 250 155 C262 135 258 118 250 110 Z" fill="#d95804"/>
+                  <path d="M235 160 C205 200 185 245 185 290 C185 315 195 335 212 350 C198 330 198 305 205 280 C212 250 230 215 255 180 Z" fill="#d95804"/>
+                  <path d="M220 220 C200 255 195 285 200 320 C208 335 218 345 230 355 C218 340 215 320 220 300 C225 275 240 245 260 215 Z" fill="#d95804"/>
+                  
+                  <!-- Chamas da Direita (Laranja Oficial) -->
+                  <path d="M255 210 C270 245 295 275 312 300 C330 325 335 350 328 375 C335 350 330 320 3
