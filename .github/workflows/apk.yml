@@ -32,47 +32,66 @@ jobs:
         run: |
           # 1. Renomear pastas se necessario
           [ -d "aplicativo" ] && mv aplicativo app || true
-          [ -d "app/src/main/Ativos" ] && mv app/src/main/Ativos app/src/main/assets_temp || true
-          [ -d "app/src/main/Assets" ] && mv app/src/main/Assets app/src/main/assets_temp || true
+          [ -d "app/src/main/Ativos" ] && mv app/src/main/Ativos app/src/main/assets || true
+          [ -d "app/src/main/Assets" ] && mv app/src/main/Assets app/src/main/assets || true
 
-          # 2. Criar a pasta oficial assets
-          mkdir -p app/src/main/assets
+          # 2. Criar pastas necessarias
           mkdir -p app/src/main/assets/data
           mkdir -p app/src/main/assets/dados
 
-          # 3. Encontrar index.html e copiar todos os arquivos web para assets
+          # 3. Copiar arquivos apenas se nao estiverem ja dentro de assets
           INDEX_FILE=$(find . -name "index.html" | head -n 1)
           if [ -n "$INDEX_FILE" ]; then
             SRC_DIR=$(dirname "$INDEX_FILE")
-            echo "Copiando de $SRC_DIR para app/src/main/assets/"
-            cp -rf "$SRC_DIR"/* app/src/main/assets/ || true
+            if [ "$SRC_DIR" != "app/src/main/assets" ] && [ "$SRC_DIR" != "./app/src/main/assets" ]; then
+              echo "Copiando de $SRC_DIR para app/src/main/assets/"
+              cp -rf "$SRC_DIR"/* app/src/main/assets/ || true
+            fi
           fi
 
-          # 4. Encontrar hinos.json e garantir nas pastas data e dados
+          # 4. Copiar hinos apenas se estiverem fora
           HINOS_FILE=$(find . -iname "*hinos*.json" | head -n 1)
           if [ -n "$HINOS_FILE" ]; then
-            echo "Hinos encontrado: $HINOS_FILE"
-            cp -f "$HINOS_FILE" app/src/main/assets/data/hinos.json
-            cp -f "$HINOS_FILE" app/src/main/assets/dados/hinos.json
-            cp -f "$HINOS_FILE" app/src/main/assets/hinos.json
+            if [ "$HINOS_FILE" != "app/src/main/assets/data/hinos.json" ] && [ "$HINOS_FILE" != "./app/src/main/assets/data/hinos.json" ]; then
+              cp -f "$HINOS_FILE" app/src/main/assets/data/hinos.json || true
+            fi
+            if [ "$HINOS_FILE" != "app/src/main/assets/dados/hinos.json" ] && [ "$HINOS_FILE" != "./app/src/main/assets/dados/hinos.json" ]; then
+              cp -f "$HINOS_FILE" app/src/main/assets/dados/hinos.json || true
+            fi
           fi
 
-          # 5. Injetar a Autoria Oficial com os nomes e cargos exatos
-          sed -i 's|<footer.*</footer>||g' app/src/main/assets/index.html || true
-          CREDITOS='<footer style="text-align:center;padding:25px 15px;margin-top:35px;font-size:0.9em;opacity:0.9;border-top:1px solid rgba(128,128,128,0.3);line-height:1.6;"><p style="margin:4px 0;font-weight:bold;font-size:1.15em;color:#2e7d32;">Hinário Tchokwe - IASD</p><p style="margin:6px 0;"><strong>Desenvolvedor:</strong> Isaías Muwaneno João IT</p><p style="margin:4px 0;"><strong>Revisão e Correção:</strong> Pastor Nunes Sacavumbi Lucas</p><p style="margin:4px 0;"><strong>Colaboradores:</strong> Líder Ecal Gomes e Líder Januário Justo Miranda</p><p style="margin:10px 0 0 0;font-size:0.8em;opacity:0.75;">Para a Glória de Deus • Edição 2026</p></footer>'
-          sed -i "s|</body>|$CREDITOS</body>|g" app/src/main/assets/index.html || true
+          # 5. Injetar a Autoria Oficial limpa e sem erros
+          python3 -c "
+          with open('app/src/main/assets/index.html', 'r', encoding='utf-8') as f:
+              c = f.read()
+          import re
+          c = re.sub(r'<footer[\s\S]*?</footer>', '', c)
+          creditos = '''<footer style=\"text-align:center;padding:25px 15px;margin-top:35px;font-size:0.9em;opacity:0.9;border-top:1px solid rgba(128,128,128,0.3);line-height:1.6;\">
+          <p style=\"margin:4px 0;font-weight:bold;font-size:1.15em;color:#2e7d32;\">Hinário Tchokwe - IASD</p>
+          <p style=\"margin:6px 0;\"><strong>Desenvolvedor:</strong> Isaías Muwaneno João IT</p>
+          <p style=\"margin:4px 0;\"><strong>Revisão e Correção:</strong> Pastor Nunes Sacavumbi Lucas</p>
+          <p style=\"margin:4px 0;\"><strong>Colaboradores:</strong> Líder Ecal Gomes e Líder Januário Justo Miranda</p>
+          <p style=\"margin:10px 0 0 0;font-size:0.8em;opacity:0.75;\">Para a Glória de Deus • Edição 2026</p>
+          </footer>'''
+          if '</body>' in c:
+              c = c.replace('</body>', creditos + '\n</body>')
+          else:
+              c = c + creditos
+          with open('app/src/main/assets/index.html', 'w', encoding='utf-8') as f:
+              f.write(c)
+          "
 
           # 6. Otimizar para iPhone
           PWA_HEAD='<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Hinário Tchokwe"><link rel="apple-touch-icon" href="icone-512.png">'
           sed -i "s|</head>|$PWA_HEAD</head>|g" app/src/main/assets/index.html || true
-          [ -f "icone-512.png" ] && cp icone-512.png app/src/main/assets/ || true
+          [ -f "icone-512.png" ] && cp -f icone-512.png app/src/main/assets/ || true
 
           # 7. Forcar Gradle a incluir a pasta assets
           if ! grep -q "assets.srcDirs" app/build.gradle; then
             sed -i '/android {/a \    sourceSets { main { assets.srcDirs = ["src/main/assets"] } }' app/build.gradle || true
           fi
 
-          # 8. Ativar permissoes no MainActivity para o Samsung S21
+          # 8. Permissoes no MainActivity para Android 14
           MAIN_JAVA=$(find app/src/main/java -name "MainActivity.java" | head -n 1)
           if [ -n "$MAIN_JAVA" ]; then
             if ! grep -q "setAllowFileAccess" "$MAIN_JAVA"; then
@@ -80,15 +99,15 @@ jobs:
             fi
           fi
 
-          # 9. Compilar APK (debug) e AAB (bundle da Play Store)
+          # 9. Compilar APK e AAB da Play Store
           gradle assembleDebug bundleDebug --stacktrace
 
-          # 10. Injetar os hinos diretamente no APK se necessario
+          # 10. Garantir integridade dos assets no APK
           if ! unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -q "assets/index.html"; then
             (cd app/src/main && zip -r -u ../../../app/build/outputs/apk/debug/app-debug.apk assets)
           fi
 
-          # 11. Criar chave e assinar o APK para o Android 14
+          # 11. Assinar o APK para o Android
           mkdir -p ~/.android
           if [ ! -f ~/.android/debug.keystore ]; then
             keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
@@ -98,10 +117,10 @@ jobs:
           echo "Assinando APK com: $APKSIGNER"
           $APKSIGNER sign --ks ~/.android/debug.keystore --ks-pass pass:android app/build/outputs/apk/debug/app-debug.apk
 
-          # 12. Organizar os dois arquivos para download
+          # 12. Organizar saida
           mkdir -p saida_loja
-          cp app/build/outputs/apk/debug/app-debug.apk saida_loja/Hinario-Tchokwe.apk
-          find app/build/outputs/bundle -name "*.aab" -exec cp {} saida_loja/Hinario-Tchokwe-PlayStore.aab \;
+          cp -f app/build/outputs/apk/debug/app-debug.apk saida_loja/Hinario-Tchokwe.apk
+          find app/build/outputs/bundle -name "*.aab" -exec cp -f {} saida_loja/Hinario-Tchokwe-PlayStore.aab \;
 
       - name: Disponibilizar APK e AAB para Download
         uses: actions/upload-artifact@v4
