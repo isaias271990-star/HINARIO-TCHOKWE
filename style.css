@@ -1,0 +1,150 @@
+/*
+ * Hinário Tchokwe — IASD, Missão Leste de Angola
+ * Desenvolvedor: Isaías Muwaneno · Colaboradores: Januário Justo Miranda, Ecal Gomes
+ * © 2026 Missão Leste de Angola. Todos os direitos reservados.
+ */
+:root{
+  --bg:#faf7f2; --papel:#ffffff; --tinta:#1f2a2e; --suave:#5b6a70; --linha:#e6e0d6;
+  --acento:#00758d; --acento-tx:#ffffff; --destaque:#f1ece2; --estrela:#c98a14;
+  --lh:1.55; --fs:19px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-tema="claro"]){
+    --bg:#111719; --papel:#182024; --tinta:#e8eceb; --suave:#9fb0b4; --linha:#2a363b;
+    --acento:#5fb3bd; --acento-tx:#0b1417; --destaque:#1f2b30; --estrela:#e3a93a;
+  }
+}
+:root[data-tema="escuro"]{
+  --bg:#111719; --papel:#182024; --tinta:#e8eceb; --suave:#9fb0b4; --linha:#2a363b;
+  --acento:#5fb3bd; --acento-tx:#0b1417; --destaque:#1f2b30; --estrela:#e3a93a;
+}
+[hidden]{display:none!important}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--tinta);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+#app{height:100%;display:flex;flex-direction:column}
+.tela{display:flex;flex-direction:column;height:100%;min-height:0}
+.tela[hidden]{display:none}
+
+.topo{padding:14px 16px 8px;background:var(--bg);
+  border-bottom:1px solid var(--linha)}
+.topo-linha{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+h1{margin:0;font-size:1.35rem;letter-spacing:.2px;color:var(--acento)}
+.sub{margin:2px 0 0;font-size:.85rem;color:var(--suave)}
+.icone{min-width:44px;height:44px;border-radius:12px;font-size:1.25rem;color:var(--acento);
+  display:inline-flex;align-items:center;justify-content:center}
+.icone:active{background:var(--destaque)}
+
+.busca{position:relative;margin:10px 0 6px}
+.busca input{width:100%;height:48px;border-radius:14px;border:1.5px solid var(--linha);
+  background:var(--papel);color:var(--tinta);font-size:1.05rem;padding:0 44px 0 16px;outline:none}
+.busca input:focus{border-color:var(--acento)}
+.limpar{position:absolute;right:4px;top:2px;width:44px;height:44px;font-size:1.6rem;color:var(--suave)}
+
+.abas{display:flex;gap:6px;margin-top:4px}
+.abas button{flex:1;height:42px;border-radius:10px;color:var(--suave);font-weight:600;
+  border-bottom:3px solid transparent;border-radius:0}
+.abas button.ativa{color:var(--acento);border-bottom-color:var(--acento)}
+#cont-fav{font-weight:400;font-size:.85rem}
+
+.lista{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:0}
+.item{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:12px 16px;
+  min-height:58px;border-bottom:1px solid var(--linha)}
+.item:active{background:var(--destaque)}
+.num{flex:none;min-width:48px;height:36px;border-radius:10px;background:var(--destaque);
+  color:var(--acento);font-weight:700;display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums}
+.item-tx{flex:1;min-width:0}
+.item-ti{font-size:1.05rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item-sn{font-size:.88rem;color:var(--suave);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
+.item-fav{color:var(--estrela)}
+mark{background:transparent;color:var(--acento);font-weight:800}
+.vazio{padding:48px 24px;text-align:center;color:var(--suave);line-height:1.5}
+
+.topo-hino{display:flex;align-items:center;gap:6px;padding-bottom:10px}
+.titulo-hino{flex:1;min-width:0;text-align:center}
+.h-num{font-size:.8rem;color:var(--suave);letter-spacing:1px;text-transform:uppercase}
+.titulo-hino h2{margin:0;font-size:1.1rem;line-height:1.25;color:var(--acento)}
+#btn-fav[aria-pressed="true"]{color:var(--estrela)}
+
+.letra{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:18px 22px 28px;
+  font-family:Georgia,"Times New Roman",serif;font-size:var(--fs);line-height:var(--lh)}
+.bloco{margin:0 auto 26px;max-width:36rem}
+.vnum{display:block;font-family:system-ui,sans-serif;font-size:.7em;font-weight:800;
+  color:var(--acento);margin-bottom:4px;letter-spacing:.5px}
+.linha{display:block}
+.coro{border-left:4px solid var(--acento);padding-left:14px;font-style:italic;background:var(--destaque);
+  padding-top:10px;padding-bottom:10px;border-radius:0 10px 10px 0}
+.coro .vnum{font-style:normal;text-transform:uppercase}
+
+.barra{display:flex;justify-content:space-between;align-items:center;padding:6px 10px 6px;
+  border-top:1px solid var(--linha);background:var(--bg)}
+.barra .icone{min-width:52px;height:48px}
+.fonte{display:flex;gap:4px}
+.fonte .icone{font-weight:700;font-size:1.05rem}
+#ant,#seg{font-size:2rem;line-height:1}
+button:disabled{opacity:.3}
+
+/* ---------- capa ---------- */
+.capa{background:linear-gradient(165deg,#005669 0%,#00758d 55%,#0a8aa3 100%);color:#fff;
+  justify-content:space-between;text-align:center;
+  padding:24px}
+.capa-miolo{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.logo-caixa{width:132px;height:132px;border-radius:50%;background:#fff;display:flex;align-items:center;
+  justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,.28);margin-bottom:18px;overflow:hidden;color:#00758d}
+.logo-caixa img{width:100%;height:100%;object-fit:contain;padding:10px}
+.logo-reserva{width:88px;height:88px}
+.logo-reserva[hidden],.logo-caixa img[hidden]{display:none}
+.capa-igreja{margin:0;font-size:1.15rem;line-height:1.3;letter-spacing:.4px;font-weight:600}
+.capa-missao{margin:4px 0 0;font-size:.95rem;opacity:.9;letter-spacing:1.5px;text-transform:uppercase}
+.capa-fio{width:64px;height:3px;background:#f4c450;border-radius:2px;margin:22px 0 18px}
+.capa-titulo{margin:0;color:#fff;font-family:Georgia,"Times New Roman",serif;font-size:2.6rem;line-height:1.08;font-weight:700}
+.capa-rodape{display:flex;flex-direction:column;gap:6px;align-items:stretch}
+.btn-grande{height:54px;border-radius:14px;background:var(--acento);color:var(--acento-tx);font-weight:700;font-size:1.05rem}
+.capa .btn-grande{background:#fff;color:#005669}
+.btn-link{height:44px;color:inherit;opacity:.85;text-decoration:underline;font-size:.95rem}
+.btn-sec{height:50px;border-radius:14px;border:1.5px solid var(--acento);color:var(--acento);font-weight:600;margin-top:10px}
+.perigo{color:#b3261e}
+.btn-sec.perigo{border-color:#b3261e}
+:root[data-tema="escuro"] .perigo{color:#ff8a80}
+
+/* ---------- administração ---------- */
+.faixa-admin{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--destaque);
+  color:var(--acento);font-size:.85rem;font-weight:700;padding:6px 12px;border-radius:10px;margin:8px 0 0}
+#admin-hino{margin:0;border-radius:0;padding:6px 16px}
+.mini{height:34px;padding:0 12px;border-radius:9px;border:1.5px solid var(--acento);color:var(--acento);
+  font-size:.85rem;font-weight:700;margin-left:4px;background:var(--papel)}
+.mini.perigo{border-color:#b3261e}
+.form{padding:20px 20px 32px;display:flex;flex-direction:column;gap:6px;overflow-y:auto;flex:1}
+.form label{font-size:.85rem;font-weight:700;color:var(--suave);margin-top:10px}
+.form input,.form textarea{width:100%;border-radius:12px;border:1.5px solid var(--linha);background:var(--papel);
+  color:var(--tinta);font:inherit;font-size:1.05rem;padding:12px 14px;outline:none}
+.form input:focus,.form textarea:focus{border-color:var(--acento)}
+.form textarea{font-family:Georgia,serif;line-height:1.5;resize:vertical}
+.linha-2{display:flex;gap:10px}.linha-2>div{flex:1;display:flex;flex-direction:column;gap:6px}
+.texto-suave{color:var(--suave);font-size:.92rem;line-height:1.45;margin:4px 0}
+.erro{color:#b3261e;font-size:.92rem;min-height:1.2em;margin:4px 0}
+:root[data-tema="escuro"] .erro{color:#ff8a80}
+.form .btn-grande{margin-top:10px}
+
+/* ---------- janela de confirmação e aviso ---------- */
+.veu{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:24px;z-index:50}
+.caixa{background:var(--papel);color:var(--tinta);border-radius:18px;padding:22px;max-width:360px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,.35)}
+.caixa p{margin:0 0 18px;font-size:1.05rem;line-height:1.45}
+.caixa .acoes{display:flex;gap:10px;justify-content:flex-end}
+.caixa button{height:46px;padding:0 18px;border-radius:12px;font-weight:700}
+.caixa .nao{color:var(--suave)}
+.caixa .sim{background:var(--acento);color:var(--acento-tx)}
+.caixa .sim.perigo{background:#b3261e;color:#fff}
+.aviso{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:#222;color:#fff;
+  padding:12px 18px;border-radius:12px;font-size:.95rem;z-index:60;max-width:86%;text-align:center}
+
+/* ---------- sobre ---------- */
+.sobre{align-items:center;text-align:center;gap:4px}
+.sobre-logo{width:96px;height:96px;object-fit:contain;margin-top:8px}
+.sobre h3{margin:8px 0 0;font-size:1.5rem;color:var(--acento);font-family:Georgia,serif}
+.sobre p{margin:4px 0;line-height:1.45}
+.creditos{margin:18px 0;padding:16px 28px;border-top:1px solid var(--linha);border-bottom:1px solid var(--linha);width:100%}
+.cred-titulo{font-size:.78rem;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--suave);margin-top:10px!important}
+.creditos p:not(.cred-titulo){font-size:1.1rem;font-weight:600}
