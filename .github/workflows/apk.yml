@@ -49,59 +49,111 @@ jobs:
             fi
           fi
 
-          # 4. Injetar todos os 300 hinos no hinos.js (Garante carregamento 100% offline)
-          HINOS_JSON=$(find . -iname "*hinos*.json" | head -n 1)
-          if [ -n "$HINOS_JSON" ]; then
-            echo "Encontrado arquivo de hinos: $HINOS_JSON"
-            python3 - << EOF
-          import json, os
-          with open('$HINOS_JSON', 'r', encoding='utf-8') as f:
-              raw = f.read().strip()
-          dados = json.loads(raw)
-          js_content = 'window.HINOS = ' + json.dumps(dados, ensure_ascii=False) + ';\n'
-          for dest in ['app/src/main/assets/hinos.js', 'hinos.js']:
-              os.makedirs(os.path.dirname(dest) if os.path.dirname(dest) else '.', exist_ok=True)
-              with open(dest, 'w', encoding='utf-8') as f:
-                  f.write(js_content)
-              print('Hinos gravados em:', dest)
-          EOF
-          fi
+          # 4. Motor de Injeção Direta dos 300 Hinos (Resolve o Carregando Acervo)
+          python3 - << 'PYEOF'
+          import glob, json, os
 
-          # 5. Injetar elementos invisiveis para destravar o app.js
+          hinos_files = glob.glob('**/*hinos*.json', recursive=True)
+          if not hinos_files:
+              print("Aviso: Nenhum hinos.json encontrado!")
+          else:
+              hinos_path = hinos_files[0]
+              print(f"Usando arquivo de hinos: {hinos_path}")
+              with open(hinos_path, 'r', encoding='utf-8') as f:
+                  raw_data = f.read().strip()
+              try:
+                  dados = json.loads(raw_data)
+                  json_compacto = json.dumps(dados, ensure_ascii=False)
+              except Exception as e:
+                  json_compacto = raw_data
+
+              # Copiar para todos os caminhos possiveis
+              for d in ['app/src/main/assets/hinos.json', 'app/src/main/assets/data/hinos.json', 'app/src/main/assets/dados/hinos.json', 'hinos.json']:
+                  os.makedirs(os.path.dirname(d) if os.path.dirname(d) else '.', exist_ok=True)
+                  with open(d, 'w', encoding='utf-8') as f:
+                      f.write(json_compacto)
+
+              js_code = f"window.__HINOS_DATA__ = {json_compacto};\nwindow.HINOS = window.__HINOS_DATA__;\n"
+              for d in ['app/src/main/assets/hinos.js', 'app/src/main/assets/data/hinos.js', 'hinos.js']:
+                  os.makedirs(os.path.dirname(d) if os.path.dirname(d) else '.', exist_ok=True)
+                  with open(d, 'w', encoding='utf-8') as f:
+                      f.write(js_code)
+
+              # Interceptor universal: entrega os hinos sem depender de rede ou regras de seguranca
+              interceptor = f"""<script id="offline-hinos-engine">
+          window.__HINOS_DATA__ = {json_compacto};
+          window.HINOS = window.__HINOS_DATA__;
+          (function() {{
+            var dataStr = JSON.stringify(window.__HINOS_DATA__);
+            if (window.fetch) {{
+              var origFetch = window.fetch;
+              window.fetch = function(url, opt) {{
+                var u = String(url || '');
+                if (u.indexOf('hinos') !== -1 || u.indexOf('.json') !== -1) {{
+                  return Promise.resolve(new Response(dataStr, {{
+                    status: 200,
+                    statusText: 'OK',
+                    headers: {{ 'Content-Type': 'application/json' }}
+                  }}));
+                }}
+                return origFetch.apply(window, arguments);
+              }};
+            }}
+            if (window.XMLHttpRequest) {{
+              var OrigXHR = window.XMLHttpRequest;
+              window.XMLHttpRequest = function() {{
+                var xhr = new OrigXHR();
+                var isHinos = false;
+                var origOpen = xhr.open;
+                xhr.open = function(method, url) {{
+                  var u = String(url || '');
+                  if (u.indexOf('hinos') !== -1 || u.indexOf('.json') !== -1) {{ isHinos = true; }}
+                  return origOpen.apply(xhr, arguments);
+                }};
+                var origSend = xhr.send;
+                xhr.send = function() {{
+                  if (isHinos) {{
+                    setTimeout(function() {{
+                      try {{
+                        Object.defineProperty(xhr, 'status', {{ value: 200, configurable: true }});
+                        Object.defineProperty(xhr, 'responseText', {{ value: dataStr, configurable: true }});
+                        Object.defineProperty(xhr, 'response', {{ value: dataStr, configurable: true }});
+                        Object.defineProperty(xhr, 'readyState', {{ value: 4, configurable: true }});
+                      }} catch(e) {{}}
+                      if (xhr.onload) xhr.onload();
+                      if (xhr.onreadystatechange) xhr.onreadystatechange();
+                      var evt = document.createEvent('Event');
+                      evt.initEvent('load', false, false);
+                      xhr.dispatchEvent(evt);
+                    }}, 10);
+                    return;
+                  }}
+                  return origSend.apply(xhr, arguments);
+                }};
+                return xhr;
+              }};
+            }}
+          }})();
+          </script>"""
+
+              for html_path in glob.glob('**/index.html', recursive=True):
+                  with open(html_path, 'r', encoding='utf-8') as f:
+                      html = f.read()
+                  if 'offline-hinos-engine' not in html:
+                      if '<head>' in html:
+                          html = html.replace('<head>', '<head>\n' + interceptor)
+                      else:
+                          html = interceptor + '\n' + html
+                      with open(html_path, 'w', encoding='utf-8') as f:
+                          f.write(html)
+                      print(f"Acervo ativado em: {html_path}")
+          PYEOF
+
+          # 5. Elementos de suporte invisiveis para seguranca de cliques
           DUMMY='<div id="elementos-suporte" style="display:none!important;"><button id="fonte-menos"></button><button id="fonte-mais"></button><button id="btn-tema"></button><span id="logo-reserva"></span></div>'
           find . -name "index.html" -exec sed -i "s|<body>|<body>$DUMMY|g" {} + || true
 
-          # 6. Garantir que hinos.js seja carregado antes do app.js no index.html
-          python3 - << 'EOF'
-          import glob, re
-          for p in glob.glob('**/index.html', recursive=True):
-              with open(p, 'r', encoding='utf-8') as f:
-                  html = f.read()
-              if 'hinos.js' not in html:
-                  html = re.sub(r'(<script[^>]*app\.js[^>]*></script>)', r'<script src="hinos.js"></script>\n\1', html)
-              with open(p, 'w', encoding='utf-8') as f:
-                  f.write(html)
-          EOF
-
-          # 7. Corrigir o app.js para garantir carregamento da lista
-          python3 - << 'EOF'
-          import glob, re
-          for p in glob.glob('**/*.js', recursive=True):
-              with open(p, 'r', encoding='utf-8') as f:
-                  t = f.read()
-              t = re.sub(r"\$\(['\"]fonte-menos['\"]\)\.onclick", "if ($('fonte-menos')) $('fonte-menos').onclick", t)
-              t = re.sub(r"\$\(['\"]fonte-mais['\"]\)\.onclick", "if ($('fonte-mais')) $('fonte-mais').onclick", t)
-              t = re.sub(r"\$\(['\"]fonte-menos['\"]\)\.disabled", "if ($('fonte-menos')) $('fonte-menos').disabled", t)
-              t = re.sub(r"\$\(['\"]fonte-mais['\"]\)\.disabled", "if ($('fonte-mais')) $('fonte-mais').disabled", t)
-              t = re.sub(r"\$\(['\"]btn-tema['\"]\)\.onclick", "if ($('btn-tema')) $('btn-tema').onclick", t)
-              # Garantir que ao abrir a lista os hinos aparecam
-              if 'function mostrar(' in t and 'carregar()' not in t:
-                  t = t.replace("function mostrar(id) {", "function mostrar(id) { if (id === 'lista' && (!HINOS || HINOS.length === 0)) { carregar(); desenharLista(); }")
-              with open(p, 'w', encoding='utf-8') as f:
-                  f.write(t)
-          EOF
-
-          # 8. Injetar a Autoria Oficial limpa
+          # 6. Injetar a Autoria Oficial limpa
           python3 - << 'EOF'
           import glob, re
           for p in glob.glob('**/index.html', recursive=True):
@@ -123,17 +175,17 @@ jobs:
                   f.write(c)
           EOF
 
-          # 9. Otimizar para iPhone
+          # 7. Otimizar para iPhone
           PWA_HEAD='<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Hinário Tchokwe"><link rel="apple-touch-icon" href="icone-512.png">'
           sed -i "s|</head>|$PWA_HEAD</head>|g" app/src/main/assets/index.html || true
           [ -f "icone-512.png" ] && cp -f icone-512.png app/src/main/assets/ || true
 
-          # 10. Forcar Gradle a incluir a pasta assets
+          # 8. Forcar Gradle a incluir a pasta assets
           if ! grep -q "assets.srcDirs" app/build.gradle; then
             sed -i '/android {/a \    sourceSets { main { assets.srcDirs = ["src/main/assets"] } }' app/build.gradle || true
           fi
 
-          # 11. Permissoes no MainActivity para Android 14
+          # 9. Permissoes completas no MainActivity para Android 14
           MAIN_JAVA=$(find app/src/main/java -name "MainActivity.java" | head -n 1)
           if [ -n "$MAIN_JAVA" ]; then
             if ! grep -q "setAllowFileAccess" "$MAIN_JAVA"; then
@@ -141,15 +193,15 @@ jobs:
             fi
           fi
 
-          # 12. Compilar APK e AAB da Play Store
+          # 10. Compilar APK e AAB da Play Store
           gradle assembleDebug bundleDebug --stacktrace
 
-          # 13. Garantir integridade dos assets no APK
+          # 11. Garantir integridade dos assets no APK
           if ! unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -q "assets/index.html"; then
             (cd app/src/main && zip -r -u ../../../app/build/outputs/apk/debug/app-debug.apk assets)
           fi
 
-          # 14. Assinar o APK para o Android
+          # 12. Assinar o APK para o Android
           mkdir -p ~/.android
           if [ ! -f ~/.android/debug.keystore ]; then
             keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
@@ -159,7 +211,7 @@ jobs:
           echo "Assinando APK com: $APKSIGNER"
           $APKSIGNER sign --ks ~/.android/debug.keystore --ks-pass pass:android app/build/outputs/apk/debug/app-debug.apk
 
-          # 15. Organizar saida
+          # 13. Organizar saida
           mkdir -p saida_loja
           cp -f app/build/outputs/apk/debug/app-debug.apk saida_loja/Hinario-Tchokwe.apk
           find app/build/outputs/bundle -name "*.aab" -exec cp -f {} saida_loja/Hinario-Tchokwe-PlayStore.aab \;
