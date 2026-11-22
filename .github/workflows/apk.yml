@@ -279,40 +279,43 @@ jobs:
                 }
               }
 
-              // EXTRATOR INTELIGENTE DE TEXTO DE OBJETOS OU STRINGS
-              function formatarTextoEstrofe(item) {
-                if (!item) return '';
-                if (typeof item === 'string') return item.replace(/\\n/g, '<br>');
+              // CONVERSOR UNIVERSAL - EXTRAI TEXTO E NUNCA RETORNA [object Object]
+              function converterQualquerCoisaParaTexto(item) {
+                if (item === null || item === undefined) return '';
+                if (typeof item === 'string') return item.trim().replace(/\\n/g, '<br>');
+                if (typeof item === 'number') return '';
+
                 if (Array.isArray(item)) {
-                  return item.map(function(sub) { return formatarTextoEstrofe(sub); }).join('<br>');
+                  var partesArr = [];
+                  for (var i = 0; i < item.length; i++) {
+                    var r = converterQualquerCoisaParaTexto(item[i]);
+                    if (r) partesArr.push(r);
+                  }
+                  return partesArr.join('<br>');
                 }
+
                 if (typeof item === 'object') {
-                  // Campos prioritários comuns
-                  if (Array.isArray(item.linhas)) return item.linhas.join('<br>');
-                  if (Array.isArray(item.lines)) return item.lines.join('<br>');
-                  if (Array.isArray(item.versos)) return item.versos.join('<br>');
-                  if (Array.isArray(item.verses)) return item.verses.join('<br>');
-
-                  var chaves = ['texto', 'letra', 'text', 'content', 'conteudo', 'corpo', 'verso', 'verse', 'estrofe', 'stanza', 'linhas', 'lines'];
-                  for (var i = 0; i < chaves.length; i++) {
-                    var k = chaves[i];
-                    if (item[k]) {
-                      if (typeof item[k] === 'string') return item[k].replace(/\\n/g, '<br>');
-                      if (Array.isArray(item[k])) return item[k].join('<br>');
+                  var chavesConhecidas = [
+                    'texto', 'letra', 'text', 'lines', 'linhas', 'content', 'conteudo',
+                    'corpo', 'body', 'verse', 'verso', 'versos', 'verses', 'estrofe',
+                    'stanza', 'stanzas', 'estrofes', 'coro', 'chorus', 'refrao', 'words'
+                  ];
+                  for (var j = 0; j < chavesConhecidas.length; j++) {
+                    var k = chavesConhecidas[j];
+                    if (item[k] !== undefined && item[k] !== null) {
+                      var txt = converterQualquerCoisaParaTexto(item[k]);
+                      if (txt) return txt;
                     }
                   }
 
-                  // Varrer todas as propriedades que tenham texto
-                  var partes = [];
+                  var partesObj = [];
                   for (var prop in item) {
-                    if (['numero', 'number', 'num', 'id', 'tipo', 'type', 'isCoro'].indexOf(prop) === -1) {
-                      var val = item[prop];
-                      if (typeof val === 'string') partes.push(val.replace(/\\n/g, '<br>'));
-                      else if (Array.isArray(val)) partes.push(val.join('<br>'));
-                      else if (val && typeof val === 'object') partes.push(formatarTextoEstrofe(val));
+                    if (['numero', 'number', 'num', 'id', 'tipo', 'type', 'titulo', 'title', 'nome'].indexOf(prop) === -1) {
+                      var pedaco = converterQualquerCoisaParaTexto(item[prop]);
+                      if (pedaco) partesObj.push(pedaco);
                     }
                   }
-                  if (partes.length > 0) return partes.join('<br>');
+                  if (partesObj.length > 0) return partesObj.join('<br>');
                 }
                 return '';
               }
@@ -329,109 +332,4 @@ jobs:
 
                 var tit = hino.titulo || hino.title || hino.nome || ('Hino ' + num);
                 document.getElementById('leitorTitulo').textContent = num + '. ' + tit;
-                document.getElementById('btnFavLeitor').classList.toggle('active', favoritos.indexOf(num) !== -1);
-
-                var containerLetra = document.getElementById('leitorLetra');
-                containerLetra.innerHTML = '';
-
-                // 1. Se tem estrofes estruturadas
-                if (hino.estrofes && Array.isArray(hino.estrofes) && hino.estrofes.length > 0) {
-                  hino.estrofes.forEach(function(est, idx) {
-                    var isCoro = (est && (est.tipo === 'coro' || est.isCoro || est.tipo === 'chorus')) || false;
-                    var textoEstrofe = formatarTextoEstrofe(est);
-                    if (!textoEstrofe) return;
-
-                    var div = document.createElement('div');
-                    if (isCoro) {
-                      div.className = 'chorus';
-                      div.innerHTML = '<div class="chorus-header">Coro</div><p>' + textoEstrofe + '</p>';
-                    } else {
-                      var numEst = (est && (est.numero || est.num || est.id)) || (idx + 1);
-                      div.className = 'stanza';
-                      div.innerHTML = '<div class="stanza-header">Estrofe ' + numEst + '</div><p>' + textoEstrofe + '</p>';
-                    }
-                    containerLetra.appendChild(div);
-
-                    // Se houver coro global ou embutido
-                    if (idx === 0 && hino.coro) {
-                      var textoCoro = formatarTextoEstrofe(hino.coro);
-                      if (textoCoro) {
-                        var coroDiv = document.createElement('div');
-                        coroDiv.className = 'chorus';
-                        coroDiv.innerHTML = '<div class="chorus-header">Coro</div><p>' + textoCoro + '</p>';
-                        containerLetra.appendChild(coroDiv);
-                      }
-                    }
-                  });
-                } else {
-                  // 2. Se for texto contínuo
-                  var textoBruto = formatarTextoEstrofe(hino.letra || hino.texto || hino.hino || hino.corpo || hino);
-                  if (textoBruto) {
-                    var blocos = textoBruto.split(/<br>\\s*<br>/i);
-                    blocos.forEach(function(bloco) {
-                      var limpo = bloco.trim();
-                      if (!limpo) return;
-                      var isCoro = /^(coro|refr[ãa]o)/i.test(limpo);
-                      var div = document.createElement('div');
-                      div.className = isCoro ? 'chorus' : 'stanza';
-                      div.innerHTML = isCoro
-                        ? '<div class="chorus-header">Coro</div><p>' + limpo + '</p>'
-                        : '<p>' + limpo + '</p>';
-                      containerLetra.appendChild(div);
-                    });
-                  }
-                }
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }
-
-              function voltarParaLista() {
-                document.getElementById('view-leitor').style.display = 'none';
-                document.getElementById('view-lista').style.display = 'block';
-                document.getElementById('searchBox').style.display = 'block';
-                document.getElementById('navTabs').style.display = 'flex';
-                hinoAtualId = null;
-              }
-
-              function ajustarFonte(delta) {
-                tamanhoFonte = Math.max(0.85, Math.min(1.8, tamanhoFonte + delta * 0.1));
-                document.getElementById('leitorLetra').style.fontSize = tamanhoFonte + 'rem';
-              }
-
-              window.onload = inicializar;
-            </script>
-          </body>
-          </html>"""
-
-          os.makedirs('web_public', exist_ok=True)
-          with open('web_public/index.html', 'w', encoding='utf-8') as f:
-              f.write(html_template)
-
-          for asset_dir in ['app/src/main/assets', 'hinario-app/app/src/main/assets']:
-              if os.path.exists(os.path.dirname(os.path.dirname(asset_dir))):
-                  os.makedirs(asset_dir, exist_ok=True)
-                  with open(os.path.join(asset_dir, 'index.html'), 'w', encoding='utf-8') as f:
-                      f.write(html_template)
-
-          print("Preparacao concluida com sucesso!")
-          EOF
-          python3 preparar_hinos.py
-
-      - name: Publicar Versao Web para iPhone e Navegadores (GitHub Pages)
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./web_public
-
-      - name: Compilar Aplicativo Android (APK)
-        run: |
-          rm -f local.properties hinario-app/local.properties
-          if [ -d "hinario-app" ]; then
-            cd hinario-app
-          fi
-          gradle assembleDebug
-
-      - name: Disponibilizar APK para Download
-        uses: actions/upload-artifact@v4
-        with:
-          name: Hinario-Tchokwe-Samsung-Android
-          path: '**/build/outputs/apk/debug/*.apk'
+                document.getElementById('btnFavLeitor').classList
