@@ -1,3 +1,8 @@
+/*
+ * Hinário Tchokwe — IASD, Missão Leste de Angola
+ * Desenvolvedor: Isaías Muwaneno · Colaboradores: Januário Justo Miranda, Ecal Gomes
+ * © 2026 Missão Leste de Angola. Todos os direitos reservados.
+ */
 :root{
   --bg:#faf7f2; --papel:#ffffff; --tinta:#1f2a2e; --suave:#5b6a70; --linha:#e6e0d6;
   --acento:#00758d; --acento-tx:#ffffff; --destaque:#f1ece2; --estrela:#c98a14;
@@ -22,7 +27,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .tela{display:flex;flex-direction:column;height:100%;min-height:0}
 .tela[hidden]{display:none}
 
-.topo{padding:calc(env(safe-area-inset-top) + 14px) 16px 8px;background:var(--bg);
+.topo{padding:14px 16px 8px;background:var(--bg);
   border-bottom:1px solid var(--linha)}
 .topo-linha{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 h1{margin:0;font-size:1.35rem;letter-spacing:.2px;color:var(--acento)}
@@ -43,7 +48,7 @@ h1{margin:0;font-size:1.35rem;letter-spacing:.2px;color:var(--acento)}
 .abas button.ativa{color:var(--acento);border-bottom-color:var(--acento)}
 #cont-fav{font-weight:400;font-size:.85rem}
 
-.lista{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:env(safe-area-inset-bottom)}
+.lista{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:0}
 .item{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:12px 16px;
   min-height:58px;border-bottom:1px solid var(--linha)}
 .item:active{background:var(--destaque)}
@@ -73,7 +78,7 @@ mark{background:transparent;color:var(--acento);font-weight:800}
   padding-top:10px;padding-bottom:10px;border-radius:0 10px 10px 0}
 .coro .vnum{font-style:normal;text-transform:uppercase}
 
-.barra{display:flex;justify-content:space-between;align-items:center;padding:6px 10px calc(env(safe-area-inset-bottom) + 6px);
+.barra{display:flex;justify-content:space-between;align-items:center;padding:6px 10px 6px;
   border-top:1px solid var(--linha);background:var(--bg)}
 .barra .icone{min-width:52px;height:48px}
 .fonte{display:flex;gap:4px}
@@ -84,7 +89,7 @@ button:disabled{opacity:.3}
 /* ---------- capa ---------- */
 .capa{background:linear-gradient(165deg,#005669 0%,#00758d 55%,#0a8aa3 100%);color:#fff;
   justify-content:space-between;text-align:center;
-  padding:calc(env(safe-area-inset-top) + 24px) 24px calc(env(safe-area-inset-bottom) + 24px)}
+  padding:24px}
 .capa-miolo{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
 .logo-caixa{width:132px;height:132px;border-radius:50%;background:#fff;display:flex;align-items:center;
   justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,.28);margin-bottom:18px;overflow:hidden;color:#00758d}
@@ -132,5 +137,14 @@ button:disabled{opacity:.3}
 .caixa .nao{color:var(--suave)}
 .caixa .sim{background:var(--acento);color:var(--acento-tx)}
 .caixa .sim.perigo{background:#b3261e;color:#fff}
-.aviso{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 84px);transform:translateX(-50%);background:#222;color:#fff;
+.aviso{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:#222;color:#fff;
   padding:12px 18px;border-radius:12px;font-size:.95rem;z-index:60;max-width:86%;text-align:center}
+
+/* ---------- sobre ---------- */
+.sobre{align-items:center;text-align:center;gap:4px}
+.sobre-logo{width:96px;height:96px;object-fit:contain;margin-top:8px}
+.sobre h3{margin:8px 0 0;font-size:1.5rem;color:var(--acento);font-family:Georgia,serif}
+.sobre p{margin:4px 0;line-height:1.45}
+.creditos{margin:18px 0;padding:16px 28px;border-top:1px solid var(--linha);border-bottom:1px solid var(--linha);width:100%}
+.cred-titulo{font-size:.78rem;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--suave);margin-top:10px!important}
+.creditos p:not(.cred-titulo){font-size:1.1rem;font-weight:600}

@@ -39,3 +39,6 @@ Nos telemóveis, ao instalar, permita "instalar de fontes desconhecidas".
 
 ## Nota
 `HINARIO.db` não pôde ser aberto (arquivo cifrado ou danificado) e não foi usado. `Projecto.db` tem só os primeiros 40 hinos e coincide com o Word.
+
+## Versão web (GitHub Pages)
+`python3 tools/build_single.py app/src/main/assets site/index.html` cria **um único ficheiro** `site/index.html` com tudo dentro. Para publicar no GitHub Pages basta enviar esse ficheiro (substituindo o `index.html` do site). Assim nenhum ficheiro pode ficar desatualizado.
