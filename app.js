@@ -82,14 +82,14 @@
   }
   function aplicarTamanho() {
     document.documentElement.style.setProperty('--fs', tamanho + 'px');
-    $('fonte-menos').disabled = tamanho <= 14; $('fonte-mais').disabled = tamanho >= 36;
+    if ($('fonte-menos')) $('fonte-menos').disabled = tamanho <= 14; if ($('fonte-mais')) $('fonte-mais').disabled = tamanho >= 36;
   }
-  $('btn-tema').onclick = function () {
+  if ($('btn-tema')) $('btn-tema').onclick = function () {
     tema = tema === 'auto' ? 'escuro' : tema === 'escuro' ? 'claro' : 'auto';
     gravar('tema', tema); aplicarTema(); aviso('Tema: ' + (tema === 'auto' ? 'automático' : tema));
   };
-  $('fonte-menos').onclick = function () { tamanho = Math.max(14, tamanho - 2); gravar('tamanho', tamanho); aplicarTamanho(); };
-  $('fonte-mais').onclick = function () { tamanho = Math.min(36, tamanho + 2); gravar('tamanho', tamanho); aplicarTamanho(); };
+  if ($('fonte-menos')) $('fonte-menos').onclick = function () { tamanho = Math.max(14, tamanho - 2); gravar('tamanho', tamanho); aplicarTamanho(); };
+  if ($('fonte-mais')) $('fonte-mais').onclick = function () { tamanho = Math.min(36, tamanho + 2); gravar('tamanho', tamanho); aplicarTamanho(); };
 
   /* ---------- capa ---------- */
   (function () {
