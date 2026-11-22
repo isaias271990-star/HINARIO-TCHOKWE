@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Hinário Tchokwe - IASD</title>
   <meta name="theme-color" content="#0f172a">
+  <link rel="icon" type="image/png" href="logo.png">
   <style>
     :root {
       --bg: #0f172a;
@@ -34,27 +35,31 @@
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
     
     /* CAPA INICIAL */
-    #view-capa { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 24px 16px; text-align: center; }
-    .logo-emblema { width: 110px; height: 110px; margin-bottom: 20px; filter: drop-shadow(0 4px 12px rgba(245, 158, 11, 0.3)); }
-    .capa-igreja { font-size: 0.95rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
-    .capa-missao { font-size: 1.1rem; font-weight: 600; color: var(--primary); margin-bottom: 24px; }
-    .capa-titulo { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-bottom: 8px; letter-spacing: -0.5px; }
-    .capa-subtitulo { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 40px; max-width: 320px; line-height: 1.5; }
+    #view-capa { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 32px 18px; text-align: center; }
+    .logo-container { width: 140px; height: 140px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; }
+    .logo-emblema { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 6px 20px rgba(245, 158, 11, 0.25)); }
     
-    .botoes-capa { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 300px; margin-bottom: 30px; }
-    .btn-abrir { background: var(--primary); color: #000; font-weight: 700; font-size: 1.05rem; padding: 15px 20px; border-radius: 12px; border: none; cursor: pointer; transition: transform 0.15s, background 0.15s; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3); }
+    .capa-igreja { font-size: 0.95rem; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+    .capa-missao { font-size: 1.15rem; font-weight: 700; color: var(--primary); margin-bottom: 24px; letter-spacing: 0.5px; }
+    .capa-titulo { font-size: 2.3rem; font-weight: 800; color: var(--text); margin-bottom: 10px; letter-spacing: -0.5px; }
+    .capa-subtitulo { font-size: 1rem; color: var(--text-muted); margin-bottom: 40px; max-width: 340px; line-height: 1.5; }
+    
+    .botoes-capa { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 320px; margin-bottom: 34px; }
+    .btn-abrir { background: var(--primary); color: #000; font-weight: 800; font-size: 1.05rem; padding: 16px 22px; border-radius: 12px; border: none; cursor: pointer; transition: transform 0.15s, background 0.15s; box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35); letter-spacing: 0.5px; }
     .btn-abrir:hover { background: var(--primary-hover); transform: translateY(-2px); }
-    .btn-sobre { background: var(--surface); color: var(--text); font-weight: 600; font-size: 0.95rem; padding: 12px 20px; border-radius: 12px; border: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+    .btn-sobre { background: var(--surface); color: var(--text); font-weight: 600; font-size: 0.95rem; padding: 13px 20px; border-radius: 12px; border: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
     .btn-sobre:hover { background: var(--surface-hover); }
     
     /* CABECALHO DO HINARIO */
     #app-header { display: none; background: var(--surface); padding: 12px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
     .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .header-info-box { display: flex; align-items: center; gap: 10px; }
+    .mini-logo { width: 34px; height: 34px; object-fit: contain; }
     .header-title h1 { font-size: 1.15rem; font-weight: 700; color: var(--text); }
     .header-title p { font-size: 0.8rem; color: var(--text-muted); }
     .header-acoes { display: flex; gap: 8px; align-items: center; }
-    .btn-nav-capa { background: transparent; border: 1px solid var(--border); color: var(--text); border-radius: 20px; padding: 4px 10px; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
-    .theme-toggle { background: transparent; border: 1px solid var(--border); color: var(--text); border-radius: 20px; padding: 4px 10px; cursor: pointer; font-size: 0.8rem; }
+    .btn-nav-capa { background: transparent; border: 1px solid var(--border); color: var(--text); border-radius: 20px; padding: 5px 12px; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
+    .theme-toggle { background: transparent; border: 1px solid var(--border); color: var(--text); border-radius: 20px; padding: 5px 12px; cursor: pointer; font-size: 0.8rem; }
     
     .search-container { position: relative; width: 100%; }
     .search-input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.95rem; outline: none; }
@@ -91,14 +96,15 @@
     .chorus-header { font-size: 0.8rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 6px; font-style: normal; }
     
     /* MODAL SOBRE */
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.75); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
-    .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; max-width: 450px; width: 100%; text-align: center; }
-    .modal-box h3 { font-size: 1.3rem; color: var(--primary); margin-bottom: 6px; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.78); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
+    .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; max-width: 460px; width: 100%; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
+    .modal-logo { width: 70px; height: 70px; object-fit: contain; margin-bottom: 12px; }
+    .modal-box h3 { font-size: 1.3rem; color: var(--primary); margin-bottom: 4px; }
     .modal-box h4 { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 16px; }
-    .modal-desc { font-size: 0.9rem; line-height: 1.6; color: var(--text); margin-bottom: 20px; text-align: justify; }
-    .modal-credits { background: var(--bg); padding: 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem; line-height: 1.7; margin-bottom: 20px; text-align: left; }
+    .modal-desc { font-size: 0.9rem; line-height: 1.6; color: var(--text); margin-bottom: 18px; text-align: justify; }
+    .modal-credits { background: var(--bg); padding: 14px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.85rem; line-height: 1.8; margin-bottom: 20px; text-align: left; }
     .modal-credits span { display: block; }
-    .btn-fechar-modal { background: var(--primary); color: #000; font-weight: 700; padding: 10px 24px; border-radius: 8px; border: none; cursor: pointer; }
+    .btn-fechar-modal { background: var(--primary); color: #000; font-weight: 700; padding: 10px 26px; border-radius: 8px; border: none; cursor: pointer; }
     
     /* RODAPÉ */
     footer { display: none; background: var(--surface); border-top: 1px solid var(--border); padding: 18px 14px; text-align: center; margin-top: auto; }
@@ -110,19 +116,11 @@
 </head>
 <body>
 
-  <!-- 1. CAPA INICIAL -->
+  <!-- 1. CAPA INICIAL OFICIAL -->
   <div id="view-capa">
-    <!-- Emblema da Igreja Adventista -->
-    <svg class="logo-emblema" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="50" cy="50" r="47" stroke="#f59e0b" stroke-width="2.5" opacity="0.5"/>
-      <!-- Chamas Estilizadas -->
-      <path d="M50 16 C44 28 36 40 36 55 C36 67 43 75 50 78 C57 75 64 67 64 55 C64 40 56 28 50 16 Z" fill="#f59e0b" opacity="0.85"/>
-      <path d="M50 25 C47 33 42 42 42 53 C42 61 46 68 50 70 C54 68 58 61 58 53 C58 42 53 33 50 25 Z" fill="#0f172a"/>
-      <!-- Cruz Central -->
-      <path d="M48 34 H52 V64 H48 Z M40 44 H60 V48 H40 Z" fill="#ffffff"/>
-      <!-- Bíblia Aberta na Base -->
-      <path d="M28 73 Q50 68 50 78 Q50 68 72 73 L74 78 Q50 72 50 82 Q50 72 26 78 Z" fill="#f59e0b"/>
-    </svg>
+    <div class="logo-container">
+      <img src="logo.png" alt="Igreja Adventista do Sétimo Dia" class="logo-emblema">
+    </div>
 
     <div class="capa-igreja">Igreja Adventista do Sétimo Dia</div>
     <div class="capa-missao">Missão Leste de Angola</div>
@@ -137,12 +135,15 @@
     <div class="footer-edition">Para a Glória de Deus • Edição 2026</div>
   </div>
 
-  <!-- 2. CABECALHO DO APP (VISIVEL APÓS ABRIR) -->
+  <!-- 2. CABECALHO DO APP -->
   <header id="app-header">
     <div class="header-top">
-      <div class="header-title">
-        <h1>Hinário Tchokwe - IASD</h1>
-        <p>Missão Leste de Angola</p>
+      <div class="header-info-box">
+        <img src="logo.png" alt="Logo IASD" class="mini-logo">
+        <div class="header-title">
+          <h1>Hinário Tchokwe - IASD</h1>
+          <p>Missão Leste de Angola</p>
+        </div>
       </div>
       <div class="header-acoes">
         <button class="btn-nav-capa" onclick="voltarParaCapa()">Capa</button>
@@ -182,6 +183,7 @@
   <!-- 4. MODAL SOBRE O HINÁRIO -->
   <div class="modal-overlay" id="modalSobre" onclick="fecharModalSobre(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
+      <img src="logo.png" alt="Logo IASD" class="modal-logo">
       <h3>Hinário Tchokwe - IASD</h3>
       <h4>Missão Leste de Angola</h4>
       <div class="modal-desc">
@@ -191,7 +193,7 @@
         <span><strong>Desenvolvedor:</strong> Isaías Muwaneno João IT</span>
         <span><strong>Revisão e Correção:</strong> Pastor Nunes Sacavumbi Lucas</span>
         <span><strong>Colaboradores:</strong> Líder Ecal Gomes e Líder Januário Justo Miranda</span>
-        <span style="text-align: center; margin-top: 8px; color: var(--primary); font-weight: 600;">Para a Glória de Deus • Edição 2026</span>
+        <span style="text-align: center; margin-top: 10px; color: var(--primary); font-weight: 700;">Para a Glória de Deus • Edição 2026</span>
       </div>
       <button class="btn-fechar-modal" onclick="fecharModalSobre()">Fechar</button>
     </div>
@@ -229,7 +231,6 @@
       localStorage.setItem('tchokwe_tema', isLight ? 'light' : 'dark');
     }
 
-    /* NAVEGAÇÃO DA CAPA */
     function abrirHinario() {
       document.getElementById('view-capa').style.display = 'none';
       document.getElementById('app-header').style.display = 'block';
