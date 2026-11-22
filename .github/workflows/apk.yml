@@ -65,11 +65,13 @@ jobs:
               lista_hinos = dados_brutos
 
           print('Total de hinos carregados:', len(lista_hinos))
+          if len(lista_hinos) > 0:
+              print('Campos do primeiro hino:', list(lista_hinos[0].keys()))
 
           json_hinos = json.dumps(lista_hinos, ensure_ascii=False)
           json_hinos_seguro = json_hinos.replace('</script>', '<\\/script>')
 
-          # 2. Gerar HTML completo 100% offline
+          # 2. Gerar HTML completo com extrator inteligente de qualquer campo de letra
           html_template = """<!DOCTYPE html>
           <html lang="pt">
           <head>
@@ -135,6 +137,7 @@ jobs:
               .stanza-header { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
               .chorus { background: var(--chorus-bg); border-left: 3px solid var(--primary); padding: 12px 14px; border-radius: 0 8px 8px 0; margin: 18px 0; font-style: italic; }
               .chorus-header { font-size: 0.8rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 4px; font-style: normal; }
+              .msg-sem-letra { text-align: center; padding: 30px 10px; color: var(--text-muted); font-size: 1rem; border: 1px dashed var(--border); border-radius: 8px; margin-top: 20px; }
               footer { background: var(--surface); border-top: 1px solid var(--border); padding: 18px 14px; text-align: center; margin-top: auto; }
               .footer-church { font-weight: 700; font-size: 0.95rem; color: var(--text); margin-bottom: 6px; }
               .credits-block { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 6px; }
@@ -284,6 +287,39 @@ jobs:
                 }
               }
 
+              // EXTRATOR UNIVERSAL DE LETRAS
+              function extrairConteudoHino(h) {
+                if (h.estrofes && Array.isArray(h.estrofes) && h.estrofes.length > 0) {
+                  return { tipo: 'estrofes', dados: h.estrofes, coro: h.coro || h.chorus || h.refrao };
+                }
+                if (h.stanzas && Array.isArray(h.stanzas) && h.stanzas.length > 0) {
+                  return { tipo: 'estrofes', dados: h.stanzas, coro: h.coro || h.chorus || h.refrao };
+                }
+                if (h.versos && Array.isArray(h.versos) && h.versos.length > 0) {
+                  return { tipo: 'estrofes', dados: h.versos, coro: h.coro || h.chorus || h.refrao };
+                }
+
+                var chavesTexto = ['letra', 'texto', 'hino', 'corpo', 'conteudo', 'content', 'lyrics', 'body', 'text', 'palavras'];
+                for (var i = 0; i < chavesTexto.length; i++) {
+                  var k = chavesTexto[i];
+                  if (h[k] && typeof h[k] === 'string' && h[k].trim().length > 0) {
+                    return { tipo: 'texto', dados: h[k], coro: h.coro || h.chorus || h.refrao };
+                  }
+                }
+
+                for (var prop in h) {
+                  if (['numero', 'number', 'num', 'id', 'titulo', 'title', 'nome'].indexOf(prop) === -1) {
+                    if (typeof h[prop] === 'string' && h[prop].trim().length > 5) {
+                      return { tipo: 'texto', dados: h[prop], coro: h.coro || h.chorus || h.refrao };
+                    }
+                    if (Array.isArray(h[prop]) && h[prop].length > 0) {
+                      return { tipo: 'estrofes', dados: h[prop], coro: h.coro || h.chorus || h.refrao };
+                    }
+                  }
+                }
+                return null;
+              }
+
               function abrirHino(num) {
                 var hino = window.HINOS_DADOS.find(function(h) { return parseInt(h.numero || h.number || h.id, 10) === num; });
                 if (!hino) return;
@@ -301,22 +337,30 @@ jobs:
                 var containerLetra = document.getElementById('leitorLetra');
                 containerLetra.innerHTML = '';
 
-                if (hino.estrofes && Array.isArray(hino.estrofes)) {
-                  hino.estrofes.forEach(function(est, idx) {
+                var conteudo = extrairConteudoHino(hino);
+
+                if (!conteudo) {
+                  containerLetra.innerHTML = '<div class="msg-sem-letra">A letra deste hino ainda não foi cadastrada no banco de dados.</div>';
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  return;
+                }
+
+                if (conteudo.tipo === 'estrofes') {
+                  conteudo.dados.forEach(function(est, idx) {
                     var div = document.createElement('div');
                     div.className = 'stanza';
-                    div.innerHTML = '<div class="stanza-header">Estrofe ' + (idx + 1) + '</div><p>' + est.replace(/\\n/g, '<br>') + '</p>';
+                    div.innerHTML = '<div class="stanza-header">Estrofe ' + (idx + 1) + '</div><p>' + String(est).replace(/\\n/g, '<br>') + '</p>';
                     containerLetra.appendChild(div);
 
-                    if (idx === 0 && hino.coro) {
+                    if (idx === 0 && conteudo.coro) {
                       var coroDiv = document.createElement('div');
                       coroDiv.className = 'chorus';
-                      coroDiv.innerHTML = '<div class="chorus-header">Coro</div><p>' + hino.coro.replace(/\\n/g, '<br>') + '</p>';
+                      coroDiv.innerHTML = '<div class="chorus-header">Coro</div><p>' + String(conteudo.coro).replace(/\\n/g, '<br>') + '</p>';
                       containerLetra.appendChild(coroDiv);
                     }
                   });
                 } else {
-                  var textoBruto = hino.letra || hino.lyrics || hino.content || '';
+                  var textoBruto = String(conteudo.dados);
                   var blocos = textoBruto.split(/\\n\\s*\\n/);
                   blocos.forEach(function(bloco) {
                     var limpo = bloco.trim();
@@ -355,103 +399,12 @@ jobs:
           with open('web_public/index.html', 'w', encoding='utf-8') as f:
               f.write(html_template)
 
-          os.makedirs('app/src/main/assets', exist_ok=True)
-          with open('app/src/main/assets/index.html', 'w', encoding='utf-8') as f:
-              f.write(html_template)
-
-          os.makedirs('app/src/main/java/ao/iasd/hinariotchokwe', exist_ok=True)
-          main_java = """package ao.iasd.hinariotchokwe;
-
-          import android.app.Activity;
-          import android.os.Bundle;
-          import android.webkit.WebSettings;
-          import android.webkit.WebView;
-          import android.webkit.WebViewClient;
-
-          public class MainActivity extends Activity {
-              private WebView webView;
-
-              @Override
-              protected void onCreate(Bundle savedInstanceState) {
-                  super.onCreate(savedInstanceState);
-                  webView = new WebView(this);
-                  WebSettings ws = webView.getSettings();
-                  ws.setJavaScriptEnabled(true);
-                  ws.setDomStorageEnabled(true);
-                  ws.setAllowFileAccess(true);
-                  ws.setAllowContentAccess(true);
-                  ws.setAllowFileAccessFromFileURLs(true);
-                  ws.setAllowUniversalAccessFromFileURLs(true);
-                  webView.setWebViewClient(new WebViewClient());
-                  webView.loadUrl("file:///android_asset/index.html");
-                  setContentView(webView);
-              }
-
-              @Override
-              public void onBackPressed() {
-                  if (webView != null && webView.canGoBack()) {
-                      webView.goBack();
-                  } else {
-                      super.onBackPressed();
-                  }
-              }
-          }
-          """
-          with open('app/src/main/java/ao/iasd/hinariotchokwe/MainActivity.java', 'w', encoding='utf-8') as f:
-              f.write(main_java)
-
-          manifest_xml = """<?xml version="1.0" encoding="utf-8"?>
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <uses-permission android:name="android.permission.INTERNET" />
-              <application
-                  android:allowBackup="true"
-                  android:label="Hinário Tchokwe"
-                  android:supportsRtl="true"
-                  android:theme="@android:style/Theme.NoTitleBar">
-                  <activity
-                      android:name=".MainActivity"
-                      android:exported="true"
-                      android:configChanges="orientation|screenSize|keyboardHidden">
-                      <intent-filter>
-                          <action android:name="android.intent.action.MAIN" />
-                          <category android:name="android.intent.category.LAUNCHER" />
-                      </intent-filter>
-                  </activity>
-              </application>
-          </manifest>"""
-          with open('app/src/main/AndroidManifest.xml', 'w', encoding='utf-8') as f:
-              f.write(manifest_xml)
-
-          build_gradle = """plugins {
-              id 'com.android.application'
-          }
-          android {
-              namespace 'ao.iasd.hinariotchokwe'
-              compileSdk 34
-              defaultConfig {
-                  applicationId "ao.iasd.hinariotchokwe"
-                  minSdk 21
-                  targetSdk 34
-                  versionCode 1
-                  versionName "1.0.0"
-              }
-              buildTypes {
-                  release {
-                      minifyEnabled false
-                  }
-                  debug {
-                      minifyEnabled false
-                  }
-              }
-              compileOptions {
-                  sourceCompatibility JavaVersion.VERSION_17
-                  targetCompatibility JavaVersion.VERSION_17
-              }
-          }
-          dependencies {}
-          """
-          with open('app/build.gradle', 'w', encoding='utf-8') as f:
-              f.write(build_gradle)
+          # Gravar também na pasta assets do Android
+          for asset_dir in ['app/src/main/assets', 'hinario-app/app/src/main/assets']:
+              if os.path.exists(os.path.dirname(os.path.dirname(asset_dir))):
+                  os.makedirs(asset_dir, exist_ok=True)
+                  with open(os.path.join(asset_dir, 'index.html'), 'w', encoding='utf-8') as f:
+                      f.write(html_template)
 
           print("Preparacao concluida com sucesso!")
           EOF
@@ -466,6 +419,10 @@ jobs:
       - name: Compilar Aplicativo Android (APK)
         run: |
           rm -f local.properties hinario-app/local.properties
+          # Localizar gradlew onde quer que ele esteja
+          if [ -f "hinario-app/gradlew" ]; then
+            cd hinario-app
+          fi
           chmod +x gradlew
           ./gradlew assembleDebug
 
@@ -473,4 +430,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Hinario-Tchokwe-Samsung-Android
-          path: app/build/outputs/apk/debug/*.apk
+          path: '**/build/outputs/apk/debug/*.apk'
