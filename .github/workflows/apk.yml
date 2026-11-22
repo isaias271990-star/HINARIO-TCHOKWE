@@ -30,7 +30,6 @@ jobs:
           cat << 'EOF' > preparar_hinos.py
           import json, os
 
-          # 1. Localizar o ficheiro hinos.json
           caminhos_busca = [
               'hinario-app/tools/hinos.json',
               'tools/hinos.json',
@@ -52,7 +51,6 @@ jobs:
               print('ERRO: hinos.json nao encontrado!')
               exit(1)
 
-          print('Lendo hinos de:', caminho_hinos)
           with open(caminho_hinos, 'r', encoding='utf-8') as f:
               dados_brutos = json.load(f)
 
@@ -64,14 +62,9 @@ jobs:
           else:
               lista_hinos = dados_brutos
 
-          print('Total de hinos carregados:', len(lista_hinos))
-          if len(lista_hinos) > 0:
-              print('Campos do primeiro hino:', list(lista_hinos[0].keys()))
-
           json_hinos = json.dumps(lista_hinos, ensure_ascii=False)
           json_hinos_seguro = json_hinos.replace('</script>', '<\\/script>')
 
-          # 2. Gerar HTML completo com extrator inteligente
           html_template = """<!DOCTYPE html>
           <html lang="pt">
           <head>
@@ -132,12 +125,11 @@ jobs:
               .font-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text); width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font-weight: bold; }
               .reader-title { text-align: center; margin-bottom: 20px; }
               .reader-title h2 { font-size: 1.35rem; color: var(--primary); margin-bottom: 4px; }
-              .reader-body { font-size: 1.15rem; line-height: 1.7; }
-              .stanza { margin-bottom: 18px; }
-              .stanza-header { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
-              .chorus { background: var(--chorus-bg); border-left: 3px solid var(--primary); padding: 12px 14px; border-radius: 0 8px 8px 0; margin: 18px 0; font-style: italic; }
-              .chorus-header { font-size: 0.8rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 4px; font-style: normal; }
-              .msg-sem-letra { text-align: center; padding: 30px 10px; color: var(--text-muted); font-size: 1rem; border: 1px dashed var(--border); border-radius: 8px; margin-top: 20px; }
+              .reader-body { font-size: 1.15rem; line-height: 1.8; }
+              .stanza { margin-bottom: 20px; }
+              .stanza-header { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+              .chorus { background: var(--chorus-bg); border-left: 3px solid var(--primary); padding: 12px 14px; border-radius: 0 8px 8px 0; margin: 20px 0; font-style: italic; }
+              .chorus-header { font-size: 0.8rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 6px; font-style: normal; }
               footer { background: var(--surface); border-top: 1px solid var(--border); padding: 18px 14px; text-align: center; margin-top: auto; }
               .footer-church { font-weight: 700; font-size: 0.95rem; color: var(--text); margin-bottom: 6px; }
               .credits-block { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 6px; }
@@ -287,36 +279,42 @@ jobs:
                 }
               }
 
-              function extrairConteudoHino(h) {
-                if (h.estrofes && Array.isArray(h.estrofes) && h.estrofes.length > 0) {
-                  return { tipo: 'estrofes', dados: h.estrofes, coro: h.coro || h.chorus || h.refrao };
+              // EXTRATOR INTELIGENTE DE TEXTO DE OBJETOS OU STRINGS
+              function formatarTextoEstrofe(item) {
+                if (!item) return '';
+                if (typeof item === 'string') return item.replace(/\\n/g, '<br>');
+                if (Array.isArray(item)) {
+                  return item.map(function(sub) { return formatarTextoEstrofe(sub); }).join('<br>');
                 }
-                if (h.stanzas && Array.isArray(h.stanzas) && h.stanzas.length > 0) {
-                  return { tipo: 'estrofes', dados: h.stanzas, coro: h.coro || h.chorus || h.refrao };
-                }
-                if (h.versos && Array.isArray(h.versos) && h.versos.length > 0) {
-                  return { tipo: 'estrofes', dados: h.versos, coro: h.coro || h.chorus || h.refrao };
-                }
+                if (typeof item === 'object') {
+                  // Campos prioritários comuns
+                  if (Array.isArray(item.linhas)) return item.linhas.join('<br>');
+                  if (Array.isArray(item.lines)) return item.lines.join('<br>');
+                  if (Array.isArray(item.versos)) return item.versos.join('<br>');
+                  if (Array.isArray(item.verses)) return item.verses.join('<br>');
 
-                var chavesTexto = ['letra', 'texto', 'hino', 'corpo', 'conteudo', 'content', 'lyrics', 'body', 'text', 'palavras'];
-                for (var i = 0; i < chavesTexto.length; i++) {
-                  var k = chavesTexto[i];
-                  if (h[k] && typeof h[k] === 'string' && h[k].trim().length > 0) {
-                    return { tipo: 'texto', dados: h[k], coro: h.coro || h.chorus || h.refrao };
-                  }
-                }
-
-                for (var prop in h) {
-                  if (['numero', 'number', 'num', 'id', 'titulo', 'title', 'nome'].indexOf(prop) === -1) {
-                    if (typeof h[prop] === 'string' && h[prop].trim().length > 5) {
-                      return { tipo: 'texto', dados: h[prop], coro: h.coro || h.chorus || h.refrao };
-                    }
-                    if (Array.isArray(h[prop]) && h[prop].length > 0) {
-                      return { tipo: 'estrofes', dados: h[prop], coro: h.coro || h.chorus || h.refrao };
+                  var chaves = ['texto', 'letra', 'text', 'content', 'conteudo', 'corpo', 'verso', 'verse', 'estrofe', 'stanza', 'linhas', 'lines'];
+                  for (var i = 0; i < chaves.length; i++) {
+                    var k = chaves[i];
+                    if (item[k]) {
+                      if (typeof item[k] === 'string') return item[k].replace(/\\n/g, '<br>');
+                      if (Array.isArray(item[k])) return item[k].join('<br>');
                     }
                   }
+
+                  // Varrer todas as propriedades que tenham texto
+                  var partes = [];
+                  for (var prop in item) {
+                    if (['numero', 'number', 'num', 'id', 'tipo', 'type', 'isCoro'].indexOf(prop) === -1) {
+                      var val = item[prop];
+                      if (typeof val === 'string') partes.push(val.replace(/\\n/g, '<br>'));
+                      else if (Array.isArray(val)) partes.push(val.join('<br>'));
+                      else if (val && typeof val === 'object') partes.push(formatarTextoEstrofe(val));
+                    }
+                  }
+                  if (partes.length > 0) return partes.join('<br>');
                 }
-                return null;
+                return '';
               }
 
               function abrirHino(num) {
@@ -336,42 +334,52 @@ jobs:
                 var containerLetra = document.getElementById('leitorLetra');
                 containerLetra.innerHTML = '';
 
-                var conteudo = extrairConteudoHino(hino);
+                // 1. Se tem estrofes estruturadas
+                if (hino.estrofes && Array.isArray(hino.estrofes) && hino.estrofes.length > 0) {
+                  hino.estrofes.forEach(function(est, idx) {
+                    var isCoro = (est && (est.tipo === 'coro' || est.isCoro || est.tipo === 'chorus')) || false;
+                    var textoEstrofe = formatarTextoEstrofe(est);
+                    if (!textoEstrofe) return;
 
-                if (!conteudo) {
-                  containerLetra.innerHTML = '<div class="msg-sem-letra">A letra deste hino ainda não foi cadastrada no banco de dados.</div>';
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                  return;
-                }
-
-                if (conteudo.tipo === 'estrofes') {
-                  conteudo.dados.forEach(function(est, idx) {
                     var div = document.createElement('div');
-                    div.className = 'stanza';
-                    div.innerHTML = '<div class="stanza-header">Estrofe ' + (idx + 1) + '</div><p>' + String(est).replace(/\\n/g, '<br>') + '</p>';
+                    if (isCoro) {
+                      div.className = 'chorus';
+                      div.innerHTML = '<div class="chorus-header">Coro</div><p>' + textoEstrofe + '</p>';
+                    } else {
+                      var numEst = (est && (est.numero || est.num || est.id)) || (idx + 1);
+                      div.className = 'stanza';
+                      div.innerHTML = '<div class="stanza-header">Estrofe ' + numEst + '</div><p>' + textoEstrofe + '</p>';
+                    }
                     containerLetra.appendChild(div);
 
-                    if (idx === 0 && conteudo.coro) {
-                      var coroDiv = document.createElement('div');
-                      coroDiv.className = 'chorus';
-                      coroDiv.innerHTML = '<div class="chorus-header">Coro</div><p>' + String(conteudo.coro).replace(/\\n/g, '<br>') + '</p>';
-                      containerLetra.appendChild(coroDiv);
+                    // Se houver coro global ou embutido
+                    if (idx === 0 && hino.coro) {
+                      var textoCoro = formatarTextoEstrofe(hino.coro);
+                      if (textoCoro) {
+                        var coroDiv = document.createElement('div');
+                        coroDiv.className = 'chorus';
+                        coroDiv.innerHTML = '<div class="chorus-header">Coro</div><p>' + textoCoro + '</p>';
+                        containerLetra.appendChild(coroDiv);
+                      }
                     }
                   });
                 } else {
-                  var textoBruto = String(conteudo.dados);
-                  var blocos = textoBruto.split(/\\n\\s*\\n/);
-                  blocos.forEach(function(bloco) {
-                    var limpo = bloco.trim();
-                    if (!limpo) return;
-                    var isCoro = /^(coro|refr[ãa]o)/i.test(limpo);
-                    var div = document.createElement('div');
-                    div.className = isCoro ? 'chorus' : 'stanza';
-                    div.innerHTML = isCoro
-                      ? '<div class="chorus-header">Coro</div><p>' + limpo.replace(/\\n/g, '<br>') + '</p>'
-                      : '<p>' + limpo.replace(/\\n/g, '<br>') + '</p>';
-                    containerLetra.appendChild(div);
-                  });
+                  // 2. Se for texto contínuo
+                  var textoBruto = formatarTextoEstrofe(hino.letra || hino.texto || hino.hino || hino.corpo || hino);
+                  if (textoBruto) {
+                    var blocos = textoBruto.split(/<br>\\s*<br>/i);
+                    blocos.forEach(function(bloco) {
+                      var limpo = bloco.trim();
+                      if (!limpo) return;
+                      var isCoro = /^(coro|refr[ãa]o)/i.test(limpo);
+                      var div = document.createElement('div');
+                      div.className = isCoro ? 'chorus' : 'stanza';
+                      div.innerHTML = isCoro
+                        ? '<div class="chorus-header">Coro</div><p>' + limpo + '</p>'
+                        : '<p>' + limpo + '</p>';
+                      containerLetra.appendChild(div);
+                    });
+                  }
                 }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }
@@ -417,7 +425,7 @@ jobs:
       - name: Compilar Aplicativo Android (APK)
         run: |
           rm -f local.properties hinario-app/local.properties
-          if [ -f "hinario-app/build.gradle" ]; then
+          if [ -d "hinario-app" ]; then
             cd hinario-app
           fi
           gradle assembleDebug
