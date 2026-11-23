@@ -40,6 +40,7 @@
       background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%);
       display: flex; flex-direction: column; align-items: center; justify-content: space-between;
       padding: 30px 20px 35px; z-index: 1000; text-align: center;
+      overflow-y: auto;
     }
     body.dark-mode #capa-screen {
       background: linear-gradient(180deg, #0f172a 0%, #1e1b18 100%);
@@ -49,7 +50,6 @@
     .capa-org { font-size: 14px; font-weight: 800; letter-spacing: 1.5px; color: var(--primary); text-transform: uppercase; margin-bottom: 4px; }
     .capa-sub { font-size: 13px; color: var(--text-color); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
     
-    /* LEMA DA MISSÃO LESTE DE ANGOLA */
     .capa-lema {
       display: inline-block;
       margin-top: 8px;
@@ -68,20 +68,20 @@
       border-color: rgba(249, 115, 22, 0.3);
     }
 
-    /* LOGO OFICIAL LARANJA */
+    /* LOGO OFICIAL LARANJA VECTORIAL */
     .capa-logo-box {
       margin: 15px auto; width: 175px; height: 175px;
       display: flex; align-items: center; justify-content: center;
-      filter: drop-shadow(0 8px 20px rgba(217, 88, 4, 0.25));
+      filter: drop-shadow(0 8px 16px rgba(217, 88, 4, 0.25));
     }
-    .capa-logo-box svg { width: 100%; height: 100%; fill: #d95804; }
+    .capa-logo-box svg { width: 100%; height: 100%; }
 
     .capa-titles { margin-bottom: 10px; }
     .capa-title { font-size: 28px; font-weight: 900; color: #1e293b; letter-spacing: 0.5px; line-height: 1.2; margin-bottom: 6px; }
     body.dark-mode .capa-title { color: #f8fafc; }
     .capa-desc { font-size: 14px; color: var(--text-muted); font-weight: 500; }
 
-    .capa-actions { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px; }
+    .capa-actions { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 10px; }
     .btn-abrir-hinario {
       background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
       color: white; border: none; border-radius: 14px; padding: 16px 24px;
@@ -94,14 +94,14 @@
       border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 600; cursor: pointer;
     }
 
-    /* CABEÇALHO PRINCIPAL */
+    /* CABEÇALHO */
     header {
       position: sticky; top: 0; background-color: var(--primary); color: white;
       padding: 12px 16px; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
       display: flex; align-items: center; justify-content: space-between;
     }
     .header-title-box { display: flex; align-items: center; gap: 10px; }
-    .header-logo-mini { width: 28px; height: 28px; fill: white; }
+    .header-logo-mini { width: 28px; height: 28px; }
     .header-text h1 { font-size: 17px; font-weight: 800; }
     .header-text span { font-size: 11px; opacity: 0.95; }
 
@@ -119,7 +119,7 @@
       background: var(--card-bg); color: var(--text-color); font-size: 15px; outline: none;
     }
 
-    /* LISTA DE HINOS */
+    /* LISTA DOS HINOS */
     .hymn-list { padding: 0 16px 80px; max-width: 600px; margin: 0 auto; list-style: none; }
     .hymn-item {
       background: var(--card-bg); border-radius: 12px; padding: 14px 16px;
@@ -149,21 +149,21 @@
     .reader-hymn-name { font-size: 22px; font-weight: 800; margin-top: 4px; }
 
     .stanza { margin-bottom: 24px; }
-    .stanza-num { font-weight: 800; color: var(--primary); margin-bottom: 4px; }
-    .stanza-line { margin-bottom: 4px; }
+    .stanza-num { font-weight: 800; color: var(--primary); margin-bottom: 6px; font-size: 1.1em; }
+    .stanza-line { margin-bottom: 5px; }
     .chorus {
       background: var(--primary-light); border-left: 4px solid var(--primary);
       padding: 14px 18px; border-radius: 0 12px 12px 0; margin-bottom: 24px; font-style: italic;
     }
     .chorus-tag { font-weight: bold; color: var(--primary); font-style: normal; margin-bottom: 6px; font-size: 0.9em; text-transform: uppercase; }
 
-    /* BOTÃO DE EDIÇÃO NO LEITOR (MODO DESENVOLVEDOR) */
+    /* BOTÃO DE EDIÇÃO NO LEITOR */
     .btn-edit-hymn {
       display: none; margin: 25px auto; background: #0284c7; color: white; border: none;
       padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer;
     }
 
-    /* MODAL DE EDIÇÃO DE HINO */
+    /* MODAL DE EDIÇÃO */
     #editor-modal {
       display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.75); z-index: 500; align-items: center; justify-content: center; padding: 15px;
@@ -199,24 +199,35 @@
 </head>
 <body>
 
-  <!-- CAPA INICIAL COM O LEMA DA MISSÃO E LOGO OFICIAL LARANJA -->
+  <!-- CAPA INICIAL COM LOGO OFICIAL LARANJA VECTORIAL -->
   <div id="capa-screen">
     <div class="capa-header">
       <div class="capa-org">Igreja Adventista do Sétimo Dia</div>
       <div class="capa-sub">Missão Leste de Angola</div>
-      <!-- LEMA OFICIAL -->
       <div class="capa-lema">« Onde o sol levanta com a missão »</div>
     </div>
 
-    <!-- LOGO OFICIAL LARANJA (SVG VECTORIAL PURO) -->
+    <!-- LOGO OFICIAL ADVENTISTA EM LARANJA (#d95804) -->
     <div class="capa-logo-box">
-      <svg viewBox="0 0 800 800">
-        <!-- Chamas e Bíblia Aberta Oficial Laranja -->
-        <path d="M435.6,603.5 L435.6,569.2 L405.3,569.2 L405.3,588.6 C405.3,628.7 406.8,658.7 407.4,683.4 C399.7,665.4 380.3,644.2 344.4,635.8 C287.6,622.5 194.2,642.5 114.7,705.5 C197.6,606.3 358.3,622.2 384.7,624.8 L384.7,569.2 L348.8,569.2 L348.8,603.5 L348.8,547.4 L384.7,547.4 L384.7,532.8 C384.7,460.8 393.3,371.1 440.6,279.1 C440.6,279.1 430.2,324.7 416.3,378.8 C406.3,417.8 405.3,475.9 405.3,532.8 L405.3,547.4 L435.6,547.4 L435.6,603.5 Z" />
-        <path d="M504.6,535.1 C513.7,506.7 523.5,471.2 523.5,431.1 C523.5,373.1 501.9,343.8 478.4,342.3 C499.7,381.7 500.9,431.1 494.8,459.7 C488.7,488.2 473.4,524.2 443.9,560.8 L443.9,599.9 C464.7,567.8 480.9,531.1 487.6,500.1 C494.3,469.1 493.5,420.2 481.3,382.2 C470.8,416.7 453.7,460.7 427.8,495.7 L427.8,540.6 C433.8,531.3 439.1,521.6 443.9,511.4 L443.9,535.1 Z" />
-        <path d="M410.6,684.6 C411.3,659.8 412.8,629.8 412.8,589.7 L412.8,569.2 L442.9,569.2 L442.9,603.5 L442.9,547.4 L412.8,547.4 L412.8,532.8 C412.8,490.9 413.4,445.8 420.7,403.4 C409.8,435.5 401.9,474.3 401.9,518.2 L401.9,547.4 L378.8,547.4 L378.8,569.2 L401.9,569.2 L401.9,625.2 C428.2,622.6 588.9,606.7 671.8,705.9 C592.3,642.9 498.9,622.9 442.1,636.2 C417.8,641.9 412.5,658.3 410.6,684.6 Z" />
-        <path d="M439.9,183.4 C439.9,183.4 430.4,242.4 397.6,312.3 C370.4,370.2 322.8,432.8 317.8,510.9 C317.8,510.9 311.2,465.3 331.6,412.2 C352.1,359.1 408.8,245.2 439.9,183.4 Z" />
-        <path d="M440.6,243.8 C440.6,243.8 406.8,321.4 366.5,392.3 C339.7,439.5 323.7,495.2 329.8,545.9 C329.8,545.9 322.7,506.7 341.3,460.7 C360.7,412.6 414.8,307.7 440.6,243.8 Z" />
+      <svg viewBox="0 0 400 400">
+        <!-- Chamas da Esquerda -->
+        <path fill="#d95804" d="M198,50 C198,50 165,115 145,170 C125,220 115,265 130,305 C120,270 125,225 150,180 C170,140 198,95 198,50 Z" />
+        <path fill="#d95804" d="M194,115 C194,115 158,175 142,225 C130,265 135,298 148,318 C135,290 140,255 158,212 C172,172 194,135 194,115 Z" />
+        <path fill="#d95804" d="M188,170 C188,170 162,220 152,260 C146,282 152,305 162,322 C150,300 150,272 165,240 C176,205 188,185 188,170 Z" />
+        
+        <!-- Chamas da Direita -->
+        <path fill="#d95804" d="M202,90 C202,90 228,145 244,188 C265,238 262,285 240,320 C256,285 255,238 234,192 C218,155 202,122 202,90 Z" />
+        <path fill="#d95804" d="M208,145 C208,145 234,192 244,232 C255,272 246,305 234,326 C248,295 245,262 234,228 C222,192 208,165 208,145 Z" />
+        <path fill="#d95804" d="M210,200 C210,200 228,238 234,268 C240,295 234,316 226,330 C234,308 234,282 226,258 C220,232 210,215 210,200 Z" />
+        
+        <!-- Cruz Central -->
+        <path fill="#d95804" d="M194,225 L206,225 L206,258 L226,258 L226,270 L206,270 L206,350 L194,350 L194,270 L174,270 L174,258 L194,258 Z" />
+        
+        <!-- Bíblia Aberta na Base -->
+        <path fill="#d95804" d="M195,335 C150,318 90,322 48,360 C100,344 160,344 195,365 Z" />
+        <path fill="#d95804" d="M205,335 C250,318 310,322 352,360 C300,344 240,344 205,365 Z" />
+        <path fill="#d95804" d="M192,368 C155,348 95,348 45,366 C100,355 160,355 195,378 L195,370 Z" />
+        <path fill="#d95804" d="M208,368 C245,348 305,348 355,366 C300,355 240,355 205,378 L205,370 Z" />
       </svg>
     </div>
 
@@ -234,8 +245,11 @@
   <!-- CABEÇALHO -->
   <header>
     <div class="header-title-box">
-      <svg class="header-logo-mini" viewBox="0 0 800 800">
-        <path d="M435.6,603.5 L435.6,569.2 L405.3,569.2 L405.3,588.6 C405.3,628.7 406.8,658.7 407.4,683.4 C399.7,665.4 380.3,644.2 344.4,635.8 C287.6,622.5 194.2,642.5 114.7,705.5 C197.6,606.3 358.3,622.2 384.7,624.8 L384.7,569.2 L348.8,569.2 L348.8,603.5 L348.8,547.4 L384.7,547.4 L384.7,532.8 C384.7,460.8 393.3,371.1 440.6,279.1 C440.6,279.1 430.2,324.7 416.3,378.8 C406.3,417.8 405.3,475.9 405.3,532.8 L405.3,547.4 L435.6,547.4 L435.6,603.5 Z" />
+      <svg class="header-logo-mini" viewBox="0 0 400 400">
+        <path fill="#ffffff" d="M198,50 C198,50 165,115 145,170 C125,220 115,265 130,305 C120,270 125,225 150,180 C170,140 198,95 198,50 Z" />
+        <path fill="#ffffff" d="M194,225 L206,225 L206,258 L226,258 L226,270 L206,270 L206,350 L194,350 L194,270 L174,270 L174,258 L194,258 Z" />
+        <path fill="#ffffff" d="M195,335 C150,318 90,322 48,360 C100,344 160,344 195,365 Z" />
+        <path fill="#ffffff" d="M205,335 C250,318 310,322 352,360 C300,344 240,344 205,365 Z" />
       </svg>
       <div class="header-text">
         <h1>Hinário Tchokwe</h1>
@@ -248,7 +262,7 @@
     </div>
   </header>
 
-  <!-- PESQUISA -->
+  <!-- BARRA DE PESQUISA -->
   <div class="search-bar">
     <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar por número ou título..." oninput="filtrarHinos()">
   </div>
@@ -256,7 +270,7 @@
   <!-- LISTA DOS 300 HINOS -->
   <ul id="hymnList" class="hymn-list"></ul>
 
-  <!-- TELA DE LEITURA DO HINO -->
+  <!-- LEITOR DE HINOS -->
   <div id="reader-screen">
     <div class="reader-header">
       <button class="icon-btn" onclick="fecharLeitor()">←</button>
@@ -273,12 +287,11 @@
       </div>
       <div id="readerBody"></div>
       
-      <!-- BOTÃO DE EDIÇÃO PARA O DESENVOLVEDOR -->
       <button id="btnEditHymn" class="btn-edit-hymn" onclick="abrirEditorHino()">✏️ Editar Este Hino (Dev)</button>
     </div>
   </div>
 
-  <!-- MODAL DE EDIÇÃO (MODO DESENVOLVEDOR) -->
+  <!-- MODAL DE EDIÇÃO -->
   <div id="editor-modal">
     <div class="editor-card">
       <h3>Modo Desenvolvedor • Editor</h3>
@@ -325,53 +338,117 @@
     </div>
   </div>
 
-  <script src="hinos.js"></script>
-  
   <script>
     let hinosLista = [];
     let hinoAtual = null;
     let modoDevAtivo = localStorage.getItem("modo_dev_ativo") === "true";
     let fontSize = 18;
 
-    function desempacotar(item) {
-      if (!item) return "";
-      if (typeof item === 'string') return item;
-      if (Array.isArray(item)) return item.map(desempacotar).join("\n");
-      if (typeof item === 'object') {
-        if (item.texto) return desempacotar(item.texto);
-        if (item.linhas) return desempacotar(item.linhas);
-        if (item.lines) return desempacotar(item.lines);
-        return Object.values(item).map(desempacotar).join("\n");
+    // DESEMPACOTADOR UNIVERSAL: extrai texto puro de qualquer estrutura
+    function desempacotarTexto(obj) {
+      if (obj === null || obj === undefined) return "";
+      if (typeof obj === "string") return obj.trim();
+      if (typeof obj === "number") return ""; // não incluir números de índice
+      
+      if (Array.isArray(obj)) {
+        return obj.map(desempacotarTexto).filter(s => s && s.length > 0).join("\n");
       }
-      return String(item);
+      
+      if (typeof obj === "object") {
+        for (let campo of ["texto", "linhas", "lines", "verso", "versos", "content", "letra", "letras", "corpo", "body", "text"]) {
+          if (obj[campo]) {
+            let t = desempacotarTexto(obj[campo]);
+            if (t && t.length > 0) return t;
+          }
+        }
+        
+        let valores = Object.entries(obj)
+          .filter(([k, v]) => !["numero", "num", "id", "estrofe", "ordem", "index"].includes(k.toLowerCase()))
+          .map(([k, v]) => desempacotarTexto(v))
+          .filter(s => s && s.length > 0);
+          
+        if (valores.length > 0) return valores.join("\n");
+      }
+      return "";
     }
 
-    function carregarHinos() {
-      let edicoesSalvas = JSON.parse(localStorage.getItem("hinos_personalizados") || "{}");
+    // EXTRAÇÃO INTELIGENTE DAS ESTROFES DO HINO
+    function obterEstrofesDoHino(hino) {
+      let lista = hino.estrofes || hino.estrophes || hino.versos || hino.verses || hino.stanzas;
+      
+      if (Array.isArray(lista) && lista.length > 0) {
+        return lista;
+      }
+      
+      if (lista && typeof lista === "object") {
+        let vals = Object.values(lista);
+        if (vals.length > 0) return vals;
+      }
 
-      if (window.HINOS_DADOS && Array.isArray(window.HINOS_DADOS)) {
-        hinosLista = window.HINOS_DADOS.map(h => {
+      let textoGeral = hino.letra || hino.letras || hino.texto || hino.corpo || hino.content;
+      if (typeof textoGeral === "string" && textoGeral.trim().length > 0) {
+        let blocos = textoGeral.split(/\n\s*\n/).map(b => b.trim()).filter(b => b.length > 0);
+        if (blocos.length > 0) return blocos;
+        return [textoGeral];
+      }
+
+      let chaves = Object.keys(hino)
+        .filter(k => /^(estrofe|verso|stanza|est)/i.test(k))
+        .sort();
+      if (chaves.length > 0) {
+        return chaves.map(k => hino[k]);
+      }
+
+      return [];
+    }
+
+    // CARREGAMENTO INTELIGENTE (Procura hinos.json em múltiplos caminhos)
+    async function carregarHinos() {
+      const container = document.getElementById("hymnList");
+      container.innerHTML = "<li style='text-align:center; padding:30px; color:var(--text-muted);'>A carregar os 300 hinos em Tchokwe...</li>";
+
+      let edicoesSalvas = JSON.parse(localStorage.getItem("hinos_personalizados") || "{}");
+      let dados = null;
+
+      const caminhos = [
+        'hinos.json',
+        'hinario-app/app/src/main/assets/hinos.json',
+        'app/src/main/assets/hinos.json',
+        'assets/hinos.json',
+        './hinos.json'
+      ];
+
+      for (let caminho of caminhos) {
+        try {
+          let resp = await fetch(caminho);
+          if (resp.ok) {
+            dados = await resp.json();
+            if (dados) break;
+          }
+        } catch(e) {}
+      }
+
+      if (!dados && window.HINOS_DADOS && Array.isArray(window.HINOS_DADOS)) {
+        dados = window.HINOS_DADOS;
+      }
+
+      if (dados && !Array.isArray(dados) && Array.isArray(dados.hinos)) {
+        dados = dados.hinos;
+      }
+
+      if (dados && Array.isArray(dados) && dados.length > 0) {
+        hinosLista = dados.map(h => {
           let num = h.numero || h.num || h.id;
           if (edicoesSalvas[num]) {
             return { ...h, ...edicoesSalvas[num] };
           }
           return h;
         });
+        renderizarLista(hinosLista);
       } else {
-        for (let i = 1; i <= 300; i++) {
-          if (edicoesSalvas[i]) {
-            hinosLista.push(edicoesSalvas[i]);
-          } else {
-            hinosLista.push({
-              numero: i,
-              titulo: "Hino " + i,
-              estrofes: ["Letra do Hino " + i + " em Tchokwe..."],
-              coro: ""
-            });
-          }
-        }
+        container.innerHTML = "<li style='text-align:center; padding:30px; color:#ef4444;'>Aviso: hinos.json não encontrado. Verifique se o arquivo está na raiz do GitHub.</li>";
       }
-      renderizarLista(hinosLista);
+
       atualizarInterfaceDev();
     }
 
@@ -380,7 +457,7 @@
       container.innerHTML = "";
       lista.forEach(hino => {
         const num = hino.numero || hino.num || hino.id;
-        const titulo = hino.titulo || ("Hino " + num);
+        const titulo = hino.titulo || hino.title || ("Hino " + num);
         const li = document.createElement("li");
         li.className = "hymn-item";
         li.onclick = () => abrirHino(hino);
@@ -400,16 +477,17 @@
       if (!q) { renderizarLista(hinosLista); return; }
       const filtrados = hinosLista.filter(h => {
         const num = String(h.numero || h.num || h.id);
-        const tit = (h.titulo || "").toLowerCase();
+        const tit = (h.titulo || h.title || "").toLowerCase();
         return num.includes(q) || tit.includes(q);
       });
       renderizarLista(filtrados);
     }
 
+    // ABERTURA COMPLETA DO HINO COM TODAS AS ESTROFES E CORO
     function abrirHino(hino) {
       hinoAtual = hino;
-      const num = hino.numero || hino.num || hino.id;
-      const titulo = hino.titulo || ("Hino " + num);
+      const num = hino.numero || hino.num || hino.id || "";
+      const titulo = hino.titulo || hino.title || ("Hino " + num);
 
       document.getElementById("readerTopTitle").innerText = "Hino " + num;
       document.getElementById("readerNum").innerText = "HINO " + num;
@@ -418,26 +496,49 @@
       const body = document.getElementById("readerBody");
       body.innerHTML = "";
 
-      let estrofes = Array.isArray(hino.estrofes) ? hino.estrofes : [hino.estrofes];
-      estrofes.forEach((est, idx) => {
-        const div = document.createElement("div");
-        div.className = "stanza";
-        const texto = desempacotar(est);
-        div.innerHTML = `<div class="stanza-num">${idx + 1}.</div>` + 
-          texto.split("\n").map(l => `<div class="stanza-line">${l}</div>`).join("");
-        body.appendChild(div);
+      const estrofes = obterEstrofesDoHino(hino);
+      const coroTexto = desempacotarTexto(hino.coro || hino.refrão || hino.refrao || hino.chorus);
 
-        if (idx === 0 && hino.coro) {
+      if (estrofes.length === 0 && !coroTexto) {
+        let textoDireto = desempacotarTexto(hino);
+        if (textoDireto) {
+          body.innerHTML = `<div class="stanza">${textoDireto.split("\n").map(l => `<div class="stanza-line">${l}</div>`).join("")}</div>`;
+        } else {
+          body.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:20px;">Letra em edição.</p>`;
+        }
+      } else {
+        estrofes.forEach((est, idx) => {
+          const texto = desempacotarTexto(est);
+          if (!texto) return;
+
+          let numEstrofe = (est && typeof est === "object" && (est.numero || est.num || est.estrofe)) ? (est.numero || est.num || est.estrofe) : (idx + 1);
+
+          const div = document.createElement("div");
+          div.className = "stanza";
+          div.innerHTML = `<div class="stanza-num">${numEstrofe}.</div>` +
+            texto.split("\n").map(l => `<div class="stanza-line">${l}</div>`).join("");
+          body.appendChild(div);
+
+          if (idx === 0 && coroTexto) {
+            const coroDiv = document.createElement("div");
+            coroDiv.className = "chorus";
+            coroDiv.innerHTML = `<div class="chorus-tag">Coro:</div>` +
+              coroTexto.split("\n").map(l => `<div>${l}</div>`).join("");
+            body.appendChild(coroDiv);
+          }
+        });
+
+        if (estrofes.length === 0 && coroTexto) {
           const coroDiv = document.createElement("div");
           coroDiv.className = "chorus";
-          const coroTexto = desempacotar(hino.coro);
-          coroDiv.innerHTML = `<div class="chorus-tag">Coro:</div>` + 
+          coroDiv.innerHTML = `<div class="chorus-tag">Coro:</div>` +
             coroTexto.split("\n").map(l => `<div>${l}</div>`).join("");
           body.appendChild(coroDiv);
         }
-      });
+      }
 
       document.getElementById("reader-screen").style.display = "block";
+      document.getElementById("reader-screen").scrollTo(0, 0);
       window.scrollTo(0, 0);
     }
 
@@ -484,10 +585,10 @@
       if (!hinoAtual) return;
       const num = hinoAtual.numero || hinoAtual.num || hinoAtual.id;
       document.getElementById("editNum").value = num;
-      document.getElementById("editTitulo").value = hinoAtual.titulo || "";
-      document.getElementById("editCoro").value = desempacotar(hinoAtual.coro || "");
+      document.getElementById("editTitulo").value = hinoAtual.titulo || hinoAtual.title || "";
+      document.getElementById("editCoro").value = desempacotarTexto(hinoAtual.coro || hinoAtual.refrão || "");
       
-      let ests = Array.isArray(hinoAtual.estrofes) ? hinoAtual.estrofes.map(desempacotar).join("\n\n") : desempacotar(hinoAtual.estrofes || "");
+      let ests = obterEstrofesDoHino(hinoAtual).map(desempacotarTexto).join("\n\n");
       document.getElementById("editEstrofes").value = ests;
       document.getElementById("editor-modal").style.display = "flex";
     }
@@ -511,7 +612,7 @@
       };
 
       localStorage.setItem("hinos_personalizados", JSON.stringify(edicoesSalvas));
-      alert("Hino " + num + " salvo com sucesso!");
+      alert("Hino " + num + " salvo no telemóvel!");
       fecharEditorHino();
       carregarHinos();
       
