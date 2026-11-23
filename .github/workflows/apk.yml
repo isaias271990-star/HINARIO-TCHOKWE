@@ -8,18 +8,23 @@ jobs:
       - name: Baixar Codigo
         uses: actions/checkout@v4
 
-      - name: Criar ZIP Offline
+      - name: Localizar hinos e Criar ZIP Completo
         run: |
           mkdir -p pacote_offline
+          
+          # Procura hinos.json em qualquer subpasta e copia para a raiz
+          find . -name "hinos.json" -not -path "*/pacote_offline/*" -exec cp -f {} ./hinos.json \;
+          find . -name "hinos.json" -exec cp -f {} pacote_offline/ \;
+          
           cp -f index.html pacote_offline/ 2>/dev/null || true
-          cp -f hinos.json pacote_offline/ 2>/dev/null || true
           cp -f logo.png pacote_offline/ 2>/dev/null || true
           cp -f manifest.json pacote_offline/ 2>/dev/null || true
+          
           cd pacote_offline
           zip -r ../Hinario-Tchokwe-Offline.zip ./*
           cd ..
 
-      - name: Disponibilizar ZIP
+      - name: Disponibilizar ZIP Completo
         uses: actions/upload-artifact@v4
         with:
           name: Hinario-Tchokwe-ZIP
@@ -31,16 +36,17 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Compilar APK
+      - name: Configurar Android SDK e Compilar APK
         run: |
           if [ -d "hinario-app" ]; then
             cd hinario-app
           fi
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
           if [ -f "./gradlew" ]; then
             chmod +x ./gradlew
             ./gradlew assembleDebug || gradle assembleDebug || true
           fi
-          find . -name "*.apk" -exec cp {} $GITHUB_WORKSPACE/Hinario-Tchokwe.apk \; || true
+          find . -name "*.apk" -exec cp -f {} $GITHUB_WORKSPACE/Hinario-Tchokwe.apk \; || true
 
       - name: Disponibilizar APK
         if: always()
