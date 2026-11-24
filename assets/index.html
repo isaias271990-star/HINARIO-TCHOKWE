@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#00758d">
+<title>Hinário Tchokwe</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- CAPA -->
+  <section id="tela-capa" class="tela capa">
+    <div class="capa-miolo">
+      <div class="logo-caixa">
+        <img id="logo" src="logo.png" alt="Logótipo da Igreja Adventista do Sétimo Dia">
+        <svg id="logo-reserva" class="logo-reserva" viewBox="0 0 100 100" aria-hidden="true" hidden>
+          <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="3"/>
+          <path d="M50 30 L50 72 M50 30 C40 24 28 24 20 28 L20 70 C28 66 40 66 50 72 C60 66 72 66 80 70 L80 28 C72 24 60 24 50 30Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+          <circle cx="50" cy="16" r="4" fill="currentColor"/>
+        </svg>
+      </div>
+      <p class="capa-igreja">Igreja Adventista<br>do Sétimo Dia</p>
+      <p class="capa-missao">Missão Leste de Angola</p>
+      <div class="capa-fio"></div>
+      <h1 class="capa-titulo">Hinário<br>Tchokwe</h1>
+    </div>
+    <div class="capa-rodape">
+      <button id="entrar" class="btn-grande">Abrir hinário</button>
+      <button id="ir-admin" class="btn-link">Acesso de administrador</button>
+    </div>
+  </section>
+
+  <!-- LISTA -->
+  <section id="tela-lista" class="tela" hidden>
+    <header class="topo">
+      <div class="topo-linha">
+        <div>
+          <h1>Hinário Tchokwe</h1>
+          <p class="sub">Missão Leste de Angola · IASD</p>
+        </div>
+        <button id="btn-tema" class="icone" aria-label="Mudar tema"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg></button>
+      </div>
+      <div id="faixa-admin" class="faixa-admin" hidden>
+        <span>Modo administrador</span>
+        <span>
+          <button id="novo-hino" class="mini">+ Novo hino</button>
+          <button id="abrir-gestao" class="mini">Cópia</button>
+          <button id="sair-admin" class="mini">Sair</button>
+        </span>
+      </div>
+      <div class="busca">
+        <input id="busca" type="search" inputmode="search" placeholder="Número ou nome do hino…" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Pesquisar hinos">
+        <button id="limpar" class="limpar" aria-label="Limpar pesquisa" hidden>×</button>
+      </div>
+      <nav class="abas" role="tablist">
+        <button role="tab" id="aba-todos" class="ativa" aria-selected="true">Todos</button>
+        <button role="tab" id="aba-fav" aria-selected="false">Favoritos <span id="cont-fav"></span></button>
+      </nav>
+    </header>
+    <main id="lista" class="lista" aria-live="polite"></main>
+  </section>
+
+  <!-- HINO -->
+  <section id="tela-hino" class="tela" hidden>
+    <header class="topo topo-hino">
+      <button id="voltar" class="icone" aria-label="Voltar à lista">←</button>
+      <div class="titulo-hino">
+        <span id="h-num" class="h-num"></span>
+        <h2 id="h-titulo"></h2>
+      </div>
+      <button id="btn-fav" class="icone" aria-label="Favorito" aria-pressed="false">☆</button>
+    </header>
+    <div id="admin-hino" class="faixa-admin" hidden>
+      <span>Administrador</span>
+      <span>
+        <button id="editar" class="mini">Editar</button>
+        <button id="apagar" class="mini perigo">Apagar</button>
+      </span>
+    </div>
+    <article id="letra" class="letra"></article>
+    <footer class="barra">
+      <button id="ant" class="icone" aria-label="Hino anterior">‹</button>
+      <div class="fonte">
+        <button id="fonte-menos" class="icone" aria-label="Diminuir letra">A−</button>
+        <button id="fonte-mais" class="icone" aria-label="Aumentar letra">A+</button>
+      </div>
+      <button id="partilhar" class="icone" aria-label="Partilhar hino">⤴</button>
+      <button id="seg" class="icone" aria-label="Próximo hino">›</button>
+    </footer>
+  </section>
+
+  <!-- LOGIN -->
+  <section id="tela-login" class="tela" hidden>
+    <header class="topo topo-hino">
+      <button id="login-voltar" class="icone" aria-label="Voltar">←</button>
+      <div class="titulo-hino"><h2>Acesso de administrador</h2></div>
+      <span style="width:44px"></span>
+    </header>
+    <div class="form">
+      <p id="login-msg" class="texto-suave"></p>
+      <label for="login-senha">Palavra-passe</label>
+      <input id="login-senha" type="password" autocomplete="off">
+      <div id="login-conf-caixa" hidden>
+        <label for="login-senha2">Repetir palavra-passe</label>
+        <input id="login-senha2" type="password" autocomplete="off">
+      </div>
+      <p id="login-erro" class="erro" role="alert"></p>
+      <button id="login-ok" class="btn-grande">Entrar</button>
+    </div>
+  </section>
+
+  <!-- EDITOR -->
+  <section id="tela-editor" class="tela" hidden>
+    <header class="topo topo-hino">
+      <button id="ed-voltar" class="icone" aria-label="Cancelar">←</button>
+      <div class="titulo-hino"><h2 id="ed-titulo-tela">Hino</h2></div>
+      <span style="width:44px"></span>
+    </header>
+    <div class="form form-ed">
+      <div class="linha-2">
+        <div><label for="ed-num">Número</label><input id="ed-num" type="number" inputmode="numeric" min="1"></div>
+        <div style="flex:3"><label for="ed-tit">Título</label><input id="ed-tit" type="text" autocomplete="off"></div>
+      </div>
+      <label for="ed-txt">Letra</label>
+      <textarea id="ed-txt" rows="14" spellcheck="false" placeholder="Escreva um verso por bloco. Deixe uma linha em branco entre blocos.&#10;Para o coro, escreva a palavra Utawizo na primeira linha do bloco."></textarea>
+      <p class="texto-suave">Os versos são numerados automaticamente. Use <b>Utawizo</b> na primeira linha para marcar o coro.</p>
+      <p id="ed-erro" class="erro" role="alert"></p>
+      <button id="ed-gravar" class="btn-grande">Guardar hino</button>
+    </div>
+  </section>
+
+  <!-- CÓPIA DE SEGURANÇA -->
+  <section id="tela-gestao" class="tela" hidden>
+    <header class="topo topo-hino">
+      <button id="g-voltar" class="icone" aria-label="Voltar">←</button>
+      <div class="titulo-hino"><h2>Cópia de segurança</h2></div>
+      <span style="width:44px"></span>
+    </header>
+    <div class="form form-ed">
+      <p class="texto-suave">As alterações ficam guardadas só neste telemóvel. Use a cópia para as levar a outro aparelho.</p>
+      <button id="g-exportar" class="btn-grande">Partilhar cópia dos hinos</button>
+      <label for="g-txt">Colar cópia para restaurar</label>
+      <textarea id="g-txt" rows="7" spellcheck="false" placeholder="Cole aqui o texto da cópia…"></textarea>
+      <button id="g-importar" class="btn-sec">Restaurar a partir do texto</button>
+      <button id="g-repor" class="btn-sec perigo">Repor hinos originais</button>
+      <label for="g-nova">Nova palavra-passe de administrador</label>
+      <input id="g-nova" type="password" autocomplete="off" placeholder="Mínimo 4 caracteres">
+      <button id="g-mudar" class="btn-sec">Mudar palavra-passe</button>
+      <p id="g-msg" class="texto-suave"></p>
+    </div>
+  </section>
+
+</div>
+<script src="hinos.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
