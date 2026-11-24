@@ -49,7 +49,7 @@
       padding: 16px; overflow: hidden;
     }
     .capa-badge img { width: 100%; height: 100%; object-fit: contain; }
-    .capa-badge svg { width: 100%; height: 100%; fill: #d95804; }
+    .capa-badge svg { width: 100%; height: 100%; }
 
     .capa-church { font-size: 16px; font-weight: 600; opacity: 0.95; margin-bottom: 4px; letter-spacing: 0.5px; }
     .capa-mission { font-size: 14px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
@@ -78,7 +78,7 @@
     }
     .btn-abrir-main:active { transform: scale(0.97); }
 
-    .capa-link { color: rgba(255,255,255,0.9); text-decoration: underline; font-size: 14px; font-weight: 600; background: none; border: none; cursor: pointer; }
+    .capa-link { color: rgba(255,255,255,0.9); text-decoration: underline; font-size: 14px; font-weight: 600; background: none; border: none; cursor: pointer; padding: 6px; }
 
     /* CABEÇALHO DO APLICATIVO */
     header {
@@ -174,21 +174,19 @@
   <div id="capa-screen">
     <div class="capa-badge">
       <img src="logo.png" alt="Logo IASD" onerror="this.style.display='none'; document.getElementById('svgLogo').style.display='block';">
-      <svg id="svgLogo" style="display:none;" viewBox="0 0 500 500">
-        <!-- Chamas preenchidas fortes -->
-        <path d="M250,40 C250,40 200,120 170,190 C140,260 130,320 150,370 C135,330 140,270 175,210 C205,160 250,100 250,40 Z" />
-        <path d="M245,120 C245,120 200,195 180,260 C165,310 170,350 185,380 C170,345 175,300 200,245 C220,195 245,150 245,120 Z" />
-        <path d="M238,190 C238,190 205,250 192,300 C185,330 190,360 205,385 C190,355 190,320 210,280 C225,235 238,210 238,190 Z" />
-        <path d="M255,90 C255,90 288,160 310,215 C335,280 330,340 300,385 C320,340 320,280 295,225 C275,180 255,135 255,90 Z" />
-        <path d="M260,160 C260,160 295,220 310,270 C322,320 312,360 295,390 C312,350 310,310 295,270 C280,225 260,190 260,160 Z" />
-        <path d="M262,230 C262,230 285,275 292,312 C300,345 292,372 282,392 C292,365 292,332 282,302 C275,270 262,250 262,230 Z" />
-        <!-- Cruz -->
-        <path d="M242,260 L258,260 L258,300 L285,300 L285,315 L258,315 L258,415 L242,415 L242,315 L215,315 L215,300 L242,300 Z" />
-        <!-- Bíblia Aberta -->
-        <path d="M245,395 C185,370 110,375 55,425 C125,405 200,405 245,430 Z" />
-        <path d="M255,395 C315,370 390,375 445,425 C375,405 300,405 255,430 Z" />
-        <path d="M240,435 C190,410 115,410 50,432 C120,418 195,418 245,448 L245,438 Z" />
-        <path d="M260,435 C310,410 385,410 450,432 C380,418 305,418 255,448 L255,438 Z" />
+      <svg id="svgLogo" viewBox="0 0 500 500">
+        <!-- Chamas sólidas oficiais -->
+        <path fill="#d95804" d="M250,30 C250,30 200,110 170,185 C140,260 130,320 150,370 C135,330 140,270 175,210 C205,160 250,90 250,30 Z" />
+        <path fill="#d95804" d="M245,110 C245,110 200,185 180,250 C165,300 170,340 185,370 C170,335 175,290 200,235 C220,185 245,140 245,110 Z" />
+        <path fill="#d95804" d="M238,180 C238,180 205,240 192,290 C185,320 190,350 205,375 C190,345 190,310 210,270 C225,225 238,200 238,180 Z" />
+        <path fill="#d95804" d="M255,80 C255,80 288,150 310,205 C335,270 330,330 300,375 C320,330 320,270 295,215 C275,170 255,125 255,80 Z" />
+        <path fill="#d95804" d="M260,150 C260,150 295,210 310,260 C322,310 312,350 295,380 C312,340 310,300 295,260 C280,215 260,180 260,150 Z" />
+        <path fill="#d95804" d="M262,220 C262,220 285,265 292,302 C300,335 292,362 282,382 C292,355 292,322 282,292 C275,260 262,240 262,220 Z" />
+        <path fill="#d95804" d="M242,240 L258,240 L258,280 L285,280 L285,295 L258,295 L258,400 L242,400 L242,295 L215,295 L215,280 L242,280 Z" />
+        <path fill="#d95804" d="M245,385 C185,360 110,365 55,415 C125,395 200,395 245,420 Z" />
+        <path fill="#d95804" d="M255,385 C315,360 390,365 445,415 C375,395 300,395 255,420 Z" />
+        <path fill="#d95804" d="M240,425 C190,400 115,400 50,422 C120,408 195,408 245,438 L245,428 Z" />
+        <path fill="#d95804" d="M260,425 C310,400 385,400 450,422 C380,408 305,408 255,438 L255,428 Z" />
       </svg>
     </div>
 
@@ -284,11 +282,25 @@
     </div>
   </div>
 
-  <!-- SCRIPT PARA CARREGAR OS HINOS DA BRANCH MAIN -->
-  <script src="https://cdn.jsdelivr.net/gh/isaias271990-star/HINARIO-TCHOKWE@main/hinos.js"></script>
-  <script src="hinos.js"></script>
-
   <script>
+    // FUNÇÕES DA INTERFACE (GARANTIDAS NO INÍCIO)
+    function abrirHinario() { document.getElementById("capa-screen").style.display = "none"; }
+    function voltarCapa() { document.getElementById("capa-screen").style.display = "flex"; }
+    function abrirSobre() { document.getElementById("about-modal").style.display = "flex"; }
+    function fecharSobre() { document.getElementById("about-modal").style.display = "none"; }
+    function abrirAdmin() { document.getElementById("admin-modal").style.display = "flex"; }
+    function fecharAdmin() { document.getElementById("admin-modal").style.display = "none"; }
+
+    function autenticarAdmin() {
+      let pin = document.getElementById("adminPin").value;
+      if (pin === "2026") {
+        alert("Acesso de Administrador Autorizado!");
+        fecharAdmin();
+      } else {
+        alert("Código incorreto. Tente novamente.");
+      }
+    }
+
     let hinosLista = [];
     let hinoAtual = null;
     let abaAtual = 'todos';
@@ -335,6 +347,7 @@
       return "";
     }
 
+    // CARREGAMENTO DOS HINOS
     async function carregarHinos() {
       const container = document.getElementById("hymnList");
       container.innerHTML = "<li style='text-align:center; padding:30px; color:var(--text-muted);'>A carregar os 300 hinos em Tchokwe...</li>";
@@ -343,32 +356,32 @@
       if (typeof window !== "undefined") {
         dados = window.HINOS_DADOS || window.hinos || window.HINOS || window.hinario || window.listaHinos || window.dados;
       }
-      if (!dados && typeof hinos !== "undefined") dados = hinos;
 
       if (!dados) {
         const urls = [
-          'https://raw.githubusercontent.com/isaias271990-star/HINARIO-TCHOKWE/main/hinos.js',
-          'hinos.js'
+          'hinos.js',
+          'https://raw.githubusercontent.com/isaias271990-star/HINARIO-TCHOKWE/main/hinos.js'
         ];
         for (let u of urls) {
           try {
-            let r = await fetch(u);
-            if (r.ok) {
-              let t = await r.text();
-              try {
-                let fn = new Function(t + "\nreturn (typeof HINOS_DADOS !== 'undefined' ? HINOS_DADOS : (typeof hinos !== 'undefined' ? hinos : (typeof HINOS !== 'undefined' ? HINOS : null)));");
-                let res = fn();
-                if (res && Array.isArray(res)) { dados = res; break; }
-              } catch(e1) {
-                let ini = t.indexOf('[');
-                let fim = t.lastIndexOf(']');
-                if (ini !== -1 && fim !== -1 && fim > ini) {
-                  dados = JSON.parse(t.substring(ini, fim + 1));
-                  break;
-                }
+            let resp = await fetch(u);
+            if (resp.ok) {
+              let texto = await resp.text();
+              let s = document.createElement('script');
+              s.textContent = texto;
+              document.head.appendChild(s);
+
+              dados = window.HINOS_DADOS || window.hinos || window.HINOS || window.hinario || window.listaHinos || window.dados;
+              if (dados && Array.isArray(dados)) break;
+
+              let ini = texto.indexOf('[');
+              let fim = texto.lastIndexOf(']');
+              if (ini !== -1 && fim !== -1 && fim > ini) {
+                dados = JSON.parse(texto.substring(ini, fim + 1));
+                break;
               }
             }
-          } catch(e2) {}
+          } catch(e) {}
         }
       }
 
@@ -380,7 +393,7 @@
         hinosLista = dados;
         renderizarLista();
       } else {
-        container.innerHTML = "<li style='text-align:center; padding:30px; color:#ef4444;'>A carregar os hinos... Por favor aguarde e atualize.</li>";
+        container.innerHTML = "<li style='text-align:center; padding:30px; color:#ef4444;'>A carregar hinos... Por favor aguarde um instante e atualize.</li>";
       }
     }
 
@@ -505,22 +518,6 @@
     }
 
     function toggleTema() { document.body.classList.toggle("dark-mode"); }
-    function abrirHinario() { document.getElementById("capa-screen").style.display = "none"; }
-    function voltarCapa() { document.getElementById("capa-screen").style.display = "flex"; }
-    function abrirSobre() { document.getElementById("about-modal").style.display = "flex"; }
-    function fecharSobre() { document.getElementById("about-modal").style.display = "none"; }
-    function abrirAdmin() { document.getElementById("admin-modal").style.display = "flex"; }
-    function fecharAdmin() { document.getElementById("admin-modal").style.display = "none"; }
-
-    function autenticarAdmin() {
-      let pin = document.getElementById("adminPin").value;
-      if (pin === "2026") {
-        alert("Acesso de Administrador Autorizado!");
-        fecharAdmin();
-      } else {
-        alert("Código incorreto.");
-      }
-    }
 
     window.onload = carregarHinos;
   </script>
