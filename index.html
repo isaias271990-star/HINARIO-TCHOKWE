@@ -34,7 +34,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { background-color: var(--bg-color); color: var(--text-color); transition: 0.3s; }
 
-    /* CAPA OFICIAL (ESTILO TELEFONE EM LARANJA) */
+    /* CAPA OFICIAL (EMBLEMA REDONDO E LARANJA IASD) */
     #capa-screen {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: var(--primary-gradient);
@@ -56,10 +56,10 @@
     .capa-lema-tag {
       display: inline-block;
       margin-bottom: 20px;
-      padding: 4px 14px;
+      padding: 5px 16px;
       background: rgba(255,255,255,0.2);
       border-radius: 20px;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 700;
       font-style: italic;
       letter-spacing: 0.5px;
@@ -67,7 +67,7 @@
 
     .capa-divider { width: 50px; height: 3px; background: #fbbf24; margin: 0 auto 20px; border-radius: 2px; }
 
-    .capa-app-title { font-size: 36px; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 40px; font-family: "Georgia", serif; }
+    .capa-app-title { font-size: 36px; font-weight: 900; letter-spacing: 0.5px; margin-bottom: 35px; font-family: "Georgia", serif; }
 
     .capa-buttons { width: 100%; max-width: 300px; display: flex; flex-direction: column; gap: 16px; }
     .btn-abrir-main {
@@ -79,7 +79,7 @@
 
     .capa-link { color: rgba(255,255,255,0.9); text-decoration: underline; font-size: 14px; font-weight: 600; background: none; border: none; cursor: pointer; }
 
-    /* TELA PRINCIPAL (IDÊNTICA À IMAGEM 3 DO SEU TELEFONE) */
+    /* CABEÇALHO DO APLICATIVO */
     header {
       position: sticky; top: 0; background: var(--card-bg); border-bottom: 1px solid var(--border-color);
       padding: 14px 16px; z-index: 100; display: flex; align-items: center; justify-content: space-between;
@@ -115,7 +115,7 @@
       height: 3px; background: #b44300; border-radius: 3px 3px 0 0;
     }
 
-    /* LISTA DOS HINOS (EXACTA COMO NO SEU TELEFONE) */
+    /* LISTA DOS HINOS */
     .hymn-list-container { padding: 10px 16px 80px; max-width: 650px; margin: 0 auto; list-style: none; }
     .hymn-row {
       background: var(--card-bg); border-bottom: 1px solid var(--border-color);
@@ -156,7 +156,7 @@
     body.dark-mode .chorus-box { background: #2c1a0e; border-left-color: #f97316; }
     .chorus-label { font-weight: bold; color: #ea580c; font-style: normal; margin-bottom: 6px; font-size: 0.9em; text-transform: uppercase; }
 
-    /* MODAL ADMINISTRADOR / SOBRE */
+    /* MODAL */
     .modal-backdrop {
       display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.65); z-index: 500; align-items: center; justify-content: center; padding: 20px;
@@ -169,9 +169,8 @@
 </head>
 <body>
 
-  <!-- CAPA INICIAL (MODELO DO TELEFONE EM LARANJA OFICIAL) -->
+  <!-- CAPA INICIAL COM O EMBLEMA REDONDO OFICIAL -->
   <div id="capa-screen">
-    <!-- MEDALHÃO REDONDO OFICIAL (2º MODELO) -->
     <div class="capa-badge">
       <svg viewBox="0 0 400 400">
         <path d="M198,50 C198,50 165,115 145,170 C125,220 115,265 130,305 C120,270 125,225 150,180 C170,140 198,95 198,50 Z" />
@@ -202,15 +201,15 @@
     </div>
   </div>
 
-  <!-- CABEÇALHO (IDÊNTICO À IMAGEM 3) -->
+  <!-- CABEÇALHO -->
   <header>
     <div class="header-info">
       <h1>Hinário Tchokwe</h1>
       <span>Missão Leste de Angola • IASD</span>
     </div>
     <div class="header-actions">
-      <button class="icon-round-btn" onclick="toggleTema()" title="Alternar Modo Escuro">🌓</button>
-      <button class="icon-round-btn" onclick="voltarCapa()" title="Voltar à Capa">🏠</button>
+      <button class="icon-round-btn" onclick="toggleTema()" title="Modo Escuro">🌓</button>
+      <button class="icon-round-btn" onclick="voltarCapa()" title="Capa Inicial">🏠</button>
     </div>
   </header>
 
@@ -228,7 +227,7 @@
   <!-- LISTA DOS 300 HINOS -->
   <ul id="hymnList" class="hymn-list-container"></ul>
 
-  <!-- LEITOR DE HINOS COMPLETO -->
+  <!-- LEITOR DE HINOS -->
   <div id="reader-screen">
     <div class="reader-top-bar">
       <button class="icon-round-btn" style="background:rgba(255,255,255,0.2); color:white;" onclick="fecharLeitor()">←</button>
@@ -248,7 +247,7 @@
     </div>
   </div>
 
-  <!-- MODAL SOBRE O APLICATIVO -->
+  <!-- MODAL SOBRE -->
   <div id="about-modal" class="modal-backdrop">
     <div class="modal-box">
       <h3 style="color:#b44300; font-size:22px; font-family:'Georgia',serif; margin-bottom:4px;">Hinário Tchokwe</h3>
@@ -267,11 +266,11 @@
     </div>
   </div>
 
-  <!-- MODAL ACESSO DE ADMINISTRADOR (MODO DEV) -->
+  <!-- MODAL ADMINISTRADOR -->
   <div id="admin-modal" class="modal-backdrop">
     <div class="modal-box">
       <h3 style="color:#b44300; margin-bottom:12px;">Acesso de Administrador</h3>
-      <p style="font-size:13px; color:var(--text-muted); margin-bottom:15px;">Introduza a palavra-passe para editar ou exportar dados dos hinos:</p>
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:15px;">Introduza a palavra-passe para aceder:</p>
       <input type="password" id="adminPin" style="width:100%; padding:12px; border-radius:10px; border:1px solid var(--border-color); text-align:center; font-size:18px; margin-bottom:15px;" placeholder="Código PIN">
       <div style="display:flex; gap:10px;">
         <button style="flex:1; padding:12px; border-radius:10px; border:1px solid var(--border-color); background:none; cursor:pointer;" onclick="fecharAdmin()">Cancelar</button>
@@ -280,7 +279,7 @@
     </div>
   </div>
 
-  <!-- CARREGAMENTO AUTOMÁTICO DO HINOS.JS QUE JÁ ESTÁ NO GITHUB -->
+  <!-- CARREGAMENTO AUTOMÁTICO DE HINOS.JS -->
   <script src="hinos.js"></script>
 
   <script>
