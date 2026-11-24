@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Hinário Tchokwe - IASD Missão Leste de Angola</title>
   <meta name="theme-color" content="#d95804">
+  <!-- Suporte a hinos.js offline -->
+  <script src="hinos.js"></script>
   <style>
     :root {
       --primary: #d95804;
@@ -31,7 +33,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { background-color: var(--bg-color); color: var(--text-color); line-height: 1.5; -webkit-tap-highlight-color: transparent; }
 
-    /* CAPA INICIAL OFICIAL */
+    /* CAPA OFICIAL */
     #view-capa {
       min-height: 100vh;
       background: linear-gradient(135deg, #ea580c 0%, #d95804 50%, #9a3412 100%);
@@ -44,20 +46,18 @@
       color: #ffffff;
     }
 
-    .capa-header { margin-bottom: 24px; }
     .capa-inst { font-size: 0.9rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.95; }
     .capa-missao { font-size: 1.15rem; font-weight: 800; letter-spacing: 0.5px; margin-top: 4px; text-transform: uppercase; }
     
     .capa-lema {
       display: inline-block;
-      margin-top: 10px;
+      margin: 10px 0 15px 0;
       background: rgba(255, 255, 255, 0.18);
       border: 1px solid rgba(255, 255, 255, 0.35);
       padding: 4px 16px;
       border-radius: 20px;
       font-size: 0.85rem;
       font-style: italic;
-      backdrop-filter: blur(4px);
     }
 
     .capa-medalhao {
@@ -68,18 +68,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 15px auto 25px auto;
+      margin: 10px auto 25px auto;
       box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-      border: 3px solid rgba(255,255,255,0.8);
     }
 
-    .capa-medalhao img {
-      width: 92px;
-      height: 92px;
-      object-fit: contain;
-    }
-
-    .capa-titulo { font-size: 2.2rem; font-weight: 900; margin-bottom: 6px; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .capa-medalhao img { width: 92px; height: 92px; object-fit: contain; }
+    .capa-titulo { font-size: 2.2rem; font-weight: 900; margin-bottom: 6px; letter-spacing: -0.5px; }
     .capa-sub { font-size: 0.95rem; opacity: 0.9; margin-bottom: 35px; max-width: 320px; }
 
     .capa-botoes { width: 100%; max-width: 330px; display: flex; flex-direction: column; gap: 12px; }
@@ -94,7 +88,6 @@
       border: none;
       cursor: pointer;
       box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-      transition: all 0.2s ease;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -139,10 +132,10 @@
     .tab { flex: 1; text-align: center; padding: 12px; font-weight: 700; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; font-size: 0.95rem; }
     .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 
-    /* LISTA DE HINOS */
+    /* LISTA */
     .hinos-lista { padding: 8px 12px; max-width: 720px; margin: 0 auto; }
-    .hino-card { display: flex; align-items: center; padding: 12px 14px; background: var(--card-bg); border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border-color); cursor: pointer; transition: transform 0.1s; }
-    .hino-card:active { transform: scale(0.99); background: var(--primary-light); }
+    .hino-card { display: flex; align-items: center; padding: 12px 14px; background: var(--card-bg); border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border-color); cursor: pointer; }
+    .hino-card:active { background: var(--primary-light); }
     .hino-num { width: 44px; height: 44px; background: var(--primary-light); color: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.15rem; margin-right: 14px; flex-shrink: 0; }
     .hino-detalhes { flex: 1; min-width: 0; }
     .hino-tit { font-weight: 700; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-color); }
@@ -150,7 +143,7 @@
     .btn-fav { background: none; border: none; font-size: 1.4rem; color: #cbd5e1; cursor: pointer; padding: 6px; }
     .btn-fav.active { color: #f59e0b; }
 
-    /* DETALHE DO HINO */
+    /* LEITURA DO HINO */
     .detalhe-view { max-width: 720px; margin: 0 auto; padding: 20px 16px 80px 16px; }
     .detalhe-topo { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid var(--border-color); }
     .detalhe-badge { display: inline-block; background: var(--primary); color: #fff; font-weight: 800; padding: 4px 14px; border-radius: 20px; font-size: 0.9rem; margin-bottom: 8px; }
@@ -161,14 +154,14 @@
     .coro-box { background: var(--primary-light); border-left: 4px solid var(--primary); padding: 14px 16px; border-radius: 0 10px 10px 0; margin: 20px 0; font-size: var(--font-scale); line-height: 1.6; }
     .coro-label { font-size: 0.8rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
 
-    /* BARRA DE NAVEGAÇÃO DO HINO */
+    /* NAVEGAÇÃO INFERIOR */
     .nav-hino { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); border-top: 1px solid var(--border-color); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; max-width: 720px; margin: 0 auto; z-index: 100; }
     .btn-nav-hino { background: var(--primary); color: #fff; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; }
     .btn-nav-hino:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* MODAIS (SOBRE E ADMIN) */
+    /* MODAL */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-    .modal-card { background: var(--card-bg); border-radius: 16px; padding: 24px; max-width: 440px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+    .modal-card { background: var(--card-bg); border-radius: 16px; padding: 24px; max-width: 440px; width: 100%; max-height: 85vh; overflow-y: auto; }
     .modal-card h3 { font-size: 1.3rem; margin-bottom: 8px; color: var(--primary); }
     .modal-creditos p { margin: 6px 0; font-size: 0.95rem; }
     .btn-fechar { margin-top: 18px; width: 100%; background: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
@@ -180,11 +173,9 @@
 
   <!-- 1. CAPA INICIAL -->
   <div id="view-capa">
-    <div class="capa-header">
-      <div class="capa-inst">Igreja Adventista do Sétimo Dia</div>
-      <div class="capa-missao">Missão Leste de Angola</div>
-      <div class="capa-lema">« Onde o sol levanta com a missão »</div>
-    </div>
+    <div class="capa-inst">Igreja Adventista do Sétimo Dia</div>
+    <div class="capa-missao">Missão Leste de Angola</div>
+    <div class="capa-lema">« Onde o sol levanta com a missão »</div>
 
     <div class="capa-medalhao">
       <img src="logo.png" alt="Logo Oficial IASD" onerror="this.src='https://raw.githubusercontent.com/isaias271990-star/HINARIO-TCHOKWE/main/logo.png'">
@@ -255,7 +246,7 @@
     </div>
   </div>
 
-  <!-- 4. MODAL: SOBRE O HINÁRIO (CRÉDITOS OFICIAIS) -->
+  <!-- 4. MODAL: SOBRE O HINÁRIO -->
   <div id="modal-sobre" class="modal-overlay" style="display: none;" onclick="fecharModalOverlay(event, 'modal-sobre')">
     <div class="modal-card">
       <h3>Sobre o Hinário Tchokwe</h3>
@@ -270,7 +261,7 @@
     </div>
   </div>
 
-  <!-- 5. MODAL: ACESSO DE ADMINISTRADOR -->
+  <!-- 5. MODAL: ADMIN -->
   <div id="modal-admin" class="modal-overlay" style="display: none;" onclick="fecharModalOverlay(event, 'modal-admin')">
     <div class="modal-card">
       <h3>Acesso de Administrador</h3>
@@ -280,7 +271,7 @@
     </div>
   </div>
 
-  <!-- CÓDIGO JAVASCRIPT BLINDADO -->
+  <!-- JAVASCRIPT ULTRA-ROBUSTO -->
   <script>
     let hinos = [];
     let favoritos = JSON.parse(localStorage.getItem('tchokwe_favs') || '[]');
@@ -288,7 +279,6 @@
     let hinoAtualIdx = 0;
     let tamanhoFonte = 18;
 
-    // Funções Globais de Navegação
     window.abrirHinario = function() {
       document.getElementById('view-capa').style.display = 'none';
       document.getElementById('view-lista').style.display = 'block';
@@ -319,54 +309,84 @@
       document.body.setAttribute('data-theme', 'dark');
     }
 
-    // CARREGAMENTO MULTI-FONTE (Tenta Local e Redundâncias do GitHub)
+    // CARREGADOR MULTI-FONTE ULTRA-RESISTENTE
     async function carregarHinos() {
-      const urls = [
+      // 1. Se já veio via tag <script src="hinos.js">
+      if (window.hinosDados && Array.isArray(window.hinosDados) && window.hinosDados.length > 0) {
+        definirHinos(window.hinosDados);
+        return;
+      }
+      if (window.hinos && Array.isArray(window.hinos) && window.hinos.length > 0) {
+        definirHinos(window.hinos);
+        return;
+      }
+
+      // 2. Busca nas fontes online e offline
+      const fontes = [
         'hinos.json',
+        'hinos.js',
         './hinos.json',
-        'https://raw.githubusercontent.com/isaias271990-star/HINARIO-TCHOKWE/main/hinario-app/app/src/main/assets/hinos.json',
-        'https://raw.githubusercontent.com/isaias271990-star/HINARIO-TCHOKWE/main/hinos.json'
+        './hinos.js',
+        'https://raw.githubusercontent.com/isaias271990-star/HINARIO-TCHOKWE/main/hinos.js',
+        'https://raw.githubusercontent.com/isaias271990-star/HINARIO-TCHOKWE/main/hinos.json',
+        'https://raw.githubusercontent.com/isaias271990-star/HINARIO-TCHOKWE/main/hinario-app/app/src/main/assets/hinos.json'
       ];
 
-      for (const url of urls) {
+      for (const f of fontes) {
         try {
-          const res = await fetch(url);
-          if (res.ok) {
-            const data = await res.json();
-            if (Array.isArray(data) && data.length > 0) {
-              hinos = data.map((h, i) => normalizarHino(h, i));
-              document.getElementById('total-hinos').textContent = hinos.length;
-              atualizarContadorFav();
-              filtrarHinos();
+          const resp = await fetch(f);
+          if (resp.ok) {
+            const txt = await resp.text();
+            let arr = null;
+            try {
+              arr = JSON.parse(txt);
+            } catch(e) {
+              const match = txt.match(/\[\s*\{[\s\S]*\}\s*\]/);
+              if (match) {
+                try { arr = JSON.parse(match[0]); }
+                catch(e2) { arr = (new Function('return ' + match[0]))(); }
+              }
+            }
+            if (Array.isArray(arr) && arr.length > 0) {
+              definirHinos(arr);
               return;
             }
           }
-        } catch (err) {
-          console.warn("Tentando próxima fonte...", url);
-        }
+        } catch(err) {}
       }
 
       document.getElementById('lista-container').innerHTML = `
         <div class="status-msg">
           <p style="color:#ef4444; font-weight:700; margin-bottom:8px;">⚠️ hinos.json não encontrado no gh-pages</p>
-          <p style="font-size:0.9rem;">Por favor, envie o arquivo <b>hinos.json</b> para o ramo gh-pages no GitHub.</p>
+          <p style="font-size:0.9rem; margin-bottom:12px;">Envie o arquivo <b>hinos.json</b> para o ramo gh-pages no GitHub.</p>
+          <button onclick="carregarHinos()" style="background:var(--primary); color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;">Tentar Novamente</button>
         </div>`;
     }
 
+    function definirHinos(arr) {
+      hinos = arr.map((h, i) => normalizarHino(h, i));
+      document.getElementById('total-hinos').textContent = hinos.length;
+      atualizarContadorFav();
+      filtrarHinos();
+    }
+
     function normalizarHino(h, i) {
-      const num = h.numero || h.number || h.id || (i + 1);
+      const num = parseInt(h.numero || h.number || h.id || (i + 1), 10);
       const tit = (h.titulo || h.title || h.name || `Hino ${num}`).trim();
       
       let estrofes = [];
       let coro = h.coro || h.chorus || h.refrao || '';
 
-      if (Array.isArray(h.estrofes)) {
-        estrofes = h.estrofes.map((e, idx) => {
+      const rawVerses = h.estrofes || h.verses || h.versos;
+      const rawText = h.letra || h.lyrics || h.texto || '';
+
+      if (Array.isArray(rawVerses)) {
+        estrofes = rawVerses.map((e, idx) => {
           if (typeof e === 'string') return { num: idx + 1, texto: e.trim() };
-          return { num: e.numero || idx + 1, texto: (e.texto || '').trim() };
+          return { num: e.numero || e.num || idx + 1, texto: (e.texto || e.text || '').trim() };
         });
-      } else if (typeof h.letra === 'string') {
-        estrofes = h.letra.split(/\n\s*\n/).map((b, idx) => ({ num: idx + 1, texto: b.trim() }));
+      } else if (typeof rawText === 'string' && rawText.trim()) {
+        estrofes = rawText.split(/\n\s*\n/).map((b, idx) => ({ num: idx + 1, texto: b.trim() }));
       }
 
       let primeiraLinha = '';
@@ -374,7 +394,7 @@
         primeiraLinha = estrofes[0].texto.split('\n')[0].trim();
       }
 
-      return { numero: num, titulo: tit, primeiraLinha, estrofes, coro };
+      return { numero: num, titulo: tit, primeiraLinha, estrofes, coro, letra: rawText };
     }
 
     window.mudarAba = function(aba) {
@@ -430,11 +450,12 @@
     }
 
     window.alternarFavorito = function(e, num) {
-      e.stopPropagation();
-      if (favoritos.includes(num)) {
-        favoritos = favoritos.filter(n => n !== num);
+      if (e && e.stopPropagation) e.stopPropagation();
+      const n = parseInt(num, 10);
+      if (favoritos.includes(n)) {
+        favoritos = favoritos.filter(item => item !== n);
       } else {
-        favoritos.push(num);
+        favoritos.push(n);
       }
       localStorage.setItem('tchokwe_favs', JSON.stringify(favoritos));
       atualizarContadorFav();
@@ -445,15 +466,20 @@
       document.getElementById('total-fav').textContent = favoritos.length;
     }
 
-    // TELA DE DETALHE
+    // ABRIR HINO (CORRIGIDO PARA ACEITAR TANTO STRING QUANTO NÚMERO)
     window.abrirDetalhePorNumero = function(num) {
-      const idx = hinos.findIndex(h => h.numero === num);
-      if (idx !== -1) abrirDetalhe(idx);
+      const n = parseInt(num, 10);
+      const idx = hinos.findIndex(h => parseInt(h.numero, 10) === n);
+      if (idx !== -1) {
+        abrirDetalhe(idx);
+      }
     };
 
     function abrirDetalhe(idx) {
       hinoAtualIdx = idx;
       const h = hinos[idx];
+      if (!h) return;
+
       document.getElementById('view-lista').style.display = 'none';
       document.getElementById('view-detalhe').style.display = 'block';
 
@@ -467,18 +493,22 @@
       btnFav.style.color = isFav ? '#f59e0b' : '#ffffff';
 
       let html = '';
-      if (h.coro) {
+      if (h.coro && h.coro.trim()) {
         html += `<div class="coro-box"><div class="coro-label">CORO</div>${h.coro.replace(/\n/g, '<br>')}</div>`;
       }
 
-      h.estrofes.forEach(e => {
-        html += `
-          <div class="estrofe-box">
-            <span class="estrofe-num">${e.num}.</span>
-            ${e.texto.replace(/\n/g, '<br>')}
-          </div>
-        `;
-      });
+      if (Array.isArray(h.estrofes) && h.estrofes.length > 0) {
+        h.estrofes.forEach(e => {
+          html += `
+            <div class="estrofe-box">
+              <span class="estrofe-num">${e.num}.</span>
+              ${(e.texto || '').replace(/\n/g, '<br>')}
+            </div>
+          `;
+        });
+      } else if (h.letra) {
+        html += `<div class="estrofe-box">${h.letra.replace(/\n/g, '<br>')}</div>`;
+      }
 
       document.getElementById('detalhe-texto').innerHTML = html;
       document.getElementById('btn-ant').disabled = (idx === 0);
@@ -500,7 +530,7 @@
 
     window.alternarFavAtual = function() {
       const h = hinos[hinoAtualIdx];
-      alternarFavorito({ stopPropagation: () => {} }, h.numero);
+      alternarFavorito(null, h.numero);
       const isFav = favoritos.includes(h.numero);
       const btn = document.getElementById('btn-fav-topo');
       btn.textContent = isFav ? '★' : '☆';
