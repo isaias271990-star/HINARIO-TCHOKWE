@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hinário Digital com Pesquisa por Número, Título e Logo da Igreja</title>
+  <meta name="description"
+    content="Hinário digital aberto para igrejas com janelas de pesquisa por número e título, comandos de teclado (introduzir e apagar) e logotipo personalizado.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Share+Tech+Mono&display=swap"
+    rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<h6></h6>
+
+<body data-theme="dark">
+  /refrão
+  c
+  <!-- Header: Barra Superior com Logo da Igreja e Ações -->
+  <header class="app-header">
+    <div class="header-container">
+
+      <!-- Zona do Logo e Nome da Igreja (Personalizável) -->
+      <div class="church-brand" id="btn-church-branding" role="button" tabindex="0"
+        title="Clique para alterar o Logotipo e Nome da Igreja">
+        <div class="church-logo-wrap" id="header-logo-container">
+          <i class="fa-solid fa-church" id="header-church-icon"></i>
+          <img id="header-church-img" src="" alt="Logotipo da Igreja" style="display: none;">
+        </div>
+        <div class="church-text-wrap">
+          <div class="church-title-row">
+            <h1 id="church-display-name">Hinário da Igreja</h1>
+            <span class="btn-edit-badge" title="Editar Logo e Nome da Igreja"><i
+                class="fa-solid fa-pen-to-square"></i></span>
+          </div>
+          <span class="church-tag" id="church-display-sub">Edição Aberta • Clique para personalizar</span>
+        </div>
+      </div>
+
+      <!-- Ações do Cabeçalho e Alternador de Janelas -->
+      <div class="header-actions">
+        <!-- Gatilhos de Janelas Rápidas -->
+        <div class="window-nav-pills">
+          <button id="nav-window-number" class="nav-pill active" title="Pesquisa Rápida por Número (Atalho: N)">
+            <i class="fa-solid fa-hashtag"></i>
+            <span>Por Número</span>
+            <kbd class="key-badge">N</kbd>
+          </button>
+          <button id="nav-window-title" class="nav-pill" title="Pesquisa por Título e Letra (Atalho: T)">
+            <i class="fa-solid fa-font"></i>
+            <span>Por Título</span>
+            <kbd class="key-badge">T</kbd>
+          </button>
+        </div>
+
+        <!-- Botão Novo Hino -->
+        <button id="btn-add-hymn" class="btn-icon-text" title="Adicionar Novo Hino">
+          <i class="fa-solid fa-plus"></i>
+          <span class="btn-text">Novo Hino</span>
+        </button>
+
+        <!-- Botão Favoritos -->
+        <button id="btn-filter-favorites" class="btn-icon" title="Ver Favoritos">
+          <i class="fa-regular fa-bookmark"></i>
+          <span class="counter-badge" id="fav-count">0</span>
+        </button>
+
+        <!-- Configurar Logo da Igreja -->
+        <button id="btn-open-logo-modal" class="btn-icon" title="Configurar Logotipo da Igreja">
+          <i class="fa-solid fa-image"></i>
+        </button>
+
+        <!-- Seletor de Temas (Noturno, Sépia, Claro) -->
+        <div class="theme-dropdown-container">
+          <button id="btn-theme-toggle" class="btn-icon" title="Mudar Tema Visual">
+            <i class="fa-solid fa-moon" id="theme-icon"></i>
+          </button>
+          <div class="theme-menu" id="theme-menu">
+            <button data-set-theme="dark" class="theme-option active"><i class="fa-solid fa-moon"></i> Noturno</button>
+            <button data-set-theme="sepia" class="theme-option"><i class="fa-solid fa-sun"></i> Sépia / Papiro</button>
+            <button data-set-theme="light" class="theme-option"><i class="fa-regular fa-sun"></i> Claro</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Layout Principal -->
+  <main class="main-wrapper">
+    <!-- Coluna Esquerda: Janelas de Pesquisa e Lista -->
+    <aside class="sidebar-list" id="sidebar-list">
+
+      <!-- Janela 1: Pesquisa por Número (com teclado, apagar e introduzir) -->
+      <section class="search-window-panel" id="window-number-panel">
+        <div class="window-header">
+          <span class="window-title"><i class="fa-solid fa-calculator"></i> Janela de Pesquisa por Número</span>
+          <span class="window-hint">Atalho rápido: <kbd>N</kbd></span>
+        </div>
+
+        <!-- Visor Digital LCD -->
+        <div class="number-lcd-card">
+          <div class="lcd-label">NÚMERO DO HINO:</div>
+          <div class="lcd-screen-row">
+            <span class="lcd-prefix">Nº</span>
+            <input type="text" id="lcd-number-input" class="lcd-input" placeholder="000" maxlength="4"
+              inputmode="numeric" autocomplete="off">
+          </div>
+          <!-- Pré-visualização do título antes de introduzir -->
+          <div class="lcd-preview-title" id="lcd-hymn-preview">
+            <i class="fa-solid fa-info-circle"></i> Digite o número ou use as teclas abaixo
+          </div>
+        </div>
+
+        <!-- Teclado Numérico com Teclas Apagar e Introduzir -->
+        <div class="numeric-keypad-grid">
+          <button class="pad-btn" data-val="1">1</button>
+          <button class="pad-btn" data-val="2">2</button>
+          <button class="pad-btn" data-val="3">3</button>
+          <button class="pad-btn" data-val="4">4</button>
+          <button class="pad-btn" data-val="5">5</button>
+          <button class="pad-btn" data-val="6">6</button>
+          <button class="pad-btn" data-val="7">7</button>
+          <button class="pad-btn" data-val="8">8</button>
+          <button class="pad-btn" data-val="9">9</button>
+          <button class="pad-btn pad-clear" id="btn-pad-clear" title="Limpar tudo (Delete)"><i
+              class="fa-solid fa-trash-can"></i> Limpar</button>
+          <button class="pad-btn" data-val="0">0</button>
+          <button class="pad-btn pad-backspace" id="btn-pad-backspace" title="Apagar último dígito (Backspace)"><i
+              class="fa-solid fa-delete-left"></i> Apagar</button>
+        </div>
+
+        <!-- Botão Grande de Introduzir -->
+        <button class="btn-introduce-enter" id="btn-introduce-enter" title="Introduzir / Confirmar hino (Enter)">
+          <i class="fa-solid fa-arrow-turn-down-left"></i>
+          <span>INTRODUZIR HINO</span>
+          <kbd class="key-badge-lg">Enter ↵</kbd>
+        </button>
+
+        <!-- Barra de Ajuda dos Comandos de Teclado -->
+        <div class="keyboard-shortcuts-bar">
+          <div class="shortcut-item"><kbd>0-9</kbd> Digitar</div>
+          <div class="shortcut-item"><kbd>⌫ Backspace</kbd> Apagar</div>
+          <div class="shortcut-item"><kbd>↵ Enter</kbd> Introduzir</div>
+        </div>
+      </section>
+
+      <!-- Janela 2: Pesquisa por Título e Letra -->
+      <section class="search-window-panel" id="window-title-panel" style="display: none;">
+        <div class="window-header">
+          <span class="window-title"><i class="fa-solid fa-magnifying-glass"></i> Janela de Pesquisa por Título</span>
+          <span class="window-hint">Atalho rápido: <kbd>T</kbd></span>
+        </div>
+
+        <div class="search-bar-wrapper">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="search" id="hymn-search-input" placeholder="Digite o título ou palavra da letra..."
+            autocomplete="off" aria-label="Pesquisar hino por título ou letra">
+          <button id="clear-search-btn" class="clear-btn" aria-label="Apagar busca" style="display: none;"
+            title="Apagar (Backspace / Esc)">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Categorias -->
+        <div class="categories-scroll" id="categories-container">
+          <button class="cat-pill active" data-category="all">Todos</button>
+        </div>
+      </section>
+
+      <!-- Barra de Metadados de Resultados -->
+      <div class="results-meta">
+        <span id="results-count-text">Carregando acervo...</span>
+        <button id="btn-random-hymn" class="btn-text-only" title="Hino Aleatório">
+          <i class="fa-solid fa-shuffle"></i> Aleatório
+        </button>
+      </div>
+
+      <!-- Lista de Hinos do Acervo -->
+      <div class="hymn-cards-container" id="hymns-list" role="list">
+        <!-- Renderizado dinamicamente -->
+      </div>
+    </aside>
+
+    <!-- Coluna Direita: Leitor de Letras do Hino -->
+    <section class="lyrics-view-section" id="lyrics-section">
+      <!-- Exibição do Logo no Topo do Leitor (opcional) -->
+      <div class="reader-church-watermark" id="reader-church-watermark" style="display: none;">
+        <img id="reader-church-logo" src="" alt="Logo da Igreja">
+        <span id="reader-church-name">Nome da Igreja</span>
+      </div>
+
+      <!-- Estado Vazio -->
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon-wrap">
+          <i class="fa-solid fa-book-bible"></i>
+        </div>
+        <h2>Pesquise ou Introduza um Hino</h2>
+        <p>Digite o número na janela ao lado e pressione <kbd>Enter</kbd> (Introduzir), ou alterne para a janela de
+          pesquisa por título.</p>
+        <div class="empty-quick-hints">
+          <span><i class="fa-solid fa-keyboard"></i> Atalhos: <kbd>N</kbd> para Número • <kbd>T</kbd> para Título •
+            <kbd>F</kbd> para Tela Cheia</span>
+        </div>
+      </div>
+
+      <!-- Artigo do Hino Selecionado -->
+      <article class="hymn-display" id="hymn-display" style="display: none;">
+        <!-- Barra de Ferramentas do Leitor -->
+        <div class="hymn-header-toolbar">
+          <div class="hymn-navigation-controls">
+            <button id="btn-prev-hymn" class="nav-btn" title="Hino Anterior (Seta Esquerda ←)">
+              <i class="fa-solid fa-chevron-left"></i> Anterior
+            </button>
+            <button id="btn-next-hymn" class="nav-btn" title="Próximo Hino (Seta Direita →)">
+              Próximo <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+
+          <div class="hymn-actions-toolbar">
+            <!-- Controle de Zoom -->
+            <div class="zoom-controls" title="Ajuste de Letra">
+              <button id="btn-zoom-out" aria-label="Diminuir texto"><i class="fa-solid fa-minus"></i></button>
+              <span id="zoom-indicator">100%</span>
+              <button id="btn-zoom-in" aria-label="Aumentar texto"><i class="fa-solid fa-plus"></i></button>
+            </div>
+
+            <!-- Favoritos -->
+            <button id="btn-toggle-favorite" class="btn-action" title="Salvar nos Favoritos">
+              <i class="fa-regular fa-bookmark"></i>
+            </button>
+
+            <!-- Modo Apresentação / Projeção -->
+            <button id="btn-projection-mode" class="btn-action" title="Modo Projeção / Foco (Atalho: F)">
+              <i class="fa-solid fa-expand"></i>
+            </button>
+
+            <!-- Copiar Letra -->
+            <button id="btn-copy-lyrics" class="btn-action" title="Copiar Letra Completa">
+              <i class="fa-regular fa-copy"></i>
+            </button>
+
+            <!-- Imprimir -->
+            <button id="btn-print-hymn" class="btn-action" title="Imprimir Hino">
+              <i class="fa-solid fa-print"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Banner com Título, Número e Metadados -->
+        <div class="hymn-title-card">
+          <div class="hymn-number-badge" id="display-number">Nº 1</div>
+          <div class="hymn-headings">
+            <h1 class="hymn-title" id="display-title">Título do Hino</h1>
+            <div class="hymn-details">
+              <span class="hymn-author" id="display-author"><i class="fa-solid fa-pen-nib"></i> Autor</span>
+              <span class="hymn-key" id="display-key" title="Tom"><i class="fa-solid fa-music"></i> Tom: Bb</span>
+              <span class="hymn-category-badge" id="display-category">Categoria</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conteúdo das Estrofes e Coro -->
+        <div class="lyrics-container" id="lyrics-container">
+          <!-- Estrofes e Refrão gerados dinamicamente -->
+        </div>
+
+        <!-- Rodapé do Hino com Assinatura da Igreja -->
+        <footer class="hymn-footer-note">
+          <p id="footer-church-tag"><i class="fa-solid fa-church"></i> Hinário Digital • Disponibilizado para Edificação
+            Comunitária</p>
+        </footer>
+      </article>
+    </section>
+  </main>
+
+  <!-- ==========================================================================
+       MODAL 1: Configuração do Logotipo e Nome da Igreja
+       ========================================================================== -->
+  <div class="modal-overlay" id="modal-church-config" style="display: none;">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-church"></i> Identidade da Igreja & Logotipo</h3>
+        <button class="modal-close-btn" data-close="modal-church-config"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="form-church-config" class="modal-form">
+        <p class="form-hint">Personalize o logotipo e o nome da sua igreja ou ministério para que apareçam no cabeçalho
+          e na projeção dos cultos.</p>
+
+        <!-- Pré-visualização do Logotipo -->
+        <div class="church-logo-preview-box">
+          <div class="logo-preview-display" id="logo-preview-area">
+            <i class="fa-solid fa-church logo-preview-icon" id="preview-fallback-icon"></i>
+            <img id="preview-img" src="" alt="Prévia do Logo" style="display: none;">
+          </div>
+          <div class="logo-upload-controls">
+            <label class="btn-secondary btn-upload-label" for="church-logo-file">
+              <i class="fa-solid fa-cloud-arrow-up"></i> Carregar Logo do Computador
+            </label>
+            <input type="file" id="church-logo-file" accept="image/png, image/jpeg, image/svg+xml, image/webp"
+              style="display: none;">
+            <span class="file-chosen-text" id="logo-file-name">Nenhum ficheiro selecionado (ou cole o link
+              abaixo)</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="church-logo-url">Ou Link / URL Direto da Imagem do Logo:</label>
+          <input type="url" id="church-logo-url" placeholder="https://exemplo.com/logo-igreja.png">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label for="church-name-input">Nome da Igreja / Congregação *</label>
+            <input type="text" id="church-name-input" required
+              placeholder="Ex: Assembleia de Deus / Igreja Batista Central">
+          </div>
+          <div class="form-group flex-1">
+            <label for="church-sub-input">Subtítulo / Ministério</label>
+            <input type="text" id="church-sub-input" placeholder="Ex: Ministério de Louvor">
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-outline" id="btn-remove-logo"><i class="fa-solid fa-trash"></i> Remover
+            Logo</button>
+          <button type="button" class="btn-secondary" data-close="modal-church-config">Cancelar</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-check"></i> Salvar Identidade</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 2: Adicionar Novo Hino
+       ========================================================================== -->
+  <div class="modal-overlay" id="modal-add-hymn" style="display: none;">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-plus-circle"></i> Adicionar Hino ao Acervo</h3>
+        <button class="modal-close-btn" data-close="modal-add-hymn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="form-new-hymn" class="modal-form">
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="new-hymn-number">Número do Hino *</label>
+            <input type="number" id="new-hymn-number" required placeholder="Ex: 13" min="1">
+          </div>
+          <div class="form-group flex-3">
+            <label for="new-hymn-title">Título do Hino *</label>
+            <input type="text" id="new-hymn-title" required placeholder="Ex: Maravilhosa Graça">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label for="new-hymn-author">Autor / Compositor</label>
+            <input type="text" id="new-hymn-author" placeholder="Ex: John Newton">
+          </div>
+          <div class="form-group flex-1">
+            <label for="new-hymn-key">Tom</label>
+            <input type="text" id="new-hymn-key" placeholder="Ex: G, F, C">
+          </div>
+          <div class="form-group flex-2">
+            <label for="new-hymn-category">Categoria</label>
+            <input type="text" id="new-hymn-category" placeholder="Ex: Graça, Louvor, Oração">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="new-hymn-lyrics">Letra Completa *</label>
+          <p class="form-hint">Separe as estrofes por uma linha em branco. Para o refrão, inicie o bloco com a palavra
+            <strong>Coro:</strong> ou <strong>Refrão:</strong>
+          </p>
+          <textarea id="new-hymn-lyrics" rows="9" required placeholder="1. Primeira estrofe linha 1
+Primeira estrofe linha 2
+
+Coro:
+Glória, aleluia!
+Canto ao meu Salvador!
+
+2. Segunda estrofe linha 1..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" data-close="modal-add-hymn">Cancelar</button>
+          <button type="button" class="btn-outline" id="btn-export-json"><i class="fa-solid fa-download"></i> Exportar
+            Base JSON</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-check"></i> Salvar Hino</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Message -->
+  <div id="toast-message" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Script Lógico -->
+  <script src="app.js"></script>
+</body>
+
+</html>
