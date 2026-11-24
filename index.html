@@ -43,11 +43,12 @@
     }
 
     .capa-badge {
-      width: 140px; height: 140px; border-radius: 50%; background: white;
+      width: 145px; height: 145px; border-radius: 50%; background: white;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3); margin-bottom: 24px;
-      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35); margin-bottom: 22px;
+      padding: 16px; overflow: hidden;
     }
+    .capa-badge img { width: 100%; height: 100%; object-fit: contain; }
     .capa-badge svg { width: 100%; height: 100%; fill: #d95804; }
 
     .capa-church { font-size: 16px; font-weight: 600; opacity: 0.95; margin-bottom: 4px; letter-spacing: 0.5px; }
@@ -172,18 +173,22 @@
   <!-- CAPA INICIAL COM O EMBLEMA REDONDO OFICIAL -->
   <div id="capa-screen">
     <div class="capa-badge">
-      <svg viewBox="0 0 400 400">
-        <path d="M198,50 C198,50 165,115 145,170 C125,220 115,265 130,305 C120,270 125,225 150,180 C170,140 198,95 198,50 Z" />
-        <path d="M194,115 C194,115 158,175 142,225 C130,265 135,298 148,318 C135,290 140,255 158,212 C172,172 194,135 194,115 Z" />
-        <path d="M188,170 C188,170 162,220 152,260 C146,282 152,305 162,322 C150,300 150,272 165,240 C176,205 188,185 188,170 Z" />
-        <path d="M202,90 C202,90 228,145 244,188 C265,238 262,285 240,320 C256,285 255,238 234,192 C218,155 202,122 202,90 Z" />
-        <path d="M208,145 C208,145 234,192 244,232 C255,272 246,305 234,326 C248,295 245,262 234,228 C222,192 208,165 208,145 Z" />
-        <path d="M210,200 C210,200 228,238 234,268 C240,295 234,316 226,330 C234,308 234,282 226,258 C220,232 210,215 210,200 Z" />
-        <path d="M194,225 L206,225 L206,258 L226,258 L226,270 L206,270 L206,350 L194,350 L194,270 L174,270 L174,258 L194,258 Z" />
-        <path d="M195,335 C150,318 90,322 48,360 C100,344 160,344 195,365 Z" />
-        <path d="M205,335 C250,318 310,322 352,360 C300,344 240,344 205,365 Z" />
-        <path d="M192,368 C155,348 95,348 45,366 C100,355 160,355 195,378 L195,370 Z" />
-        <path d="M208,368 C245,348 305,348 355,366 C300,355 240,355 205,378 L205,370 Z" />
+      <img src="logo.png" alt="Logo IASD" onerror="this.style.display='none'; document.getElementById('svgLogo').style.display='block';">
+      <svg id="svgLogo" style="display:none;" viewBox="0 0 500 500">
+        <!-- Chamas preenchidas fortes -->
+        <path d="M250,40 C250,40 200,120 170,190 C140,260 130,320 150,370 C135,330 140,270 175,210 C205,160 250,100 250,40 Z" />
+        <path d="M245,120 C245,120 200,195 180,260 C165,310 170,350 185,380 C170,345 175,300 200,245 C220,195 245,150 245,120 Z" />
+        <path d="M238,190 C238,190 205,250 192,300 C185,330 190,360 205,385 C190,355 190,320 210,280 C225,235 238,210 238,190 Z" />
+        <path d="M255,90 C255,90 288,160 310,215 C335,280 330,340 300,385 C320,340 320,280 295,225 C275,180 255,135 255,90 Z" />
+        <path d="M260,160 C260,160 295,220 310,270 C322,320 312,360 295,390 C312,350 310,310 295,270 C280,225 260,190 260,160 Z" />
+        <path d="M262,230 C262,230 285,275 292,312 C300,345 292,372 282,392 C292,365 292,332 282,302 C275,270 262,250 262,230 Z" />
+        <!-- Cruz -->
+        <path d="M242,260 L258,260 L258,300 L285,300 L285,315 L258,315 L258,415 L242,415 L242,315 L215,315 L215,300 L242,300 Z" />
+        <!-- Bíblia Aberta -->
+        <path d="M245,395 C185,370 110,375 55,425 C125,405 200,405 245,430 Z" />
+        <path d="M255,395 C315,370 390,375 445,425 C375,405 300,405 255,430 Z" />
+        <path d="M240,435 C190,410 115,410 50,432 C120,418 195,418 245,448 L245,438 Z" />
+        <path d="M260,435 C310,410 385,410 450,432 C380,418 305,418 255,448 L255,438 Z" />
       </svg>
     </div>
 
@@ -270,7 +275,7 @@
   <div id="admin-modal" class="modal-backdrop">
     <div class="modal-box">
       <h3 style="color:#b44300; margin-bottom:12px;">Acesso de Administrador</h3>
-      <p style="font-size:13px; color:var(--text-muted); margin-bottom:15px;">Introduza a palavra-passe para aceder:</p>
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:15px;">Introduza o PIN de acesso:</p>
       <input type="password" id="adminPin" style="width:100%; padding:12px; border-radius:10px; border:1px solid var(--border-color); text-align:center; font-size:18px; margin-bottom:15px;" placeholder="Código PIN">
       <div style="display:flex; gap:10px;">
         <button style="flex:1; padding:12px; border-radius:10px; border:1px solid var(--border-color); background:none; cursor:pointer;" onclick="fecharAdmin()">Cancelar</button>
@@ -278,6 +283,10 @@
       </div>
     </div>
   </div>
+
+  <!-- SCRIPT PARA CARREGAR OS HINOS DA BRANCH MAIN -->
+  <script src="https://cdn.jsdelivr.net/gh/isaias271990-star/HINARIO-TCHOKWE@main/hinos.js"></script>
+  <script src="hinos.js"></script>
 
   <script>
     let hinosLista = [];
@@ -290,15 +299,11 @@
       if (obj === null || obj === undefined) return "";
       if (typeof obj === "string") return obj.trim();
       if (typeof obj === "number") return "";
-      
-      if (Array.isArray(obj)) {
-        return obj.map(desempacotarTexto).filter(s => s && s.length > 0).join("\n");
-      }
-      
+      if (Array.isArray(obj)) return obj.map(desempacotarTexto).filter(s => s && s.length > 0).join("\n");
       if (typeof obj === "object") {
-        for (let campo of ["texto", "linhas", "lines", "verso", "versos", "content", "letra", "letras", "corpo", "body", "text"]) {
-          if (obj[campo]) {
-            let t = desempacotarTexto(obj[campo]);
+        for (let c of ["texto", "linhas", "lines", "verso", "versos", "content", "letra", "letras", "corpo", "body", "text"]) {
+          if (obj[c]) {
+            let t = desempacotarTexto(obj[c]);
             if (t && t.length > 0) return t;
           }
         }
@@ -315,11 +320,8 @@
       let lista = hino.estrofes || hino.estrophes || hino.versos || hino.verses || hino.stanzas;
       if (Array.isArray(lista) && lista.length > 0) return lista;
       if (lista && typeof lista === "object") return Object.values(lista);
-
-      let textoGeral = hino.letra || hino.letras || hino.texto || hino.corpo || hino.content;
-      if (typeof textoGeral === "string" && textoGeral.trim().length > 0) {
-        return textoGeral.split(/\n\s*\n/).map(b => b.trim()).filter(b => b.length > 0);
-      }
+      let t = hino.letra || hino.letras || hino.texto || hino.corpo || hino.content;
+      if (typeof t === "string" && t.trim().length > 0) return t.split(/\n\s*\n/).map(b => b.trim()).filter(b => b.length > 0);
       return [];
     }
 
@@ -333,42 +335,41 @@
       return "";
     }
 
-    // CARREGA HINOS DE FORMA INTELIGENTE (LOCAL OU DA BRANCH MAIN)
     async function carregarHinos() {
       const container = document.getElementById("hymnList");
       container.innerHTML = "<li style='text-align:center; padding:30px; color:var(--text-muted);'>A carregar os 300 hinos em Tchokwe...</li>";
 
       let dados = null;
-
-      // 1. Tenta pegar de variáveis globais
       if (typeof window !== "undefined") {
         dados = window.HINOS_DADOS || window.hinos || window.HINOS || window.hinario || window.listaHinos || window.dados;
       }
       if (!dados && typeof hinos !== "undefined") dados = hinos;
 
-      // 2. Tenta carregar hinos.js local ou direto da branch main pública
-      const fontes = [
-        'hinos.js',
-        'https://raw.githubusercontent.com/isaias271990-star/HINARIO-TCHOKWE/main/hinos.js',
-        'hinos.json',
-        'https://raw.githubusercontent.com/isaias271990-star/HINARIO-TCHOKWE/main/hinos.json'
-      ];
-
-      for (let url of fontes) {
-        if (dados && Array.isArray(dados) && dados.length > 0) break;
-        try {
-          let resp = await fetch(url);
-          if (resp.ok) {
-            let txt = await resp.text();
-            let inicio = txt.indexOf('[');
-            let fim = txt.lastIndexOf(']');
-            if (inicio !== -1 && fim !== -1 && fim > inicio) {
-              dados = JSON.parse(txt.substring(inicio, fim + 1));
-            } else {
-              dados = JSON.parse(txt);
+      if (!dados) {
+        const urls = [
+          'https://raw.githubusercontent.com/isaias271990-star/HINARIO-TCHOKWE/main/hinos.js',
+          'hinos.js'
+        ];
+        for (let u of urls) {
+          try {
+            let r = await fetch(u);
+            if (r.ok) {
+              let t = await r.text();
+              try {
+                let fn = new Function(t + "\nreturn (typeof HINOS_DADOS !== 'undefined' ? HINOS_DADOS : (typeof hinos !== 'undefined' ? hinos : (typeof HINOS !== 'undefined' ? HINOS : null)));");
+                let res = fn();
+                if (res && Array.isArray(res)) { dados = res; break; }
+              } catch(e1) {
+                let ini = t.indexOf('[');
+                let fim = t.lastIndexOf(']');
+                if (ini !== -1 && fim !== -1 && fim > ini) {
+                  dados = JSON.parse(t.substring(ini, fim + 1));
+                  break;
+                }
+              }
             }
-          }
-        } catch(e) {}
+          } catch(e2) {}
+        }
       }
 
       if (dados && !Array.isArray(dados) && Array.isArray(dados.hinos)) {
@@ -379,7 +380,7 @@
         hinosLista = dados;
         renderizarLista();
       } else {
-        container.innerHTML = "<li style='text-align:center; padding:30px; color:#ef4444;'>A processar hinos... Por favor aguarde um momento e atualize a página.</li>";
+        container.innerHTML = "<li style='text-align:center; padding:30px; color:#ef4444;'>A carregar os hinos... Por favor aguarde e atualize.</li>";
       }
     }
 
