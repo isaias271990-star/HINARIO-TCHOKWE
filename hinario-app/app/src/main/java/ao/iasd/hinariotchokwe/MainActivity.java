@@ -30,14 +30,14 @@ public class MainActivity extends Activity {
 
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
-        s.setDomStorageEnabled(true); // guarda favoritos, tamanho da letra e tema
-        s.setAllowFileAccess(true); // lê os ficheiros da pasta assets
+        s.setDomStorageEnabled(true);          // guarda favoritos, tamanho da letra e tema
+        s.setAllowFileAccess(true);            // lê os ficheiros da pasta assets
         s.setAllowContentAccess(false);
         s.setAllowFileAccessFromFileURLs(false);
         s.setAllowUniversalAccessFromFileURLs(false);
         s.setSupportZoom(false);
         s.setBuiltInZoomControls(false);
-        s.setTextZoom(100); // o tamanho da letra é controlado pela própria app
+        s.setTextZoom(100);                    // o tamanho da letra é controlado pela própria app
 
         web.setWebViewClient(new WebViewClient());
         web.addJavascriptInterface(new Ponte(), "AndroidApp");
@@ -62,8 +62,7 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        // Pergunta à interface se tem algo para fechar (hino aberto, pesquisa,
-        // favoritos).
+        // Pergunta à interface se tem algo para fechar (hino aberto, pesquisa, favoritos).
         web.evaluateJavascript("window.appBack && window.appBack()", value -> {
             if (!"true".equals(value)) {
                 finish();

@@ -20,13 +20,6 @@ android {
         }
     }
 
-    // A interface (HTML/CSS/JS) e os hinos ficam na pasta ../www, partilhada com a versão web.
-    sourceSets {
-        main {
-            assets.srcDirs = ['../www']
-        }
-    }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17

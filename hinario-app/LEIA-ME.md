@@ -2,15 +2,15 @@
 
 Aplicativo offline com os **300 hinos** do Hinário Tchokwe (fonte: `projecto_do_Hinário_Tchokwe_corrigido.docx`).
 
-**Capa:** Igreja Adventista do Sétimo Dia · Missão Leste de Angola · Hinário Tchokwe. O logótipo oficial está em `www/logo.png` (para trocar, substitua esse ficheiro e os ícones em `app/src/main/res/mipmap-*`).
+**Capa:** Igreja Adventista do Sétimo Dia · Missão Leste de Angola · Hinário Tchokwe. O logótipo oficial está em `app/src/main/assets/logo.png` (para trocar, substitua esse ficheiro e os ícones em `app/src/main/res/mipmap-*`).
 
 **Administrador:** na capa, “Acesso de administrador”. Na primeira vez cria-se uma palavra-passe; depois, com ela, aparecem os botões **+ Novo hino**, **Editar**, **Apagar** e **Cópia** (partilhar/restaurar cópia dos hinos, repor os originais, mudar a palavra-passe). As alterações ficam só no telemóvel onde foram feitas; para as levar a outro aparelho use a cópia. A palavra-passe protege contra uso casual, não é segurança forte (limpar os dados da app apaga-a e as alterações).
 
 **Funções:** pesquisa por número, título ou palavra da letra (ignora acentos) · favoritos · tamanho da letra · tema automático/claro/escuro · deslizar para o hino seguinte/anterior · partilhar letra · funciona sem internet e sem permissões.
 
 ## Estrutura
-- `www/` — a interface (HTML, CSS, JS) e os hinos (`hinos.js`). Abra `www/index.html` num navegador para testar sem Android.
-- `app/` — projeto Android (Java, sem dependências externas) que mostra a pasta `www/` num WebView.
+- `app/src/main/assets/` — a interface (HTML, CSS, JS) e os hinos (`hinos.js`). Abra `index.html` desta pasta num navegador para testar sem Android.
+- `app/` — projeto Android (Java, sem dependências externas) que mostra essa pasta num WebView.
 - `tools/` — scripts que converteram o documento Word em `hinos.json` e `hinos.js`.
 
 ## Como gerar o APK
@@ -31,7 +31,7 @@ Nos telemóveis, ao instalar, permita "instalar de fontes desconhecidas".
 ## Corrigir ou acrescentar hinos
 1. Edite o ficheiro Word e corra:
    `python3 tools/parse_docx.py hinos.docx tools/hinos.json`
-   `python3 tools/build_data.py tools/hinos.json www/hinos.js`
+   `python3 tools/build_data.py tools/hinos.json app/src/main/assets/hinos.js`
 2. Gere o APK outra vez e aumente `versionCode` em `app/build.gradle`.
 
 ## Para publicar na Google Play
