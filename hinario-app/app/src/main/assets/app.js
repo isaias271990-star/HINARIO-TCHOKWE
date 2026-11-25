@@ -1,3 +1,8 @@
+/*
+ * Hinário Tchokwe — IASD, Missão Leste de Angola
+ * Desenvolvedor: Isaías Muwaneno · Colaboradores: Januário Justo Miranda, Ecal Gomes, Pastor Nunes Sacavumbi Lucas
+ * © 2026 Missão Leste de Angola. Todos os direitos reservados.
+ */
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
@@ -38,7 +43,7 @@
   var admin = false;
 
   /* ---------- ecrãs ---------- */
-  var TELAS = ['capa', 'lista', 'hino', 'login', 'editor', 'gestao'];
+  var TELAS = ['capa', 'sobre', 'lista', 'hino', 'login', 'editor', 'gestao'];
   var telaAtual = 'capa';
   function mostrar(nome) {
     TELAS.forEach(function (t) { $('tela-' + t).hidden = (t !== nome); });
@@ -100,6 +105,8 @@
   })();
   $('entrar').onclick = function () { mostrar('lista'); };
   $('ir-admin').onclick = function () { abrirLogin('capa'); };
+  $('ir-sobre').onclick = function () { mostrar('sobre'); };
+  $('sobre-voltar').onclick = function () { mostrar('capa'); };
 
   /* ---------- lista e pesquisa ---------- */
   function item(h, q, snippet) {
@@ -121,6 +128,11 @@
     $('limpar').hidden = !raw;
     var base = aba === 'fav' ? HINOS.filter(function (h) { return favoritos.indexOf(h.n) >= 0; }) : HINOS;
     var html = '';
+    if (!HINOS.length && !q && aba === 'todos') {
+      $('lista').innerHTML = '<div class="vazio">Os hinos não foram carregados.<br>Verifique se o ficheiro <b>hinos.js</b> está na mesma pasta que o index.html.</div>';
+      $('cont-fav').textContent = '';
+      return;
+    }
     if (!q) {
       html = base.map(function (h) { return item(h, ''); }).join('');
       if (!html) html = '<div class="vazio">' + (aba === 'fav'
@@ -381,6 +393,7 @@
     var j = janelaAberta(); if (j) { j._fechar(); return true; }
     switch (telaAtual) {
       case 'hino': fechar(); return true;
+      case 'sobre': mostrar('capa'); return true;
       case 'login': mostrar(origemLogin); return true;
       case 'editor': if (editando) abrir(editando.n); else mostrar('lista'); return true;
       case 'gestao': mostrar('lista'); desenharLista(); return true;
