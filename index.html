@@ -181,7 +181,6 @@ button:disabled{opacity:.3}
     <div class="capa-rodape">
       <button id="entrar" class="btn-grande">Abrir hinário</button>
       <button id="ir-sobre" class="btn-link">Sobre o aplicativo</button>
-      <button id="ir-admin" class="btn-link">Acesso de administrador</button>
     </div>
   </section>
 
@@ -438,7 +437,8 @@ window.HINOS=[{"n":1,"ti":"Kuwaila","b":[{"t":"v","n":1,"l":["Wahiana Zambi mupe
     if (img.complete && img.naturalWidth === 0) falhou();
   })();
   $('entrar').onclick = function () { mostrar('lista'); };
-  $('ir-admin').onclick = function () { abrirLogin('capa'); };
+  // O acesso de administrador foi retirado da capa (o código fica inativo e pode ser reativado).
+  var btnAdmin = $('ir-admin'); if (btnAdmin) btnAdmin.onclick = function () { abrirLogin('capa'); };
   $('ir-sobre').onclick = function () { mostrar('sobre'); };
   $('sobre-voltar').onclick = function () { mostrar('capa'); };
 
