@@ -103,8 +103,11 @@
     img.addEventListener('error', falhou);
     if (img.complete && img.naturalWidth === 0) falhou();
   })();
+  // Na versão web mostra o atalho para descarregar o APK; dentro do aplicativo não faz sentido.
+  (function () { var l = $('baixar-apk'); if (l && !window.AndroidApp && /Android/i.test(navigator.userAgent)) l.hidden = false; })();
   $('entrar').onclick = function () { mostrar('lista'); };
-  $('ir-admin').onclick = function () { abrirLogin('capa'); };
+  // O acesso de administrador foi retirado da capa (o código fica inativo e pode ser reativado).
+  var btnAdmin = $('ir-admin'); if (btnAdmin) btnAdmin.onclick = function () { abrirLogin('capa'); };
   $('ir-sobre').onclick = function () { mostrar('sobre'); };
   $('sobre-voltar').onclick = function () { mostrar('capa'); };
 

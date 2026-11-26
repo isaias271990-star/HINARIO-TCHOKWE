@@ -157,6 +157,8 @@ button:disabled{opacity:.3}
 .cred-titulo{font-size:.78rem;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--suave);margin-top:10px!important}
 .creditos p:not(.cred-titulo){font-size:1.1rem;font-weight:600}
 
+a.btn-link{display:flex;align-items:center;justify-content:center;color:inherit}
+
 </style>
 </head>
 <body>
@@ -181,7 +183,7 @@ button:disabled{opacity:.3}
     <div class="capa-rodape">
       <button id="entrar" class="btn-grande">Abrir hinário</button>
       <button id="ir-sobre" class="btn-link">Sobre o aplicativo</button>
-      <button id="ir-admin" class="btn-link">Acesso de administrador</button>
+      <a id="baixar-apk" class="btn-link" href="https://github.com/isaias271990-star/HINARIO-TCHOKWE/releases/download/apk-latest/hinario-tchokwe.apk" hidden>Descarregar o aplicativo para Android</a>
     </div>
   </section>
 
@@ -437,8 +439,11 @@ window.HINOS=[{"n":1,"ti":"Kuwaila","b":[{"t":"v","n":1,"l":["Wahiana Zambi mupe
     img.addEventListener('error', falhou);
     if (img.complete && img.naturalWidth === 0) falhou();
   })();
+  // Na versão web mostra o atalho para descarregar o APK; dentro do aplicativo não faz sentido.
+  (function () { var l = $('baixar-apk'); if (l && !window.AndroidApp && /Android/i.test(navigator.userAgent)) l.hidden = false; })();
   $('entrar').onclick = function () { mostrar('lista'); };
-  $('ir-admin').onclick = function () { abrirLogin('capa'); };
+  // O acesso de administrador foi retirado da capa (o código fica inativo e pode ser reativado).
+  var btnAdmin = $('ir-admin'); if (btnAdmin) btnAdmin.onclick = function () { abrirLogin('capa'); };
   $('ir-sobre').onclick = function () { mostrar('sobre'); };
   $('sobre-voltar').onclick = function () { mostrar('capa'); };
 

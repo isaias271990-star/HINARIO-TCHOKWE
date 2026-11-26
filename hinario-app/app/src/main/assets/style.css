@@ -148,3 +148,5 @@ button:disabled{opacity:.3}
 .creditos{margin:18px 0;padding:16px 28px;border-top:1px solid var(--linha);border-bottom:1px solid var(--linha);width:100%}
 .cred-titulo{font-size:.78rem;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--suave);margin-top:10px!important}
 .creditos p:not(.cred-titulo){font-size:1.1rem;font-weight:600}
+
+a.btn-link{display:flex;align-items:center;justify-content:center;color:inherit}
