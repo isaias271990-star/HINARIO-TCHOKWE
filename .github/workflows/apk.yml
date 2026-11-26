@@ -1,16 +1,63 @@
-name: Gerar Aplicativo e APK
-on: [push, workflow_dispatch]
+name: Gerar APK
+
+# Corre sozinho a cada alteração na pasta hinario-app, ou à mão em Actions > Gerar APK > Run workflow.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'hinario-app/**'
+      - '.github/workflows/apk.yml'
+
+permissions:
+  contents: write
 
 jobs:
-  build:
+  apk:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: hinario-app
     steps:
       - uses: actions/checkout@v4
 
-      - name: Criar ZIP Offline Completo
-        run: zip -r Hinario-Tchokwe-Offline.zip . -x ".git/*" ".github/*"
+      - name: Verificar ficheiros do projeto
+        run: |
+          test -f settings.gradle || { echo "ERRO: não encontrei hinario-app/settings.gradle"; exit 1; }
+          test -f app/src/main/assets/index.html || { echo "ERRO: falta app/src/main/assets/index.html (a interface)"; exit 1; }
+          test -f app/src/main/assets/hinos.js || { echo "ERRO: falta app/src/main/assets/hinos.js (os hinos)"; exit 1; }
+          echo "Projeto completo."
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/setup-java@v4
         with:
-          name: Hinario-Tchokwe-ZIP
-          path: Hinario-Tchokwe-Offline.zip
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.11.1
+
+      - name: Compilar APK
+        run: gradle assembleDebug --no-daemon --stacktrace
+
+      - name: Dar nome ao APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/hinario-tchokwe.apk
+
+      - name: Guardar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: hinario-tchokwe-apk
+          path: hinario-app/app/build/outputs/apk/debug/hinario-tchokwe.apk
+          if-no-files-found: error
+
+      - name: Publicar ligação de descarga (Releases)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-latest
+          name: Hinário Tchokwe (APK para Android)
+          body: Descarregue o ficheiro hinario-tchokwe.apk, abra-o no telemóvel e instale.
+          files: hinario-app/app/build/outputs/apk/debug/hinario-tchokwe.apk
+          make_latest: true
